@@ -130,6 +130,17 @@
 
     msg.textContent = `Thanks, ${name}. We received: ${cancer} in ${location}. Next step: we’ll suggest trial search options.`;
 
+      const selectedTrialInput = document.getElementById("selectedTrial");
+
+  // Read the selected trial from the URL: index.html?trial=OSF-GBM-001#about
+  const params = new URLSearchParams(window.location.search);
+  const trialFromUrl = params.get("trial");
+  if (trialFromUrl) {
+    selectedTrialInput.value = trialFromUrl;
+  } else {
+    selectedTrialInput.value = "Not selected (please choose a trial first)";
+  }
+
     form.reset();
   });
 </script>
