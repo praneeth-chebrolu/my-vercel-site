@@ -1,1 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>OSF Cancer Clinical Trials | Trial List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 60px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      color: #1f2937;
+    }
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    nav a {
+      margin-left: 14px;
+      text-decoration: none;
+      color: #1f2937;
+    }
+    nav a:hover { text-decoration: underline; }
+
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 16px;
+      background: #ffffff;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .trial {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 220px;
+    }
+
+    .badgeRow { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge {
+      font-size: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: #f9fafb;
+    }
+
+    button {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-weight: 600;
+      text-align: left;
+    }
+    button:hover { background: #f3f4f6; }
+
+    .actions {
+      margin-top: auto;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .muted { color: #6b7280; font-size: 14px; }
+
+    @media (max-width: 900px) {
+      .filters { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .modalBackdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 700px;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      padding: 18px;
+    }
+
+    .modalHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .closeBtn {
+      width: auto;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>OSF Cancer Clinical Trials</h1>
+    <nav>
+      <a href="index.html">Intake</a>
+      <a href="trials.html">Trial List</a>
+    </nav>
+  </header>
+
+  <section class="card">
+    <h2>Choose a trial</h2>
+    <p class="muted">Filter the list below, then click “View details” for eligibility and contact info.</p>
+
+    <div class="filters">
+      <input id="q" placeholder="Search (keyword, ID, drug, cancer type)" />
+      <select id="cancer">
+        <option value="">All cancer types</option>
+        <option>GBM</option>
+        <option>Ovarian</option>
+        <option>Lung</option>
+        <option>Breast</option>
+      </select>
+      <select id="status">
+        <option value="">All statuses</option>
+        <option value="Recruiting">Recruiting</option>
+        <option value="Not yet recruiting">Not yet recruiting</option>
+      </select>
+    </div>
+
+    <div id="results" class="grid"></div>
+    <p id="count" class="muted"></p>
+  </section>
+
+  <div id="backdrop" class="modalBackdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modalHeader">
+        <h3 id="mTitle" style="margin:0;"></h3>
+        <button id="close" class="closeBtn">Close</button>
+      </div>
+      <div id="mBody" class="muted"></div>
+      <div style="margin-top:14px;">
+        <a id="mLink" href="#" target="_blank" rel="noreferrer">Open trial link</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Replace these with YOUR real trials (your "list")
+    const TRIALS = [
+      {
+        id: "OSF-GBM-001",
+        title: "GBM: Novel therapy + standard of care",
+        cancer: "GBM",
+        phase: "Phase 2",
+        status: "Recruiting",
+        location: "Peoria, IL",
+        summary: "Evaluates safety and efficacy of a novel agent combined with standard therapy.",
+        keyEligibility: [
+          "Adult patients with confirmed GBM",
+          "Measurable disease",
+          "Adequate organ function"
+        ],
+        contact: "Research Coordinator: trials@example.com",
+        link: "https://clinicaltrials.gov/"
+      },
+      {
+        id: "OSF-OV-014",
+        title: "Ovarian: Maintenance therapy study",
+        cancer: "Ovarian",
+        phase: "Phase 3",
+        status: "Not yet recruiting",
+        location: "Peoria, IL",
+        summary: "Compares maintenance strategies after response to platinum-based chemotherapy.",
+        keyEligibility: [
+          "High-grade serous ovarian cancer",
+          "Completed first-line chemotherapy",
+          "ECOG 0-1"
+        ],
+        contact: "Research Coordinator: trials@example.com",
+        link: "https://clinicaltrials.gov/"
+      },
+      {
+        id: "OSF-LUNG-007",
+        title: "Lung: Targeted therapy for EGFR mutation",
+        cancer: "Lung",
+        phase: "Phase 2",
+        status: "Recruiting",
+        location: "Peoria, IL",
+        summary: "For patients with EGFR mutation considering targeted options.",
+        keyEligibility: [
+          "Confirmed NSCLC",
+          "EGFR mutation positive",
+          "Prior treatment allowed"
+        ],
+        contact: "Research Coordinator: trials@example.com",
+        link: "https://clinicaltrials.gov/"
+      }
+    ];
+
+    const qEl = document.getElementById("q");
+    const cancerEl = document.getElementById("cancer");
+    const statusEl = document.getElementById("status");
+    const resultsEl = document.getElementById("results");
+    const countEl = document.getElementById("count");
+
+    const backdrop = document.getElementById("backdrop");
+    const closeBtn = document.getElementById("close");
+    const mTitle = document.getElementById("mTitle");
+    const mBody = document.getElementById("mBody");
+    const mLink = document.getElementById("mLink");
+
+    function matches(trial) {
+      const q = (qEl.value || "").toLowerCase().trim();
+      const c = cancerEl.value;
+      const s = statusEl.value;
+
+      const text = [
+        trial.id, trial.title, trial.cancer, trial.phase, trial.status,
+        trial.location, trial.summary
+      ].join(" ").toLowerCase();
+
+      if (q && !text.includes(q)) return false;
+      if (c && trial.cancer !== c) return false;
+      if (s && trial.status !== s) return false;
+      return true;
+    }
+
+    function render() {
+      const filtered = TRIALS.filter(matches);
+
+      resultsEl.innerHTML = filtered.map(t => `
+        <div class="trial">
+          <div class="badgeRow">
+            <span class="badge">${t.cancer}</span>
+            <span class="badge">${t.phase}</span>
+            <span class="badge">${t.status}</span>
+          </div>
+          <div>
+            <div style="font-weight:700; font-size:16px;">${t.title}</div>
+            <div class="muted">${t.id} • ${t.location}</div>
+          </div>
+          <div class="muted">${t.summary}</div>
+          <div class="actions">
+            <button type="button" onclick="openModal('${t.id}')">View details</button>
+            <a href="index.html#about">Submit intake</a>
+          </div>
+        </div>
+      `).join("");
+
+      countEl.textContent = `${filtered.length} trial(s) shown.`;
+    }
+
+    window.openModal = function(id) {
+      const t = TRIALS.find(x => x.id === id);
+      if (!t) return;
+
+      mTitle.textContent = `${t.title} (${t.id})`;
+      mBody.innerHTML = `
+        <div><strong>Cancer:</strong> ${t.cancer}</div>
+        <div><strong>Phase:</strong> ${t.phase}</div>
+        <div><strong>Status:</strong> ${t.status}</div>
+        <div><strong>Location:</strong> ${t.location}</div>
+        <div style="margin-top:10px;"><strong>Summary:</strong> ${t.summary}</div>
+        <div style="margin-top:10px;"><strong>Key eligibility:</strong>
+          <ul>${t.keyEligibility.map(x => `<li>${x}</li>`).join("")}</ul>
+        </div>
+        <div style="margin-top:10px;"><strong>Contact:</strong> ${t.contact}</div>
+      `;
+      mLink.href = t.link;
+
+      backdrop.style.display = "flex";
+    };
+
+    function closeModal() {
+      backdrop.style.display = "none";
+    }
+
+    closeBtn.addEventListener("click", closeModal);
+    backdrop.addEventListener("click", (e) => {
+      if (e.target === backdrop) closeModal();
+    });
+
+    qEl.addEventListener("input", render);
+    cancerEl.addEventListener("change", render);
+    statusEl.addEventListener("change", render);
+
+    render();
+  </script>
+</body>
+</html>
 
