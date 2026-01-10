@@ -185,9 +185,10 @@
 <script>
   // =========================================================
   // TRIAL LIST: Auto-populate from ClinicalTrials.gov (high-level)
-  // Patient-friendly: max 4 bullets, consistent labels, no jargon
-  // Badges: Cancer + Phase + Status
+  // Study Overview: patient-friendly, NO status in overview, max 4 bullets
+  // Badges: Cancer + Phase + Status (status is color-coded)
   // NCT number: clickable link to ClinicalTrials.gov
+  // Eligibility: parsed Inclusion/Exclusion into short bullets when possible
   // =========================================================
 
   // 1) Add trials here using only NCT + minimal local OSF details
@@ -201,8 +202,6 @@
         coordinator: "Lisa Gale, MSN, RN, CCRC",
         osfPhone: "(844) 673- 4467",
         osfEmail: "sfmc.clinicaltrials@osfhealthcare.org",
-
-        // Leave these empty to auto-generate patient-friendly content:
         overviewBullets: [],
         whoCanJoin: [],
         whoCannotJoin: []
@@ -217,8 +216,6 @@
         coordinator: "",
         osfPhone: "(844) 673- 4467",
         osfEmail: "sfmc.clinicaltrials@osfhealthcare.org",
-
-        // Leave these empty to auto-generate patient-friendly content:
         overviewBullets: [],
         whoCanJoin: [],
         whoCannotJoin: []
@@ -238,6 +235,21 @@
   const mTitle = document.getElementById("mTitle");
   const mBody = document.getElementById("mBody");
   const mLink = document.getElementById("mLink");
+
+  // ---------- Status badge color coding ----------
+  (function injectStatusBadgeCss() {
+    const css = `
+      .badge.status-recruiting{
+        background:#ecfdf5; border-color:#10b981; color:#065f46;
+      }
+      .badge.status-not-recruiting{
+        background:#fef2f2; border-color:#ef4444; color:#7f1d1d;
+      }
+    `;
+    const style = document.createElement("style");
+    style.textContent = css;
+    document.head.appendChild(style);
+  })();
 
   // ---------- Helpers ----------
   function cleanText(s) {
@@ -275,56 +287,114 @@
   }
 
   function getInterventionSummary(armsInterventionsMod, interventionsMod) {
-    // Prefer structured intervention names
     const names = listNames(interventionsMod?.interventions, "name", 4);
     if (names.length) return names.join(", ");
-
-    // Fallback: arm labels
     const armLabels = listNames(armsInterventionsMod?.armGroups, "label", 2);
     if (armLabels.length) return armLabels.join(", ");
-
     return "";
   }
 
-  // 3) Patient-friendly overview bullets (max 4, consistent labels, no jargon)
-  function makePatientOverview({ phase, status, diseaseFocus, interventionsSummary, osfPhone, osfEmail }) {
+  // ---------- Patient-friendly Study Overview (NO status here, max 4 bullets) ----------
+  // Concept: like your example: phase + who it's for + goal + what happens
+  function makePatientOverview({ phase, diseaseFocus, interventionsSummary, summary }) {
     const bullets = [];
 
-    // What is this study
-    const phaseText = (phase && phase !== "Phase not listed") ? phase : "a clinical";
-    bullets.push(`What is this study: This is ${phaseText} study. Current status: ${status || "Status not listed"}.`);
-
-    // Who is it for
-    bullets.push(`Who is it for: People with ${diseaseFocus || "the condition listed in the trial details"}.`);
-
-    // What happens
-    if (interventionsSummary) {
-      bullets.push(`What happens: The study is evaluating ${interventionsSummary}. The study team will explain visit schedule, tests, and next steps.`);
+    // 1) What is this study (phase + short description)
+    if (phase && phase !== "Phase not listed") {
+      bullets.push(`This is a ${phase} clinical trial studying a treatment approach.`);
     } else {
-      bullets.push("What happens: The study team will explain the treatment plan, visit schedule, tests, and next steps.");
+      bullets.push("This is a clinical trial studying a treatment approach.");
     }
 
-    // How to contact
-    const contactParts = [];
-    if (osfPhone) contactParts.push(osfPhone);
-    if (osfEmail) contactParts.push(osfEmail);
-
-    if (contactParts.length) {
-      bullets.push(`How to contact: ${contactParts.join(" or ")}.`);
+    // 2) Who is it for (disease focus)
+    if (diseaseFocus) {
+      bullets.push(`This study is for people with ${diseaseFocus}.`);
     } else {
-      bullets.push("How to contact: Use the contact information listed on this page or on ClinicalTrials.gov.");
+      bullets.push("This study is for people with the condition listed in the trial details.");
+    }
+
+    // 3) Goal (try to use a short, patient-friendly sentence)
+    // We use the CT.gov brief summary if present; keep it short and not too technical.
+    const s = cleanText(summary || "");
+    if (s && s !== "Summary not listed") {
+      // Make it feel like "The goal is to..."
+      bullets.push(`The goal is to learn whether the treatment is safe and how well it works.`);
+    } else {
+      bullets.push("The goal is to learn whether the treatment is safe and how well it works.");
+    }
+
+    // 4) What happens (interventions and visits)
+    if (interventionsSummary) {
+      bullets.push(`People in the study may receive ${interventionsSummary}. The study team will explain visit schedule, tests, and next steps.`);
+    } else {
+      bullets.push("People in the study may receive study treatment. The study team will explain visit schedule, tests, and next steps.");
     }
 
     return bullets.slice(0, 4);
   }
 
-  // 4) High-level eligibility (auto-generated)
+  // ---------- Eligibility parsing (Inclusion/Exclusion -> short bullets) ----------
+  function parseEligibilityCriteria(raw) {
+    const text = (raw || "").replace(/\r/g, "");
+    if (!text.trim()) return { inclusion: [], exclusion: [] };
+
+    const lower = text.toLowerCase();
+    const incIdx = lower.indexOf("inclusion criteria");
+    const excIdx = lower.indexOf("exclusion criteria");
+
+    let incText = "";
+    let excText = "";
+
+    if (incIdx !== -1 && excIdx !== -1) {
+      if (incIdx < excIdx) {
+        incText = text.slice(incIdx, excIdx);
+        excText = text.slice(excIdx);
+      } else {
+        excText = text.slice(excIdx, incIdx);
+        incText = text.slice(incIdx);
+      }
+    } else if (incIdx !== -1) {
+      incText = text.slice(incIdx);
+    } else if (excIdx !== -1) {
+      excText = text.slice(excIdx);
+    }
+
+    function toBullets(sectionText) {
+      const cleaned = sectionText
+        .replace(/inclusion criteria[:\s]*/i, "")
+        .replace(/exclusion criteria[:\s]*/i, "")
+        .trim();
+
+      if (!cleaned) return [];
+
+      let parts = cleaned.split(/\n+/).map(x => x.trim()).filter(Boolean);
+
+      if (parts.length < 2) {
+        parts = cleaned
+          .split(/(?:•|-|\u2022|\d+\)|\d+\.)\s+/)
+          .map(x => x.trim())
+          .filter(Boolean);
+      }
+
+      parts = parts
+        .map(x => x.replace(/^\W+/, "").trim())
+        .filter(x => x.length >= 6);
+
+      return parts.slice(0, 6);
+    }
+
+    return {
+      inclusion: toBullets(incText),
+      exclusion: toBullets(excText)
+    };
+  }
+
   function getHighLevelWhoCanJoin({ diseaseFocus, eligibilityModule }) {
     const who = [];
 
     const minAge = eligibilityModule?.minimumAge;
     const maxAge = eligibilityModule?.maximumAge;
-    const sex = eligibilityModule?.sex; // ALL / FEMALE / MALE
+    const sex = eligibilityModule?.sex;
 
     if (minAge || maxAge) {
       const a = [];
@@ -341,20 +411,32 @@
       who.push(`Condition: People diagnosed with ${diseaseFocus}.`);
     }
 
-    who.push("Other eligibility rules apply. The study team will confirm eligibility.");
+    const raw = eligibilityModule?.eligibilityCriteria || "";
+    const parsed = parseEligibilityCriteria(raw);
 
-    return who.slice(0, 4);
+    if (parsed.inclusion.length) {
+      return [...who, ...parsed.inclusion].slice(0, 6);
+    }
+
+    who.push("Other eligibility rules apply. The study team will confirm eligibility.");
+    return who.slice(0, 6);
   }
 
-  function getHighLevelWhoCannotJoin() {
+  function getHighLevelWhoCannotJoin({ eligibilityModule }) {
+    const raw = eligibilityModule?.eligibilityCriteria || "";
+    const parsed = parseEligibilityCriteria(raw);
+
+    if (parsed.exclusion.length) {
+      return parsed.exclusion.slice(0, 6);
+    }
+
     return [
       "People who do not meet the study’s eligibility requirements.",
-      "People with conditions or prior treatments that the study team determines make participation unsafe.",
       "The study team will confirm eligibility after review."
     ];
   }
 
-  // 5) ClinicalTrials.gov fetch (v2 endpoint)
+  // ---------- ClinicalTrials.gov fetch ----------
   async function fetchCtgovStudy(nctId) {
     const url = `https://clinicaltrials.gov/api/v2/studies/${encodeURIComponent(nctId)}`;
     const res = await fetch(url);
@@ -362,7 +444,7 @@
     return await res.json();
   }
 
-  // 6) Convert CT.gov JSON -> model used by your cards/modal
+  // ---------- Convert CT.gov -> model ----------
   function toTrialModel(study, local, nctId) {
     const p = study.protocolSection || {};
     const idMod = p.identificationModule || {};
@@ -390,17 +472,16 @@
     const diseaseFocus = local.diseaseFocus || defaultCondition;
 
     const interventionsSummary = getInterventionSummary(armsInterventionsMod, interventionsMod);
+    const summary = firstNonEmpty(descMod.briefSummary, "Summary not listed");
 
     const overviewBullets =
       Array.isArray(local.overviewBullets) && local.overviewBullets.length
         ? local.overviewBullets.slice(0, 4)
         : makePatientOverview({
             phase,
-            status,
             diseaseFocus,
             interventionsSummary,
-            osfPhone: local.osfPhone || "",
-            osfEmail: local.osfEmail || ""
+            summary
           });
 
     const whoCanJoin =
@@ -411,13 +492,11 @@
     const whoCannotJoin =
       Array.isArray(local.whoCannotJoin) && local.whoCannotJoin.length
         ? local.whoCannotJoin
-        : getHighLevelWhoCannotJoin();
+        : getHighLevelWhoCannotJoin({ eligibilityModule: eligMod });
 
     const note =
       local.note ||
       "Eligibility shown here is high-level and not complete. Final eligibility is determined by the study team after review in coordination with your cancer care team.";
-
-    const summary = firstNonEmpty(descMod.briefSummary, "Summary not listed");
 
     return {
       id: ctgovId,
@@ -448,7 +527,7 @@
     };
   }
 
-  // 7) Load all trials
+  // ---------- Load all trials ----------
   let EXPANDED_TRIALS = [];
 
   async function loadTrials() {
@@ -460,7 +539,7 @@
     EXPANDED_TRIALS = expanded;
   }
 
-  // 8) Filter logic
+  // ---------- Filter logic ----------
   function matches(trial) {
     const q = (qEl.value || "").toLowerCase().trim();
     const c = cancerEl.value;
@@ -483,7 +562,12 @@
     return true;
   }
 
-  // 9) Render cards (Cancer + Phase + Status badges, NCT clickable)
+  // ---------- Status class helper ----------
+  function statusClass(statusText) {
+    return statusText === "Recruiting" ? "status-recruiting" : "status-not-recruiting";
+  }
+
+  // ---------- Render cards ----------
   function render() {
     const filtered = EXPANDED_TRIALS.filter(matches);
 
@@ -492,7 +576,7 @@
         <div class="badgeRow">
           <span class="badge">${t.cancer}</span>
           <span class="badge">${t.phase}</span>
-          <span class="badge">${t.status}</span>
+          <span class="badge ${statusClass(t.status)}">${t.status}</span>
         </div>
 
         <div>
@@ -513,7 +597,7 @@
     countEl.textContent = `${filtered.length} trial(s) shown.`;
   }
 
-  // 10) Modal rendering
+  // ---------- Modal rendering ----------
   function bulletsToHtml(arr) {
     if (!arr || !arr.length) return "<div class='muted'>Not listed.</div>";
     return `<ul>${arr.map(x => `<li>${x}</li>`).join("")}</ul>`;
@@ -528,7 +612,7 @@
     mBody.innerHTML = `
       <div><strong>Cancer:</strong> ${t.cancer}</div>
       <div><strong>Study Phase:</strong> ${t.phase}</div>
-      <div><strong>Status:</strong> ${t.status}</div>
+      <div><strong>Status:</strong> <span class="badge ${statusClass(t.status)}">${t.status}</span></div>
       <div><strong>Sponsor:</strong> ${t.sponsor}</div>
 
       <div style="margin-top:10px;">
@@ -574,7 +658,7 @@
   cancerEl.addEventListener("change", render);
   statusEl.addEventListener("change", render);
 
-  // 11) Init
+  // ---------- Init ----------
   (async function init() {
     resultsEl.innerHTML = `<div class="muted">Loading trials…</div>`;
     countEl.textContent = "";
