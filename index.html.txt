@@ -31,10 +31,10 @@
     function sayHello() {
       document.getElementById("msg").textContent =
         "We are working on helping patients find the right clinical trial";
-";
     }
   </script>
 </body>
 </html>
+
 
 
