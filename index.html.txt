@@ -4,37 +4,95 @@
   <meta charset="utf-8">
   <title> OSF Cancer Clinical Trials </title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 60px auto;
-      padding: 0 20px;
-      line-height: 1.6;
-    }
-    h1 { color: #333; }
-    button {
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      cursor: pointer;
-    }
-  </style>
+ <style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 0 20px;
+    line-height: 1.6;
+    color: #1f2937;
+  }
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  nav a {
+    margin-left: 14px;
+    text-decoration: none;
+    color: #1f2937;
+  }
+  nav a:hover {
+    text-decoration: underline;
+  }
+  .card {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 16px;
+    background: #ffffff;
+  }
+  button {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button:hover {
+    background: #f3f4f6;
+  }
+  #msg {
+    margin-top: 12px;
+    font-weight: 600;
+  }
+</style>
+
 </head>
 <body>
+ <header>
   <h1>OSF Cancer Clinical Trials</h1>
-  <p>Let me help you find a clinical trial.</p>
- <button onclick="sayHello()">Find a trial</button>
-  <p id="msg"></p>
+  <nav>
+    <a href="#about">About</a>
+    <a href="#how">How it works</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
 
-  <script>
-    function sayHello() {
-      document.getElementById("msg").textContent =
-        "We are working on helping patients find the right clinical trial";
-    }
-  </script>
+<section id="about" class="card">
+  <h2>Find a clinical trial</h2>
+  <p>Let me help you find a clinical trial.</p>
+  <button onclick="sayHello()">Find a trial</button>
+  <p id="msg"></p>
+</section>
+
+<section id="how" class="card">
+  <h2>How it works</h2>
+  <ol>
+    <li>Tell us the cancer type and stage.</li>
+    <li>We match you to trials that are open and recruiting.</li>
+    <li>A coordinator follows up with next steps.</li>
+  </ol>
+</section>
+
+<section id="contact" class="card">
+  <h2>Contact</h2>
+  <p>Email: trials@example.com</p>
+</section>
+
+<script>
+  function sayHello() {
+    document.getElementById("msg").textContent =
+      "Thanks. Next we will add a short form to collect your cancer type and location.";
+  }
+</script>
 </body>
 </html>
+
 
 
 
