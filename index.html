@@ -212,8 +212,8 @@
       local: {
         cancer: "Lung",
         diseaseFocus: "Lung Cancer",
-        principalInvestigator: "",
-        coordinator: "",
+        principalInvestigator: "Jun Zhang MD, PhD",
+        coordinator: "Vishnu JaiShree Mohandas MBBS, MPH",
         osfPhone: "(844) 673- 4467",
         osfEmail: "sfmc.clinicaltrials@osfhealthcare.org",
         overviewBullets: [],
@@ -239,12 +239,18 @@
   // ---------- Status badge color coding ----------
   (function injectStatusBadgeCss() {
     const css = `
-      .badge.status-recruiting{
-        background:#ecfdf5; border-color:#10b981; color:#065f46;
-      }
-      .badge.status-not-recruiting{
-        background:#fef2f2; border-color:#ef4444; color:#7f1d1d;
-      }
+     .badge.status-recruiting{
+  background:#fef2f2;
+  border-color:#ef4444;
+  color:#7f1d1d;
+}
+
+.badge.status-not-recruiting{
+  background:#ecfdf5;
+  border-color:#10b981;
+  color:#065f46;
+}
+
     `;
     const style = document.createElement("style");
     style.textContent = css;
@@ -360,28 +366,28 @@
     }
 
     function toBullets(sectionText) {
-      const cleaned = sectionText
-        .replace(/inclusion criteria[:\s]*/i, "")
-        .replace(/exclusion criteria[:\s]*/i, "")
-        .trim();
+  const cleaned = sectionText
+    .replace(/inclusion criteria[:\s]*/i, "")
+    .replace(/exclusion criteria[:\s]*/i, "")
+    .trim();
 
-      if (!cleaned) return [];
+  if (!cleaned) return [];
 
-      let parts = cleaned.split(/\n+/).map(x => x.trim()).filter(Boolean);
+  let parts = cleaned.split(/\n+/).map(x => x.trim()).filter(Boolean);
 
-      if (parts.length < 2) {
-        parts = cleaned
-          .split(/(?:•|-|\u2022|\d+\)|\d+\.)\s+/)
-          .map(x => x.trim())
-          .filter(Boolean);
-      }
+  if (parts.length < 2) {
+    parts = cleaned
+      .split(/(?:•|-|\u2022|\d+\)|\d+\.)\s+/)
+      .map(x => x.trim())
+      .filter(Boolean);
+  }
 
-      parts = parts
-        .map(x => x.replace(/^\W+/, "").trim())
-        .filter(x => x.length >= 6);
+  parts = parts
+    .map(x => x.replace(/^\W+/, "").trim())
+    .filter(x => x.length >= 6);
 
-      return parts.slice(0, 6);
-    }
+  return parts.slice(0, 6);
+}
 
     return {
       inclusion: toBullets(incText),
