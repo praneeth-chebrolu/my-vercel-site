@@ -22,7 +22,7 @@
   </style>
 </head>
 <body>
-  <h1>Welcome to my website</h1>
+  <h1>OSF Cancer Clinical Trials</h1>
   <p>Let me help you find a clinical trial.</p>
  <button onclick="sayHello()">Find a trial</button>
   <p id="msg"></p>
@@ -35,6 +35,7 @@
   </script>
 </body>
 </html>
+
 
 
 
