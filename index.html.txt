@@ -65,10 +65,35 @@
 
 <section id="about" class="card">
   <h2>Find a clinical trial</h2>
-  <p>Let me help you find a clinical trial.</p>
-  <button onclick="sayHello()">Find a trial</button>
+  <p>Share a few details and we’ll guide you to the next step.</p>
+
+  <form id="trialForm">
+    <label>
+      Your name<br>
+      <input name="name" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; margin:6px 0 12px;">
+    </label>
+
+    <label>
+      Cancer type (example: ovarian, lung, GBM)<br>
+      <input name="cancer" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; margin:6px 0 12px;">
+    </label>
+
+    <label>
+      City and state (example: Peoria, IL)<br>
+      <input name="location" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; margin:6px 0 12px;">
+    </label>
+
+    <label>
+      Email (optional)<br>
+      <input name="email" type="email" style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; margin:6px 0 12px;">
+    </label>
+
+    <button type="submit">Submit</button>
+  </form>
+
   <p id="msg"></p>
 </section>
+
 
 <section id="how" class="card">
   <h2>How it works</h2>
@@ -85,13 +110,26 @@
 </section>
 
 <script>
-  function sayHello() {
-    document.getElementById("msg").textContent =
-      "Thanks. Next we will add a short form to collect your cancer type and location.";
-  }
+  const form = document.getElementById("trialForm");
+  const msg = document.getElementById("msg");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const data = new FormData(form);
+    const name = data.get("name");
+    const cancer = data.get("cancer");
+    const location = data.get("location");
+
+    msg.textContent = `Thanks, ${name}. We received: ${cancer} in ${location}. Next step: we’ll suggest trial search options.`;
+
+    form.reset();
+  });
 </script>
+
 </body>
 </html>
+
 
 
 
