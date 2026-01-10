@@ -182,9 +182,15 @@
     </div>
   </div>
 
-  <script>
-  // ============ 1) Trials: NCT + your local OSF fields ============
-  // Add more trials by adding another object with nctId and local fields.
+<script>
+  // =========================================================
+  // TRIAL LIST: Auto-populate from ClinicalTrials.gov (high-level)
+  // Patient-friendly: max 4 bullets, consistent labels, no jargon
+  // Badges: Cancer + Phase + Status
+  // NCT number: clickable link to ClinicalTrials.gov
+  // =========================================================
+
+  // 1) Add trials here using only NCT + minimal local OSF details
   const TRIALS = [
     {
       nctId: "NCT06890338",
@@ -196,35 +202,31 @@
         osfPhone: "(844) 673- 4467",
         osfEmail: "sfmc.clinicaltrials@osfhealthcare.org",
 
-        overviewBullets: [
-          "This is a Phase II clinical trial testing a combination therapy.",
-          "This study is for people with advanced ovarian, fallopian tube, or primary peritoneal cancer whose tumors have a protein called folate receptor alpha (FRα).",
-          "The goal is to find out whether giving two medicines Mirvetuximab Soravtansine (MIRV) and Carboplatin before surgery is safe and effective in shrinking the cancer.",
-          "In this study, MIRV is considered an experimental medicine and is being evaluated for its safety and effectiveness when given with carboplatin before surgery.",
-          "In this study, participants will receive MIRV together with Carboplatin through an IV once every three weeks for up to 6 to 9 treatment cycles before surgery.",
-          "About 140 adults will take part across 80 locations in the United States, and the study will last about three years.",
-          "Participants will have regular clinic visits, blood tests, and scans as part of their care. The treatment and monitoring schedule may require more clinic visits than standard treatment."
-        ],
+        // Leave these empty to auto-generate patient-friendly content:
+        overviewBullets: [],
+        whoCanJoin: [],
+        whoCannotJoin: []
+      }
+    },
+    {
+      nctId: "NCT06343402",
+      local: {
+        cancer: "Lung",
+        diseaseFocus: "Lung Cancer",
+        principalInvestigator: "",
+        coordinator: "",
+        osfPhone: "(844) 673- 4467",
+        osfEmail: "sfmc.clinicaltrials@osfhealthcare.org",
 
-        whoCanJoin: [
-          "Adults 18 years and older with advanced (stage III or IV) ovarian, fallopian tube, or primary peritoneal cancer that is high-grade serous type and shows high folate receptor alpha (FRα) levels may be able to join.",
-          "Participants must be in good overall health (ECOG 0–1) and",
-          "Considered suitable by their doctor to receive chemotherapy before surgery."
-        ],
-
-        whoCannotJoin: [
-          "Participants with other cancer types (like clear cell, mucinous, or low-grade tumors).",
-          "Participants who received prior cancer treatments for this disease (except one carboplatin cycle)",
-          "Participants with lung inflammation (pneumonitis), or serious eye conditions that affect vision cannot participate.",
-          "Participants with another active cancer in the past 3 years are also not eligible, unless it was a minor, well-treated skin or in-situ cancer."
-        ],
-
-        note: "The eligibility listed above do not represent the complete list of criteria. Final eligibility will be determined by the study team after a complete review, in coordination with your cancer care team"
+        // Leave these empty to auto-generate patient-friendly content:
+        overviewBullets: [],
+        whoCanJoin: [],
+        whoCannotJoin: []
       }
     }
   ];
 
-  // ============ 2) Existing element lookups ============
+  // 2) Existing element lookups (must match your HTML ids)
   const qEl = document.getElementById("q");
   const cancerEl = document.getElementById("cancer");
   const statusEl = document.getElementById("status");
@@ -237,7 +239,122 @@
   const mBody = document.getElementById("mBody");
   const mLink = document.getElementById("mLink");
 
-  // ============ 3) Minimal CT.gov fetch (high-level fields only) ============
+  // ---------- Helpers ----------
+  function cleanText(s) {
+    return (s || "").replace(/\s+/g, " ").trim();
+  }
+
+  function firstNonEmpty(...vals) {
+    for (const v of vals) {
+      if (typeof v === "string" && v.trim()) return v.trim();
+    }
+    return "";
+  }
+
+  function listNames(arr, key = "name", max = 4) {
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .map(x => (typeof x === "string" ? x : x?.[key]))
+      .filter(Boolean)
+      .map(x => cleanText(x))
+      .slice(0, max);
+  }
+
+  function getPhaseText(designMod) {
+    const phases = Array.isArray(designMod?.phases) ? designMod.phases : [];
+    return phases.length ? phases.join(", ").replaceAll("_", " ") : "Phase not listed";
+  }
+
+  function getSponsorText(sponsorMod) {
+    const lead = sponsorMod?.leadSponsor?.name;
+    const cols = Array.isArray(sponsorMod?.collaborators)
+      ? sponsorMod.collaborators.map(c => c?.name).filter(Boolean)
+      : [];
+    const all = [lead, ...cols].filter(Boolean);
+    return all.length ? all.join(" / ") : "Sponsor not listed";
+  }
+
+  function getInterventionSummary(armsInterventionsMod, interventionsMod) {
+    // Prefer structured intervention names
+    const names = listNames(interventionsMod?.interventions, "name", 4);
+    if (names.length) return names.join(", ");
+
+    // Fallback: arm labels
+    const armLabels = listNames(armsInterventionsMod?.armGroups, "label", 2);
+    if (armLabels.length) return armLabels.join(", ");
+
+    return "";
+  }
+
+  // 3) Patient-friendly overview bullets (max 4, consistent labels, no jargon)
+  function makePatientOverview({ phase, status, diseaseFocus, interventionsSummary, osfPhone, osfEmail }) {
+    const bullets = [];
+
+    // What is this study
+    const phaseText = (phase && phase !== "Phase not listed") ? phase : "a clinical";
+    bullets.push(`What is this study: This is ${phaseText} study. Current status: ${status || "Status not listed"}.`);
+
+    // Who is it for
+    bullets.push(`Who is it for: People with ${diseaseFocus || "the condition listed in the trial details"}.`);
+
+    // What happens
+    if (interventionsSummary) {
+      bullets.push(`What happens: The study is evaluating ${interventionsSummary}. The study team will explain visit schedule, tests, and next steps.`);
+    } else {
+      bullets.push("What happens: The study team will explain the treatment plan, visit schedule, tests, and next steps.");
+    }
+
+    // How to contact
+    const contactParts = [];
+    if (osfPhone) contactParts.push(osfPhone);
+    if (osfEmail) contactParts.push(osfEmail);
+
+    if (contactParts.length) {
+      bullets.push(`How to contact: ${contactParts.join(" or ")}.`);
+    } else {
+      bullets.push("How to contact: Use the contact information listed on this page or on ClinicalTrials.gov.");
+    }
+
+    return bullets.slice(0, 4);
+  }
+
+  // 4) High-level eligibility (auto-generated)
+  function getHighLevelWhoCanJoin({ diseaseFocus, eligibilityModule }) {
+    const who = [];
+
+    const minAge = eligibilityModule?.minimumAge;
+    const maxAge = eligibilityModule?.maximumAge;
+    const sex = eligibilityModule?.sex; // ALL / FEMALE / MALE
+
+    if (minAge || maxAge) {
+      const a = [];
+      if (minAge) a.push(`at least ${minAge}`);
+      if (maxAge) a.push(`up to ${maxAge}`);
+      who.push(`Age: People who are ${a.join(" and ")}.`);
+    }
+
+    if (sex && sex !== "ALL") {
+      who.push(`Sex: This study is only for ${sex.toLowerCase()} participants.`);
+    }
+
+    if (diseaseFocus) {
+      who.push(`Condition: People diagnosed with ${diseaseFocus}.`);
+    }
+
+    who.push("Other eligibility rules apply. The study team will confirm eligibility.");
+
+    return who.slice(0, 4);
+  }
+
+  function getHighLevelWhoCannotJoin() {
+    return [
+      "People who do not meet the study’s eligibility requirements.",
+      "People with conditions or prior treatments that the study team determines make participation unsafe.",
+      "The study team will confirm eligibility after review."
+    ];
+  }
+
+  // 5) ClinicalTrials.gov fetch (v2 endpoint)
   async function fetchCtgovStudy(nctId) {
     const url = `https://clinicaltrials.gov/api/v2/studies/${encodeURIComponent(nctId)}`;
     const res = await fetch(url);
@@ -245,68 +362,105 @@
     return await res.json();
   }
 
-  // Convert CT.gov JSON -> high-level model used by your UI.
-  function toHighLevelTrial(study, local, nctId) {
+  // 6) Convert CT.gov JSON -> model used by your cards/modal
+  function toTrialModel(study, local, nctId) {
     const p = study.protocolSection || {};
-    const id = p.identificationModule || {};
-    const status = p.statusModule || {};
-    const sponsor = p.sponsorCollaboratorsModule || {};
-    const desc = p.descriptionModule || {};
-    const design = p.designModule || {};
-    const cond = p.conditionsModule || {};
+    const idMod = p.identificationModule || {};
+    const statusMod = p.statusModule || {};
+    const sponsorMod = p.sponsorCollaboratorsModule || {};
+    const descMod = p.descriptionModule || {};
+    const designMod = p.designModule || {};
+    const condMod = p.conditionsModule || {};
+    const armsInterventionsMod = p.armsInterventionsModule || {};
+    const interventionsMod = p.interventionsModule || {};
+    const eligMod = p.eligibilityModule || {};
 
-    const title = id.officialTitle || id.briefTitle || "Title not listed";
+    const ctgovId = idMod.nctId || nctId;
+    const ctgovLink = `https://clinicaltrials.gov/study/${ctgovId}`;
 
-    const phase = (Array.isArray(design.phases) && design.phases.length)
-      ? design.phases.join(", ").replaceAll("_", " ")
-      : "Phase not listed";
+    const title = firstNonEmpty(idMod.officialTitle, idMod.briefTitle, "Title not listed");
+    const phase = getPhaseText(designMod);
+    const sponsor = getSponsorText(sponsorMod);
+    const status = (statusMod.overallStatus || "Status not listed").replaceAll("_", " ");
 
-    const sponsorText = [
-      sponsor.leadSponsor?.name,
-      ...(Array.isArray(sponsor.collaborators) ? sponsor.collaborators.map(c => c.name) : [])
-    ].filter(Boolean).join(" / ") || "Sponsor not listed";
+    const defaultCondition =
+      (Array.isArray(condMod.conditions) && condMod.conditions.length) ? condMod.conditions[0] : "Cancer";
 
-    const overallStatus = (status.overallStatus || "Status not listed").replaceAll("_", " ");
+    const cancerBadge = local.cancer || defaultCondition;
+    const diseaseFocus = local.diseaseFocus || defaultCondition;
+
+    const interventionsSummary = getInterventionSummary(armsInterventionsMod, interventionsMod);
+
+    const overviewBullets =
+      Array.isArray(local.overviewBullets) && local.overviewBullets.length
+        ? local.overviewBullets.slice(0, 4)
+        : makePatientOverview({
+            phase,
+            status,
+            diseaseFocus,
+            interventionsSummary,
+            osfPhone: local.osfPhone || "",
+            osfEmail: local.osfEmail || ""
+          });
+
+    const whoCanJoin =
+      Array.isArray(local.whoCanJoin) && local.whoCanJoin.length
+        ? local.whoCanJoin
+        : getHighLevelWhoCanJoin({ diseaseFocus, eligibilityModule: eligMod });
+
+    const whoCannotJoin =
+      Array.isArray(local.whoCannotJoin) && local.whoCannotJoin.length
+        ? local.whoCannotJoin
+        : getHighLevelWhoCannotJoin();
+
+    const note =
+      local.note ||
+      "Eligibility shown here is high-level and not complete. Final eligibility is determined by the study team after review in coordination with your cancer care team.";
+
+    const summary = firstNonEmpty(descMod.briefSummary, "Summary not listed");
 
     return {
-      id: id.nctId || nctId,
-      ctgovLink: `https://clinicaltrials.gov/study/${id.nctId || nctId}`,
+      id: ctgovId,
+      ctgovLink,
 
-      // What shows on cards
-      title: title,
-      cancer: local.cancer || (cond.conditions?.[0] || "Cancer"),
-      phase: phase,
-      status: overallStatus,
-      sponsor: sponsorText,
+      // Card fields
+      title,
+      cancer: cancerBadge,
+      phase,
+      status,
+      sponsor,
 
-      // Modal details
-      diseaseFocus: local.diseaseFocus || (cond.conditions?.[0] || "Disease focus not listed"),
-      summary: desc.briefSummary || "Summary not listed",
+      // Modal fields
+      diseaseFocus,
+      summary,
 
+      // Local OSF fields
       principalInvestigator: local.principalInvestigator || "",
       coordinator: local.coordinator || "",
       osfPhone: local.osfPhone || "",
       osfEmail: local.osfEmail || "",
 
-      overviewBullets: local.overviewBullets || [],
-      whoCanJoin: local.whoCanJoin || [],
-      whoCannotJoin: local.whoCannotJoin || [],
-      note: local.note || ""
+      // Patient-friendly content
+      overviewBullets,
+      whoCanJoin,
+      whoCannotJoin,
+      note
     };
   }
 
+  // 7) Load all trials
   let EXPANDED_TRIALS = [];
 
   async function loadTrials() {
     const expanded = [];
     for (const t of TRIALS) {
       const study = await fetchCtgovStudy(t.nctId);
-      expanded.push(toHighLevelTrial(study, t.local || {}, t.nctId));
+      expanded.push(toTrialModel(study, t.local || {}, t.nctId));
     }
     EXPANDED_TRIALS = expanded;
   }
 
-  // ============ 4) Filtering ============
+  // 8) Filter logic
   function matches(trial) {
     const q = (qEl.value || "").toLowerCase().trim();
     const c = cancerEl.value;
@@ -323,16 +477,13 @@
     ].join(" ").toLowerCase();
 
     if (q && !text.includes(q)) return false;
-
-    // Match cancer dropdown against trial.cancer (simple and consistent)
     if (c && trial.cancer !== c) return false;
-
     if (s && trial.status !== s) return false;
 
     return true;
   }
 
-  // ============ 5) Render cards (Cancer + Phase + Status badges, NCT clickable) ============
+  // 9) Render cards (Cancer + Phase + Status badges, NCT clickable)
   function render() {
     const filtered = EXPANDED_TRIALS.filter(matches);
 
@@ -362,7 +513,7 @@
     countEl.textContent = `${filtered.length} trial(s) shown.`;
   }
 
-  // ============ 6) Modal ============
+  // 10) Modal rendering
   function bulletsToHtml(arr) {
     if (!arr || !arr.length) return "<div class='muted'>Not listed.</div>";
     return `<ul>${arr.map(x => `<li>${x}</li>`).join("")}</ul>`;
@@ -375,22 +526,25 @@
     mTitle.textContent = `${t.title} (${t.id})`;
 
     mBody.innerHTML = `
+      <div><strong>Cancer:</strong> ${t.cancer}</div>
       <div><strong>Study Phase:</strong> ${t.phase}</div>
+      <div><strong>Status:</strong> ${t.status}</div>
       <div><strong>Sponsor:</strong> ${t.sponsor}</div>
-      <div>
+
+      <div style="margin-top:10px;">
         <strong>ClinicalTrials.gov Identifier:</strong>
         <a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${t.id}</a>
       </div>
-      <div><strong>Disease Focus:</strong> ${t.diseaseFocus}</div>
 
-      <div style="margin-top:10px;"><strong>Principal Investigator:</strong> ${t.principalInvestigator}</div>
-      <div><strong>Clinical Research Coordinator:</strong> ${t.coordinator}</div>
+      <div style="margin-top:10px;"><strong>Disease Focus:</strong> ${t.diseaseFocus}</div>
+
+      ${t.principalInvestigator ? `<div style="margin-top:10px;"><strong>Principal Investigator:</strong> ${t.principalInvestigator}</div>` : ""}
+      ${t.coordinator ? `<div><strong>Clinical Research Coordinator:</strong> ${t.coordinator}</div>` : ""}
 
       <div style="margin-top:14px;"><strong>Study Overview</strong></div>
       ${bulletsToHtml(t.overviewBullets)}
 
       <div style="margin-top:14px;"><strong>Eligibility</strong></div>
-
       <div style="margin-top:10px;"><strong>Who Can Join This Study</strong></div>
       ${bulletsToHtml(t.whoCanJoin)}
 
@@ -399,9 +553,8 @@
 
       <div style="margin-top:10px;" class="muted"><strong>Note:</strong> ${t.note}</div>
 
-      <div style="margin-top:14px;"><strong>Enrollment Information</strong></div>
-      <div><strong>Status:</strong> ${t.status}</div>
-      <div>See if you qualify. Contact us: ${t.osfPhone} (OR) Email: ${t.osfEmail}</div>
+      <div style="margin-top:14px;"><strong>How to contact</strong></div>
+      <div>${t.osfPhone ? t.osfPhone : ""}${t.osfPhone && t.osfEmail ? " or " : ""}${t.osfEmail ? t.osfEmail : ""}</div>
     `;
 
     mLink.href = t.ctgovLink;
@@ -421,15 +574,17 @@
   cancerEl.addEventListener("change", render);
   statusEl.addEventListener("change", render);
 
-  // ============ 7) Init ============
+  // 11) Init
   (async function init() {
     resultsEl.innerHTML = `<div class="muted">Loading trials…</div>`;
     countEl.textContent = "";
+
     try {
       await loadTrials();
       render();
     } catch (e) {
       resultsEl.innerHTML = `<div class="muted">Could not load trials right now. Please refresh.</div>`;
+      countEl.textContent = "";
     }
   })();
 </script>
