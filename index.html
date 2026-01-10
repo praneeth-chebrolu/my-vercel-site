@@ -1,1 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title> OSF Cancer Clinical Trials </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+ <style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 0 20px;
+    line-height: 1.6;
+    color: #1f2937;
+  }
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  nav a {
+    margin-left: 14px;
+    text-decoration: none;
+    color: #1f2937;
+  }
+  nav a:hover {
+    text-decoration: underline;
+  }
+  .card {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 16px;
+    background: #ffffff;
+  }
+  button {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button:hover {
+    background: #f3f4f6;
+  }
+  #msg {
+    margin-top: 12px;
+    font-weight: 600;
+  }
+</style>
+
+</head>
+<body>
+ <header>
+  <h1>OSF Cancer Clinical Trials</h1>
+  <nav>
+    <a href="#about">About</a>
+    <a href="#how">How it works</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section id="about" class="card">
+  <h2>Find a clinical trial</h2>
+  <p>Share a few details and we’ll guide you to the next step.</p>
+
+  <form id="trialForm">
+    <label>
+      Your name<br>
+      <input name="name" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; margin:6px 0 12px;">
+    </label>
+
+    <label>
+      Cancer type (example: ovarian, lung, GBM)<br>
+      <input name="cancer" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; margin:6px 0 12px;">
+    </label>
+
+    <label>
+      City and state (example: Peoria, IL)<br>
+      <input name="location" required style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; margin:6px 0 12px;">
+    </label>
+
+    <label>
+      Email (optional)<br>
+      <input name="email" type="email" style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; margin:6px 0 12px;">
+    </label>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <p id="msg"></p>
+</section>
+
+
+<section id="how" class="card">
+  <h2>How it works</h2>
+  <ol>
+    <li>Tell us the cancer type and stage.</li>
+    <li>We match you to trials that are open and recruiting.</li>
+    <li>A coordinator follows up with next steps.</li>
+  </ol>
+</section>
+
+<section id="contact" class="card">
+  <h2>Contact</h2>
+  <p>Email: trials@example.com</p>
+</section>
+
+<script>
+  const form = document.getElementById("trialForm");
+  const msg = document.getElementById("msg");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const data = new FormData(form);
+    const name = data.get("name");
+    const cancer = data.get("cancer");
+    const location = data.get("location");
+
+    msg.textContent = `Thanks, ${name}. We received: ${cancer} in ${location}. Next step: we’ll suggest trial search options.`;
+
+    form.reset();
+  });
+</script>
+
+</body>
+</html>
+
+
+
+
+
 
