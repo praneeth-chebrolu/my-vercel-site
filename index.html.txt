@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>My First Vercel Website</title>
+  <title>Clinical Trials Guru Website</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -22,8 +22,8 @@
   </style>
 </head>
 <body>
-  <h1>Hello 👋</h1>
-  <p>This is my first website deployed on Vercel.</p>
+  <h1>Welcome to my website</h1>
+  <p>Let me help you find a clinical trial.</p>
   <button onclick="sayHello()">Click me</button>
   <p id="msg"></p>
 
@@ -35,3 +35,4 @@
   </script>
 </body>
 </html>
+
