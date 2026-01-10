@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Clinical Trials Guru Website</title>
+  <title> OSF Cancer Clinical Trials </title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -24,15 +24,17 @@
 <body>
   <h1>Welcome to my website</h1>
   <p>Let me help you find a clinical trial.</p>
-  <button onclick="sayHello()">Click me</button>
+ <button onclick="sayHello()">Find a trial</button>
   <p id="msg"></p>
 
   <script>
     function sayHello() {
       document.getElementById("msg").textContent =
-        "You just built and deployed a website 🚀";
+        "We are working on helping patients find the right clinical trial";
+";
     }
   </script>
 </body>
 </html>
+
 
