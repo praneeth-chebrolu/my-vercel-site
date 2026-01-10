@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>OSF Cancer Clinical Trials | Trial List</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -166,10 +167,20 @@
 
     <div class="filters">
       <input id="q" placeholder="Search (keyword, ID, drug, cancer type)" />
-     <select id="cancer">
-  <option value="">All cancer types</option>
-</select>
-
+      <select id="cancer">
+        <option value="">All cancer types</option>
+        <option>GBM</option>
+        <option>Ovarian</option>
+        <option>Lung</option>
+        <option>Breast</option>
+      </select>
+      <select id="status">
+        <option value="">All statuses</option>
+        <option value="Recruiting">Recruiting</option>
+        <option value="Not yet recruiting">Not yet recruiting</option>
+        <option value="Active, not recruiting">Active, not recruiting</option>
+        <option value="Completed">Completed</option>
+      </select>
     </div>
 
     <div id="results" class="grid"></div>
