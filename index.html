@@ -443,12 +443,75 @@
   }
 
   // ---------- ClinicalTrials.gov fetch ----------
-  async function fetchCtgovStudy(nctId) {
-    const url = `https://clinicaltrials.gov/api/v2/studies/${encodeURIComponent(nctId)}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`ClinicalTrials.gov error ${res.status}`);
-    return await res.json();
+
+  // ===============================
+// STEP 3: Load trials from CSV (your actual Excel headers)
+// Expected columns:
+// NCT ID, Cancer, Principal Investigator, Clinical Research Coordinator, Status
+// ===============================
+async function loadTrialsFromCSV(csvUrl) {
+  const response = await fetch(csvUrl);
+  const csvText = await response.text();
+
+  const rows = csvText
+    .split("\n")
+    .map(r => r.trim())
+    .filter(r => r.length);
+
+  // First row = headers (strip quotes + trim)
+  const headers = rows
+    .shift()
+    .split(",")
+    .map(h => h.replace(/^"|"$/g, "").trim());
+
+  // helper to read values even if spacing/case differs
+  function get(record, key) {
+    if (record[key] != null) return record[key];
+
+    const normKey = key.replace(/\s+/g, " ").trim().toLowerCase();
+    for (const k of Object.keys(record)) {
+      const nk = k.replace(/\s+/g, " ").trim().toLowerCase();
+      if (nk === normKey) return record[k];
+    }
+    return "";
   }
+
+  return rows
+    .map(row => {
+      const values = row
+        .split(",")
+        .map(v => v.replace(/^"|"$/g, "").trim());
+
+      const record = {};
+      headers.forEach((h, i) => {
+        record[h] = values[i] || "";
+      });
+
+      const nctId = get(record, "NCT ID");
+      const cancer = get(record, "Cancer");
+      const principalInvestigator = get(record, "Principal Investigator");
+      const coordinator = get(record, "Clinical Research Coordinator");
+      const statusOverride = get(record, "Status"); // optional if you want to use your sheet status
+
+      return {
+        nctId,
+        local: {
+          cancer,
+          diseaseFocus: "", // optional column if you add it later
+          principalInvestigator,
+          coordinator,
+          statusOverride, // safe to keep even if you don't use it yet
+          osfPhone: "(844) 673-4467",
+          osfEmail: "sfmc.clinicaltrials@osfhealthcare.org",
+          overviewBullets: [],
+          whoCanJoin: [],
+          whoCannotJoin: []
+        }
+      };
+    })
+    .filter(t => t.nctId); // drop blank rows
+}
+
 
   // ---------- Convert CT.gov -> model ----------
   function toTrialModel(study, local, nctId) {
