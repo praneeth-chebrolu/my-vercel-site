@@ -184,163 +184,232 @@
 
   <script>
     // Replace these with YOUR real trials (your "list")
-    const TRIALS = [
+    // 1) Only store NCT + your local OSF details here
+const TRIALS = [
   {
-  id: "NCT06890338",
-  title: "Neoadjuvant Carboplatin + Mirvetuximab Soravtansine",
-  cancer: "Ovarian",
-  phase: "Phase II",
-  status: "Recruiting",
-  location: "Peoria, IL",
-  summary: "Phase II study evaluating neoadjuvant carboplatin with mirvetuximab soravtansine (MIRV) in patients with FRα-expressing advanced-stage serous ovarian, fallopian tube, or primary peritoneal cancer.",
-  keyEligibility: [
-    "Age ≥18 years",
-    "Stage III or IV high-grade serous ovarian, fallopian tube, or primary peritoneal cancer",
-    "High folate receptor alpha (FRα) expression",
-    "ECOG performance status 0–1",
-    "Eligible for neoadjuvant chemotherapy"
-  ],
-  contact: "PI: Michelle Rowland, MD, PhD, MPH | CRC: Lisa Gale, MSN, RN, CCRC | OSF Clinical Trials: (844) 673-4467 | sfmc.clinicaltrials@osfhealthcare.org",
-  link: "https://clinicaltrials.gov/study/NCT06890338"
-},
+    nctId: "NCT06890338",
+    local: {
+      cancer: "Ovarian",
+      location: "Peoria, IL",
+      principalInvestigator: "Michelle Rowland, MD, PhD, MPH.",
+      coordinator: "Lisa Gale, MSN, RN, CCRC",
+      osfContactPhone: "(844) 673-4467",
+      osfContactEmail: "sfmc.clinicaltrials@osfhealthcare.org"
+    }
+  },
+
+  // Keep your custom, non NCT trials as-is if you want
+  // (They will skip the CTgov fetch.)
   {
-        id: "OSF-GBM-001",
-        title: "GBM: Novel therapy + standard of care",
-        cancer: "GBM",
-        phase: "Phase 2",
-        status: "Recruiting",
-        location: "Peoria, IL",
-        summary: "Evaluates safety and efficacy of a novel agent combined with standard therapy.",
-        keyEligibility: [
-          "Adult patients with confirmed GBM",
-          "Measurable disease",
-          "Adequate organ function"
-        ],
-        contact: "Research Coordinator: trials@example.com",
-        link: "https://clinicaltrials.gov/"
-      },
-      {
-        id: "OSF-OV-014",
-        title: "Ovarian: Maintenance therapy study",
-        cancer: "Ovarian",
-        phase: "Phase 3",
-        status: "Not yet recruiting",
-        location: "Peoria, IL",
-        summary: "Compares maintenance strategies after response to platinum-based chemotherapy.",
-        keyEligibility: [
-          "High-grade serous ovarian cancer",
-          "Completed first-line chemotherapy",
-          "ECOG 0-1"
-        ],
-        contact: "Research Coordinator: trials@example.com",
-        link: "https://clinicaltrials.gov/"
-      },
-      {
-        id: "OSF-LUNG-007",
-        title: "Lung: Targeted therapy for EGFR mutation",
-        cancer: "Lung",
-        phase: "Phase 2",
-        status: "Recruiting",
-        location: "Peoria, IL",
-        summary: "For patients with EGFR mutation considering targeted options.",
-        keyEligibility: [
-          "Confirmed NSCLC",
-          "EGFR mutation positive",
-          "Prior treatment allowed"
-        ],
-        contact: "Research Coordinator: trials@example.com",
-        link: "https://clinicaltrials.gov/"
+    id: "OSF-GBM-001",
+    title: "GBM: Novel therapy + standard of care",
+    cancer: "GBM",
+    phase: "Phase 2",
+    status: "Recruiting",
+    location: "Peoria, IL",
+    summary: "Evaluates safety and efficacy of a novel agent combined with standard therapy.",
+    keyEligibility: [
+      "Adult patients with confirmed GBM",
+      "Measurable disease",
+      "Adequate organ function"
+    ],
+    contact: "Research Coordinator: trials@example.com",
+    link: "https://clinicaltrials.gov/"
+  }
+];
+
+// ---------- Existing element lookups ----------
+const qEl = document.getElementById("q");
+const cancerEl = document.getElementById("cancer");
+const statusEl = document.getElementById("status");
+const resultsEl = document.getElementById("results");
+const countEl = document.getElementById("count");
+
+const backdrop = document.getElementById("backdrop");
+const closeBtn = document.getElementById("close");
+const mTitle = document.getElementById("mTitle");
+const mBody = document.getElementById("mBody");
+const mLink = document.getElementById("mLink");
+
+// ---------- NEW: Fetch CTgov by NCT ----------
+async function fetchStudyByNct(nctId) {
+  const url = `https://clinicaltrials.gov/api/v2/studies/${encodeURIComponent(nctId)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`ClinicalTrials.gov error ${res.status}`);
+  return await res.json();
+}
+
+// ---------- NEW: Convert CTgov JSON into your card format ----------
+function toTrialCardFromCtgov(study, local = {}) {
+  const protocol = study.protocolSection || {};
+  const idMod = protocol.identificationModule || {};
+  const statusMod = protocol.statusModule || {};
+  const sponsorMod = protocol.sponsorCollaboratorsModule || {};
+  const descMod = protocol.descriptionModule || {};
+  const designMod = protocol.designModule || {};
+  const condMod = protocol.conditionsModule || {};
+  const eligMod = protocol.eligibilityModule || {};
+
+  const phases = Array.isArray(designMod.phases) ? designMod.phases : [];
+  const phaseText = phases.length ? phases.join(", ").replaceAll("_", " ") : "Phase not listed";
+
+  const overallStatus = (statusMod.overallStatus || "Status not listed").replaceAll("_", " ");
+
+  const title = idMod.officialTitle || idMod.briefTitle || "Title not listed";
+
+  const sponsorName = sponsorMod.leadSponsor?.name || "Sponsor not listed";
+
+  // CTgov often has a big eligibility string. We keep it as a single item.
+  const eligibilityText = eligMod.eligibilityCriteria || "Eligibility criteria not listed on ClinicalTrials.gov.";
+
+  return {
+    id: idMod.nctId || local.nctId || "NCT",
+    title,
+    cancer: local.cancer || (condMod.conditions?.[0] || "Cancer"),
+    phase: local.phase || phaseText,
+    status: local.status || overallStatus,
+    location: local.location || "Location not listed",
+    summary: descMod.briefSummary || "Summary not listed",
+    keyEligibility: [eligibilityText],
+    contact: [
+      `Sponsor: ${sponsorName}`,
+      local.principalInvestigator ? `PI: ${local.principalInvestigator}` : "",
+      local.coordinator ? `CRC: ${local.coordinator}` : "",
+      local.osfContactPhone ? `OSF Clinical Trials: ${local.osfContactPhone}` : "",
+      local.osfContactEmail ? local.osfContactEmail : ""
+    ].filter(Boolean).join(" | "),
+    link: `https://clinicaltrials.gov/study/${idMod.nctId || local.nctId || ""}`
+  };
+}
+
+// ---------- NEW: Expand TRIALS into fully populated list ----------
+let EXPANDED_TRIALS = [];
+
+async function expandTrials() {
+  const expanded = [];
+
+  for (const t of TRIALS) {
+    // If it's already a full object (custom trial), keep it
+    if (t.id && t.title) {
+      expanded.push(t);
+      continue;
+    }
+
+    // If it's an NCT entry, fetch from CTgov
+    if (t.nctId) {
+      try {
+        const study = await fetchStudyByNct(t.nctId);
+        expanded.push(toTrialCardFromCtgov(study, { ...(t.local || {}), nctId: t.nctId }));
+      } catch (e) {
+        expanded.push({
+          id: t.nctId,
+          title: `Could not load ${t.nctId}`,
+          cancer: t.local?.cancer || "Cancer",
+          phase: "Unknown",
+          status: "Unknown",
+          location: t.local?.location || "Unknown",
+          summary: "There was a problem loading details from ClinicalTrials.gov. Please try again later.",
+          keyEligibility: ["Not available"],
+          contact: [
+            t.local?.principalInvestigator ? `PI: ${t.local.principalInvestigator}` : "",
+            t.local?.coordinator ? `CRC: ${t.local.coordinator}` : "",
+            t.local?.osfContactPhone ? `OSF Clinical Trials: ${t.local.osfContactPhone}` : "",
+            t.local?.osfContactEmail ? t.local.osfContactEmail : ""
+          ].filter(Boolean).join(" | "),
+          link: `https://clinicaltrials.gov/study/${t.nctId}`
+        });
       }
-    ];
-
-    const qEl = document.getElementById("q");
-    const cancerEl = document.getElementById("cancer");
-    const statusEl = document.getElementById("status");
-    const resultsEl = document.getElementById("results");
-    const countEl = document.getElementById("count");
-
-    const backdrop = document.getElementById("backdrop");
-    const closeBtn = document.getElementById("close");
-    const mTitle = document.getElementById("mTitle");
-    const mBody = document.getElementById("mBody");
-    const mLink = document.getElementById("mLink");
-
-    function matches(trial) {
-      const q = (qEl.value || "").toLowerCase().trim();
-      const c = cancerEl.value;
-      const s = statusEl.value;
-
-      const text = [
-        trial.id, trial.title, trial.cancer, trial.phase, trial.status,
-        trial.location, trial.summary
-      ].join(" ").toLowerCase();
-
-      if (q && !text.includes(q)) return false;
-      if (c && trial.cancer !== c) return false;
-      if (s && trial.status !== s) return false;
-      return true;
     }
+  }
 
-    function render() {
-      const filtered = TRIALS.filter(matches);
+  EXPANDED_TRIALS = expanded;
+}
 
-      resultsEl.innerHTML = filtered.map(t => `
-        <div class="trial">
-          <div class="badgeRow">
-            <span class="badge">${t.cancer}</span>
-            <span class="badge">${t.phase}</span>
-            <span class="badge">${t.status}</span>
-          </div>
-          <div>
-            <div style="font-weight:700; font-size:16px;">${t.title}</div>
-            <div class="muted">${t.id} • ${t.location}</div>
-          </div>
-          <div class="muted">${t.summary}</div>
-        <div class="actions">
-  <button type="button" onclick="openModal('${t.id}')">View details</button>
-  <a href="index.html?trial=${encodeURIComponent(t.id)}#about">I’m interested</a>
-</div>
-        </div>
-      `).join("");
+// ---------- Existing match logic, but use expanded trials ----------
+function matches(trial) {
+  const q = (qEl.value || "").toLowerCase().trim();
+  const c = cancerEl.value;
+  const s = statusEl.value;
 
-      countEl.textContent = `${filtered.length} trial(s) shown.`;
-    }
+  const text = [
+    trial.id, trial.title, trial.cancer, trial.phase, trial.status,
+    trial.location, trial.summary
+  ].join(" ").toLowerCase();
 
-    window.openModal = function(id) {
-      const t = TRIALS.find(x => x.id === id);
-      if (!t) return;
+  if (q && !text.includes(q)) return false;
+  if (c && trial.cancer !== c) return false;
+  if (s && trial.status !== s) return false;
+  return true;
+}
 
-      mTitle.textContent = `${t.title} (${t.id})`;
-      mBody.innerHTML = `
-        <div><strong>Cancer:</strong> ${t.cancer}</div>
-        <div><strong>Phase:</strong> ${t.phase}</div>
-        <div><strong>Status:</strong> ${t.status}</div>
-        <div><strong>Location:</strong> ${t.location}</div>
-        <div style="margin-top:10px;"><strong>Summary:</strong> ${t.summary}</div>
-        <div style="margin-top:10px;"><strong>Key eligibility:</strong>
-          <ul>${t.keyEligibility.map(x => `<li>${x}</li>`).join("")}</ul>
-        </div>
-        <div style="margin-top:10px;"><strong>Contact:</strong> ${t.contact}</div>
-      `;
-      mLink.href = t.link;
+// ---------- UPDATED: render now works off EXPANDED_TRIALS ----------
+function render() {
+  const filtered = EXPANDED_TRIALS.filter(matches);
 
-      backdrop.style.display = "flex";
-    };
+  resultsEl.innerHTML = filtered.map(t => `
+    <div class="trial">
+      <div class="badgeRow">
+        <span class="badge">${t.cancer}</span>
+        <span class="badge">${t.phase}</span>
+        <span class="badge">${t.status}</span>
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:16px;">${t.title}</div>
+        <div class="muted">${t.id} • ${t.location}</div>
+      </div>
+      <div class="muted">${t.summary}</div>
+      <div class="actions">
+        <button type="button" onclick="openModal('${t.id}')">View details</button>
+        <a href="intake.html?trial=${encodeURIComponent(t.id)}#about">I’m interested</a>
+      </div>
+    </div>
+  `).join("");
 
-    function closeModal() {
-      backdrop.style.display = "none";
-    }
+  countEl.textContent = `${filtered.length} trial(s) shown.`;
+}
 
-    closeBtn.addEventListener("click", closeModal);
-    backdrop.addEventListener("click", (e) => {
-      if (e.target === backdrop) closeModal();
-    });
+// ---------- UPDATED: modal pulls from EXPANDED_TRIALS ----------
+window.openModal = function(id) {
+  const t = EXPANDED_TRIALS.find(x => x.id === id);
+  if (!t) return;
 
-    qEl.addEventListener("input", render);
-    cancerEl.addEventListener("change", render);
-    statusEl.addEventListener("change", render);
+  mTitle.textContent = `${t.title} (${t.id})`;
+  mBody.innerHTML = `
+    <div><strong>Cancer:</strong> ${t.cancer}</div>
+    <div><strong>Phase:</strong> ${t.phase}</div>
+    <div><strong>Status:</strong> ${t.status}</div>
+    <div><strong>Location:</strong> ${t.location}</div>
+    <div style="margin-top:10px;"><strong>Summary:</strong> ${t.summary}</div>
+    <div style="margin-top:10px;"><strong>Eligibility:</strong>
+      <pre style="white-space:pre-wrap; font-family:inherit;">${t.keyEligibility[0]}</pre>
+    </div>
+    <div style="margin-top:10px;"><strong>Contact:</strong> ${t.contact}</div>
+  `;
+  mLink.href = t.link;
 
-    render();
+  backdrop.style.display = "flex";
+};
+
+function closeModal() {
+  backdrop.style.display = "none";
+}
+
+closeBtn.addEventListener("click", closeModal);
+backdrop.addEventListener("click", (e) => {
+  if (e.target === backdrop) closeModal();
+});
+
+qEl.addEventListener("input", render);
+cancerEl.addEventListener("change", render);
+statusEl.addEventListener("change", render);
+
+// ---------- NEW: load CTgov data first, then render ----------
+(async function init() {
+  resultsEl.innerHTML = `<div class="muted">Loading trials…</div>`;
+  countEl.textContent = "";
+  await expandTrials();
+  render();
+})();
   </script>
 </body>
 </html>
