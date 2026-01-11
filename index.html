@@ -1,11 +1,9 @@
-
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Choose Cancer Type | OSF Cancer Clinical Trials</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <style>
     body{
       font-family: Arial, sans-serif;
@@ -16,7 +14,6 @@
       background: #ffffff;
       line-height: 1.6;
     }
-
     header{
       display:flex;
       justify-content:space-between;
@@ -25,7 +22,6 @@
       flex-wrap: wrap;
       margin-bottom: 18px;
     }
-
     nav a{
       margin-left: 14px;
       text-decoration:none;
@@ -40,7 +36,6 @@
       padding:18px;
       background:#ffffff;
     }
-
     .muted{
       color:#6b7280;
       font-size: 14px;
@@ -75,10 +70,9 @@
       transform: translateY(-1px);
     }
 
-    /* icon image container */
     .iconBadge{
-      width:52px;
-      height:52px;
+      width:56px;
+      height:56px;
       border-radius:16px;
       display:flex;
       align-items:center;
@@ -88,10 +82,9 @@
       background: #ffffff;
       overflow:hidden;
     }
-
     .iconBadge svg{
-      width:34px;
-      height:34px;
+      width:40px;
+      height:40px;
       display:block;
     }
 
@@ -127,11 +120,10 @@
     <!-- ALL TRIALS -->
     <a class="tile" href="trials.html">
       <div class="iconBadge" aria-hidden="true">
-        <!-- simple list icon -->
         <svg viewBox="0 0 24 24" fill="none">
-          <rect x="4" y="5" width="16" height="3" rx="1.5" fill="#2563eb"/>
-          <rect x="4" y="10.5" width="16" height="3" rx="1.5" fill="#2563eb"/>
-          <rect x="4" y="16" width="16" height="3" rx="1.5" fill="#2563eb"/>
+          <rect x="5" y="6" width="14" height="3" rx="1.5" fill="#2563eb"/>
+          <rect x="5" y="11" width="14" height="3" rx="1.5" fill="#2563eb"/>
+          <rect x="5" y="16" width="14" height="3" rx="1.5" fill="#2563eb"/>
         </svg>
       </div>
       <div>
@@ -143,9 +135,12 @@
     <!-- BLADDER -->
     <a class="tile" href="trials.html?cancer=Bladder%20cancer">
       <div class="iconBadge" aria-hidden="true">
-        <!-- droplet -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M12 2c3 5 6 8 6 12a6 6 0 1 1-12 0c0-4 3-7 6-12Z" fill="#0ea5e9"/>
+        <!-- more “organ-like” bladder -->
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M22 10c2 6 2 10 2 16 0 6-3 10-6 13-4 4-6 8-6 12 0 8 7 13 20 13s20-5 20-13c0-4-2-8-6-12-3-3-6-7-6-13 0-6 0-10 2-16"
+                fill="#0ea5e9"/>
+          <path d="M30 52c0 4-2 8-6 10" stroke="#075985" stroke-width="3" stroke-linecap="round"/>
+          <path d="M34 52c0 4 2 8 6 10" stroke="#075985" stroke-width="3" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
@@ -157,11 +152,14 @@
     <!-- BRAIN -->
     <a class="tile" href="trials.html?cancer=Brain%20cancer">
       <div class="iconBadge" aria-hidden="true">
-        <!-- brain (simple) -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M9 4c-2 0-4 2-4 4v8c0 2 2 4 4 4h2V4H9Z" fill="#7c3aed"/>
-          <path d="M15 4c2 0 4 2 4 4v8c0 2-2 4-4 4h-2V4h2Z" fill="#7c3aed"/>
-          <path d="M9 8h2M9 12h2M13 8h2M13 12h2" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"/>
+        <!-- more “organ-like” brain -->
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M26 10c-8 0-14 7-14 15 0 4 2 7 4 9-2 2-3 5-3 8 0 7 6 12 13 12h7V10h-7Z"
+                fill="#7c3aed"/>
+          <path d="M38 10c8 0 14 7 14 15 0 4-2 7-4 9 2 2 3 5 3 8 0 7-6 12-13 12h-7V10h7Z"
+                fill="#7c3aed"/>
+          <path d="M22 22c4 0 6 2 6 6M22 34c4 0 6 2 6 6M42 22c-4 0-6 2-6 6M42 34c-4 0-6 2-6 6"
+                stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
@@ -173,11 +171,15 @@
     <!-- BREAST (PINK RIBBON) -->
     <a class="tile" href="trials.html?cancer=Breast%20cancer">
       <div class="iconBadge" aria-hidden="true">
-        <!-- pink ribbon svg -->
+        <!-- nicer pink ribbon -->
         <svg viewBox="0 0 64 64" fill="none">
-          <path d="M32 10c4 7 8 12 8 19 0 6-4 10-8 13-4-3-8-7-8-13 0-7 4-12 8-19Z" fill="#e11d48"/>
-          <path d="M24 29c-7 5-12 9-12 16 0 5 4 9 9 9 6 0 11-6 15-10-4-3-8-8-12-15Z" fill="#fb7185"/>
-          <path d="M40 29c7 5 12 9 12 16 0 5-4 9-9 9-6 0-11-6-15-10 4-3 8-8 12-15Z" fill="#fb7185"/>
+          <path d="M32 6c5 9 10 15 10 24 0 8-5 13-10 17-5-4-10-9-10-17 0-9 5-15 10-24Z"
+                fill="#e11d48"/>
+          <path d="M24 30C14 38 10 44 10 50c0 6 5 10 11 10 7 0 13-7 17-12-5-4-9-10-14-18Z"
+                fill="#fb7185"/>
+          <path d="M40 30c10 8 14 14 14 20 0 6-5 10-11 10-7 0-13-7-17-12 5-4 9-10 14-18Z"
+                fill="#fb7185"/>
+          <path d="M32 30c-2 3-4 5-6 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
@@ -186,27 +188,14 @@
       </div>
     </a>
 
-    <!-- CHILDHOOD -->
-    <a class="tile" href="trials.html?cancer=Childhood%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- child (simple) -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="7" r="3" fill="#f59e0b"/>
-          <path d="M6 21v-5c0-2 2-4 6-4s6 2 6 4v5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div>
-        <p class="title">Childhood cancer</p>
-        <p class="desc">Trials for pediatric and adolescent cancers.</p>
-      </div>
-    </a>
-
     <!-- COLON & RECTAL -->
     <a class="tile" href="trials.html?cancer=Colon%20%26%20rectal%20cancer">
       <div class="iconBadge" aria-hidden="true">
-        <!-- colon (abstract tube) -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M8 6c0-2 2-3 4-3h4v4h-2v3h2v4h-2v3h2v4h-4c-2 0-4-1-4-3V6Z" fill="#16a34a"/>
+        <!-- organ-like colon -->
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M18 16c0-6 5-10 11-10h16v10h-8v8h8v16h-8v8h8v10H29c-6 0-11-4-11-10V16Z"
+                fill="#16a34a"/>
+          <path d="M26 20h8M26 32h8M26 44h8" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
@@ -218,9 +207,11 @@
     <!-- GASTROINTESTINAL -->
     <a class="tile" href="trials.html?cancer=Gastrointestinal%20cancer">
       <div class="iconBadge" aria-hidden="true">
-        <!-- stomach -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M10 4c0 3 2 4 4 5 2 1 3 3 3 5 0 4-3 7-7 7-3 0-5-2-5-5V9c0-3 2-5 5-5h0Z" fill="#059669"/>
+        <!-- organ-like stomach -->
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M28 10c0 10 8 10 14 14 6 4 10 10 10 18 0 14-11 22-24 22-10 0-18-7-18-17V24c0-8 6-14 16-14h2Z"
+                fill="#059669"/>
+          <path d="M26 28c0 4 3 7 7 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
@@ -232,11 +223,14 @@
     <!-- GYNECOLOGIC -->
     <a class="tile" href="trials.html?cancer=Gynecologic%20cancer">
       <div class="iconBadge" aria-hidden="true">
-        <!-- uterus (simple) -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M7 7c0 2 2 3 5 3s5-1 5-3v2c0 3-2 5-5 5s-5-2-5-5V7Z" fill="#db2777"/>
-          <path d="M6 7c-2 1-3 3-3 5 0 2 1 4 3 5" stroke="#db2777" stroke-width="2" stroke-linecap="round"/>
-          <path d="M18 7c2 1 3 3 3 5 0 2-1 4-3 5" stroke="#db2777" stroke-width="2" stroke-linecap="round"/>
+        <!-- uterus -->
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M20 20c0 8 6 12 12 12s12-4 12-12v6c0 10-7 18-12 18S20 36 20 26v-6Z"
+                fill="#db2777"/>
+          <path d="M18 20c-8 4-10 10-10 16 0 6 3 12 10 16" stroke="#db2777" stroke-width="4" stroke-linecap="round"/>
+          <path d="M46 20c8 4 10 10 10 16 0 6-3 12-10 16" stroke="#db2777" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="18" cy="20" r="4" fill="#db2777"/>
+          <circle cx="46" cy="20" r="4" fill="#db2777"/>
         </svg>
       </div>
       <div>
@@ -249,8 +243,10 @@
     <a class="tile" href="trials.html?cancer=Head%20%26%20neck%20cancer">
       <div class="iconBadge" aria-hidden="true">
         <!-- head profile -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M12 3c4 0 7 3 7 7v2c0 2-1 4-3 5v4h-6v-3H8c-2 0-3-2-3-4v-2c0-5 3-9 7-9Z" fill="#9333ea"/>
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M34 8c14 0 24 10 24 24v6c0 8-4 14-10 18v12H28V58h-8c-6 0-10-6-10-12V32C10 18 20 8 34 8Z"
+                fill="#9333ea"/>
+          <path d="M40 26c-2 0-4 2-4 4" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
@@ -262,10 +258,13 @@
     <!-- KIDNEY -->
     <a class="tile" href="trials.html?cancer=Kidney%20cancer">
       <div class="iconBadge" aria-hidden="true">
-        <!-- kidney (simple bean) -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M9 5c-3 0-5 3-5 6 0 4 2 7 6 7 2 0 3-1 4-2V7c0-1-2-2-5-2Z" fill="#0284c7"/>
-          <path d="M15 5c3 0 5 3 5 6 0 4-2 7-6 7-2 0-3-1-4-2V7c0-1 2-2 5-2Z" fill="#0284c7"/>
+        <!-- kidney pair -->
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M26 10c-10 0-16 10-16 20 0 14 8 24 20 24 6 0 10-3 12-7V18c0-4-6-8-16-8Z"
+                fill="#0284c7"/>
+          <path d="M38 10c10 0 16 10 16 20 0 14-8 24-20 24-6 0-10-3-12-7V18c0-4 6-8 16-8Z"
+                fill="#0284c7"/>
+          <path d="M32 24v20" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
@@ -274,14 +273,21 @@
       </div>
     </a>
 
-    <!-- LUNG -->
+    <!-- LUNG (more organ-like) -->
     <a class="tile" href="trials.html?cancer=Lung%20cancer">
       <div class="iconBadge" aria-hidden="true">
-        <!-- lungs -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M11 4v7c0 1-1 2-2 2-2 0-4-2-4-4 0-2 1-3 3-4l3-1Z" fill="#2563eb"/>
-          <path d="M13 4v7c0 1 1 2 2 2 2 0 4-2 4-4 0-2-1-3-3-4l-3-1Z" fill="#2563eb"/>
-          <rect x="11" y="4" width="2" height="16" rx="1" fill="#1d4ed8"/>
+        <svg viewBox="0 0 64 64" fill="none">
+          <!-- trachea -->
+          <rect x="30" y="8" width="4" height="22" rx="2" fill="#1d4ed8"/>
+          <!-- left lung -->
+          <path d="M28 18c-8 3-14 11-14 20 0 12 8 20 18 20 4 0 6-2 6-6V22c0-2-4-5-10-4Z"
+                fill="#2563eb"/>
+          <!-- right lung -->
+          <path d="M36 18c8 3 14 11 14 20 0 12-8 20-18 20-4 0-6-2-6-6V22c0-2 4-5 10-4Z"
+                fill="#2563eb"/>
+          <!-- inner detail -->
+          <path d="M22 30c3 2 6 6 6 10M42 30c-3 2-6 6-6 10"
+                stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
@@ -293,11 +299,11 @@
     <!-- PROSTATE -->
     <a class="tile" href="trials.html?cancer=Prostate%20cancer">
       <div class="iconBadge" aria-hidden="true">
-        <!-- male symbol -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <circle cx="10" cy="14" r="5" stroke="#0f172a" stroke-width="2"/>
-          <path d="M14 10l6-6" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
-          <path d="M16 4h4v4" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+        <!-- prostate (abstract gland) -->
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M32 14c12 0 20 8 20 18 0 12-10 20-20 20S12 44 12 32c0-10 8-18 20-18Z"
+                fill="#0f172a"/>
+          <path d="M24 30c0 4 3 7 8 7s8-3 8-7" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
@@ -310,10 +316,10 @@
     <a class="tile" href="trials.html?cancer=Skin%20cancer">
       <div class="iconBadge" aria-hidden="true">
         <!-- sun -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="4" fill="#ea580c"/>
-          <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.5 4.5l2 2M17.5 17.5l2 2M19.5 4.5l-2 2M6.5 17.5l-2 2"
-                stroke="#ea580c" stroke-width="2" stroke-linecap="round"/>
+        <svg viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="12" fill="#ea580c"/>
+          <path d="M32 6v8M32 50v8M6 32h8M50 32h8M12 12l6 6M46 46l6 6M52 12l-6 6M18 46l-6 6"
+                stroke="#ea580c" stroke-width="4" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
@@ -325,10 +331,11 @@
     <!-- TESTICULAR -->
     <a class="tile" href="trials.html?cancer=Testicular%20cancer">
       <div class="iconBadge" aria-hidden="true">
-        <!-- shield-like icon -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6l7-3Z" fill="#334155"/>
-          <path d="M8 11h8" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+        <!-- shield -->
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M32 8l22 8v18c0 16-10 24-22 28C20 58 10 50 10 34V16l22-8Z"
+                fill="#334155"/>
+          <path d="M22 34h20" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
