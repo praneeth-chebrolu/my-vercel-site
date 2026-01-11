@@ -1,20 +1,8 @@
-<!--
-SAVE THIS AS: cancer.html
-
-What this page does:
-1) Shows pictorial “cancer type” cards (simple emoji visuals + clean design).
-2) When the user clicks a cancer type, it takes them to your Trial List page (index.html)
-   and applies the filter automatically using: index.html?cancer=Ovarian
-3) It also includes an “All trials” card.
-
-Important: This page does NOT need ClinicalTrials.gov access.
-It just routes the user to the Trial List page with the correct filter.
--->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Choose a Cancer Type | OSF Cancer Clinical Trials</title>
+  <title>Choose Cancer Type | OSF Cancer Clinical Trials</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body{
@@ -45,7 +33,6 @@ It just routes the user to the Trial List page with the correct filter.
       padding:18px;
       background:#fff;
     }
-
     .muted{ color:#6b7280; font-size:14px; }
 
     .grid{
@@ -66,6 +53,8 @@ It just routes the user to the Trial List page with the correct filter.
       gap:10px;
       min-height: 170px;
       transition: transform 0.05s ease-in-out;
+      text-decoration: none;
+      color: inherit;
     }
     .tile:hover{
       transform: translateY(-1px);
@@ -97,11 +86,30 @@ It just routes the user to the Trial List page with the correct filter.
       display:inline-block;
     }
 
+    .btnRow{
+      margin-top: 14px;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn{
+      display:inline-block;
+      padding:10px 14px;
+      border-radius:10px;
+      border:1px solid #d1d5db;
+      background:#f9fafb;
+      text-decoration:none;
+      color:#1f2937;
+      font-weight:600;
+    }
+    .btn:hover{ background:#f3f4f6; }
+
     @media (max-width: 900px){
       .grid{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
+
 <body>
   <header>
     <h1 style="margin:0;">OSF Cancer Clinical Trials</h1>
@@ -113,58 +121,59 @@ It just routes the user to the Trial List page with the correct filter.
   </header>
 
   <section class="card">
-    <h2 style="margin:0 0 6px 0;">Choose a cancer type</h2>
+    <h2 style="margin:0 0 6px 0;">Start here: choose a cancer type</h2>
     <p class="muted" style="margin:0;">
-      Select a cancer type to see trials that match that disease group.
+      Click a cancer type to view trials. On the next page, use the cancer dropdown to narrow results.
     </p>
 
-    <div class="grid" id="grid"></div>
+    <div class="grid">
+      <a class="tile" href="index.html">
+        <div class="icon">📋</div>
+        <p class="title">All trials</p>
+        <p class="desc">Browse every trial currently listed.</p>
+        <div class="pillRow"><span class="pill">Browse all</span></div>
+      </a>
 
-    <p class="muted" style="margin-top:14px;">
-      Tip: If you are unsure, choose “All trials” first.
-    </p>
+      <a class="tile" href="index.html">
+        <div class="icon">🟣</div>
+        <p class="title">Ovarian</p>
+        <p class="desc">Trials for ovarian, fallopian tube, and related cancers.</p>
+        <div class="pillRow"><span class="pill">Gynecologic</span></div>
+      </a>
+
+      <a class="tile" href="index.html">
+        <div class="icon">🫁</div>
+        <p class="title">Lung</p>
+        <p class="desc">Trials for lung cancers and related conditions.</p>
+        <div class="pillRow"><span class="pill">Thoracic</span></div>
+      </a>
+
+      <a class="tile" href="index.html">
+        <div class="icon">🎗️</div>
+        <p class="title">Breast</p>
+        <p class="desc">Trials for breast cancers and subtypes.</p>
+        <div class="pillRow"><span class="pill">Women’s health</span></div>
+      </a>
+
+      <a class="tile" href="index.html">
+        <div class="icon">🧠</div>
+        <p class="title">Brain (GBM)</p>
+        <p class="desc">Trials for glioblastoma and other brain tumors.</p>
+        <div class="pillRow"><span class="pill">Neuro-oncology</span></div>
+      </a>
+
+      <a class="tile" href="index.html">
+        <div class="icon">🧬</div>
+        <p class="title">Other cancers</p>
+        <p class="desc">If you’re unsure, go to the Trial List and search by keyword.</p>
+        <div class="pillRow"><span class="pill">Search</span></div>
+      </a>
+    </div>
+
+    <div class="btnRow">
+      <a class="btn" href="index.html">Go to Trial List</a>
+      <a class="btn" href="intake.html">Go to Intake Form</a>
+    </div>
   </section>
-
-  <script>
-    // Add/adjust cancer types here anytime.
-    // The "value" must match the cancer labels you use on the Trial List page filter.
-    const CANCER_TYPES = [
-      { value: "",        label: "All trials", icon: "📋", desc: "See every trial we have listed.", tags: ["Browse all"] },
-      { value: "Ovarian",  label: "Ovarian",    icon: "🟣", desc: "Trials for ovarian, fallopian tube, and related cancers.", tags: ["Women’s health"] },
-      { value: "Lung",     label: "Lung",       icon: "🫁", desc: "Trials for lung cancers and related conditions.", tags: ["Breathing"] },
-      { value: "Breast",   label: "Breast",     icon: "🎗️", desc: "Trials for breast cancers and subtypes.", tags: ["Care options"] },
-      { value: "GBM",      label: "Brain (GBM)",icon: "🧠", desc: "Trials for glioblastoma and brain tumors.", tags: ["Neuro-oncology"] }
-    ];
-
-    const grid = document.getElementById("grid");
-
-    function goToTrials(cancerValue){
-      const base = "index.html";
-      if (!cancerValue) {
-        window.location.href = base;
-        return;
-      }
-      // Pass selected cancer as a query param. We'll make index.html read it.
-      window.location.href = `${base}?cancer=${encodeURIComponent(cancerValue)}`;
-    }
-
-    grid.innerHTML = CANCER_TYPES.map(c => `
-      <div class="tile" role="button" tabindex="0" onclick="goToTrials('${c.value.replace(/'/g, "\\'")}')">
-        <div class="icon">${c.icon}</div>
-        <p class="title">${c.label}</p>
-        <p class="desc">${c.desc}</p>
-        <div class="pillRow">
-          ${(c.tags || []).map(t => `<span class="pill">${t}</span>`).join("")}
-        </div>
-      </div>
-    `).join("");
-
-    // keyboard accessibility
-    document.querySelectorAll(".tile").forEach(tile => {
-      tile.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") tile.click();
-      });
-    });
-  </script>
 </body>
 </html>
