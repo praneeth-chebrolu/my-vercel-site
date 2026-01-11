@@ -1,29 +1,33 @@
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Choose Cancer Type | OSF Cancer Clinical Trials</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <style>
     body{
       font-family: Arial, sans-serif;
       max-width: 1000px;
-      margin: 40px auto;
-      padding: 0 16px;
+      margin: 60px auto;
+      padding: 0 20px;
       color: #1f2937;
       background: #ffffff;
       line-height: 1.6;
     }
+
     header{
       display:flex;
       justify-content:space-between;
-      align-items:baseline;
-      gap: 16px;
+      align-items:center;
+      gap:16px;
+      margin-bottom: 24px;
       flex-wrap: wrap;
-      margin-bottom: 18px;
     }
+
     nav a{
-      margin-left: 14px;
+      margin-left: 16px;
       text-decoration:none;
       color:#1f2937;
       white-space: nowrap;
@@ -33,59 +37,60 @@
     .card{
       border:1px solid #e5e7eb;
       border-radius:14px;
-      padding:18px;
+      padding:20px;
       background:#ffffff;
-    }
-    .muted{
-      color:#6b7280;
-      font-size: 14px;
-      margin-top: 6px;
     }
 
     .grid{
       display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:14px;
-      margin-top:16px;
-    }
-    @media (max-width: 900px){
-      .grid{ grid-template-columns: 1fr; }
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:16px;
+      margin-top:20px;
     }
 
     .tile{
       border:1px solid #e5e7eb;
       border-radius:14px;
-      padding:16px;
+      padding:18px;
       text-decoration:none;
       color:inherit;
       display:flex;
       gap:14px;
       align-items:flex-start;
+      transition: background 0.12s ease-in-out, transform 0.05s ease-in-out;
       background:#fff;
-      transition: transform 0.06s ease-in-out, background 0.1s ease-in-out;
-      min-height: 96px;
     }
+
     .tile:hover{
       background:#f9fafb;
       transform: translateY(-1px);
     }
 
-    .iconBadge{
-      width:56px;
-      height:56px;
-      border-radius:16px;
+    /* Image icon container */
+    .iconWrap{
+      width:54px;
+      height:54px;
+      border-radius:14px;
+      border:1px solid #e5e7eb;
+      background:#ffffff;
       display:flex;
       align-items:center;
       justify-content:center;
-      flex-shrink:0;
-      border: 1px solid #e5e7eb;
-      background: #ffffff;
       overflow:hidden;
+      flex-shrink:0;
     }
-    .iconBadge svg{
-      width:40px;
-      height:40px;
+
+    .iconImg{
+      width:44px;
+      height:44px;
+      object-fit: contain;
       display:block;
+    }
+
+    /* Fallback emoji icons for categories you haven't added images for yet */
+    .emoji{
+      font-size: 30px;
+      line-height: 1;
     }
 
     .title{
@@ -93,10 +98,16 @@
       margin:0 0 6px 0;
       font-size: 16px;
     }
+
     .desc{
       margin:0;
       font-size:14px;
       color:#6b7280;
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+      .tile{ align-items: center; }
     }
   </style>
 </head>
@@ -113,35 +124,25 @@
 
 <section class="card">
   <h2 style="margin:0;">Start here: choose a cancer type</h2>
-  <p class="muted">Select a cancer type to see matching trials.</p>
+  <p style="margin:6px 0 0 0; color:#6b7280; font-size:14px;">
+    Pick a cancer type to filter trials. You can also browse all trials.
+  </p>
 
   <div class="grid">
 
-    <!-- ALL TRIALS -->
+    <!-- All trials -->
     <a class="tile" href="trials.html">
-      <div class="iconBadge" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none">
-          <rect x="5" y="6" width="14" height="3" rx="1.5" fill="#2563eb"/>
-          <rect x="5" y="11" width="14" height="3" rx="1.5" fill="#2563eb"/>
-          <rect x="5" y="16" width="14" height="3" rx="1.5" fill="#2563eb"/>
-        </svg>
-      </div>
+      <div class="iconWrap"><span class="emoji" aria-hidden="true">📋</span></div>
       <div>
         <p class="title">All trials</p>
         <p class="desc">Browse every trial currently listed.</p>
       </div>
     </a>
 
-    <!-- BLADDER -->
+    <!-- Bladder -->
     <a class="tile" href="trials.html?cancer=Bladder%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- more “organ-like” bladder -->
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M22 10c2 6 2 10 2 16 0 6-3 10-6 13-4 4-6 8-6 12 0 8 7 13 20 13s20-5 20-13c0-4-2-8-6-12-3-3-6-7-6-13 0-6 0-10 2-16"
-                fill="#0ea5e9"/>
-          <path d="M30 52c0 4-2 8-6 10" stroke="#075985" stroke-width="3" stroke-linecap="round"/>
-          <path d="M34 52c0 4 2 8 6 10" stroke="#075985" stroke-width="3" stroke-linecap="round"/>
-        </svg>
+      <div class="iconWrap">
+        <img class="iconImg" src="icons/bladder.png" alt="Bladder icon">
       </div>
       <div>
         <p class="title">Bladder cancer</p>
@@ -149,18 +150,10 @@
       </div>
     </a>
 
-    <!-- BRAIN -->
+    <!-- Brain -->
     <a class="tile" href="trials.html?cancer=Brain%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- more “organ-like” brain -->
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M26 10c-8 0-14 7-14 15 0 4 2 7 4 9-2 2-3 5-3 8 0 7 6 12 13 12h7V10h-7Z"
-                fill="#7c3aed"/>
-          <path d="M38 10c8 0 14 7 14 15 0 4-2 7-4 9 2 2 3 5 3 8 0 7-6 12-13 12h-7V10h7Z"
-                fill="#7c3aed"/>
-          <path d="M22 22c4 0 6 2 6 6M22 34c4 0 6 2 6 6M42 22c-4 0-6 2-6 6M42 34c-4 0-6 2-6 6"
-                stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        </svg>
+      <div class="iconWrap">
+        <img class="iconImg" src="icons/brain.png" alt="Brain icon">
       </div>
       <div>
         <p class="title">Brain cancer</p>
@@ -168,19 +161,10 @@
       </div>
     </a>
 
-    <!-- BREAST (PINK RIBBON) -->
+    <!-- Breast -->
     <a class="tile" href="trials.html?cancer=Breast%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- nicer pink ribbon -->
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M32 6c5 9 10 15 10 24 0 8-5 13-10 17-5-4-10-9-10-17 0-9 5-15 10-24Z"
-                fill="#e11d48"/>
-          <path d="M24 30C14 38 10 44 10 50c0 6 5 10 11 10 7 0 13-7 17-12-5-4-9-10-14-18Z"
-                fill="#fb7185"/>
-          <path d="M40 30c10 8 14 14 14 20 0 6-5 10-11 10-7 0-13-7-17-12 5-4 9-10 14-18Z"
-                fill="#fb7185"/>
-          <path d="M32 30c-2 3-4 5-6 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        </svg>
+      <div class="iconWrap">
+        <img class="iconImg" src="icons/breast.png" alt="Breast cancer ribbon icon">
       </div>
       <div>
         <p class="title">Breast cancer</p>
@@ -188,107 +172,64 @@
       </div>
     </a>
 
-    <!-- COLON & RECTAL -->
-    <a class="tile" href="trials.html?cancer=Colon%20%26%20rectal%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- organ-like colon -->
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M18 16c0-6 5-10 11-10h16v10h-8v8h8v16h-8v8h8v10H29c-6 0-11-4-11-10V16Z"
-                fill="#16a34a"/>
-          <path d="M26 20h8M26 32h8M26 44h8" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        </svg>
+    <!-- Childhood -->
+    <a class="tile" href="trials.html?cancer=Childhood%20cancer">
+      <div class="iconWrap"><span class="emoji" aria-hidden="true">🧒</span></div>
+      <div>
+        <p class="title">Childhood cancer</p>
+        <p class="desc">Trials for pediatric and adolescent cancers.</p>
       </div>
+    </a>
+
+    <!-- Colon & rectal -->
+    <a class="tile" href="trials.html?cancer=Colon%20%26%20rectal%20cancer">
+      <div class="iconWrap"><span class="emoji" aria-hidden="true">🧻</span></div>
       <div>
         <p class="title">Colon &amp; rectal cancer</p>
         <p class="desc">Trials for colorectal cancers.</p>
       </div>
     </a>
 
-    <!-- GASTROINTESTINAL -->
+    <!-- Gastrointestinal -->
     <a class="tile" href="trials.html?cancer=Gastrointestinal%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- organ-like stomach -->
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M28 10c0 10 8 10 14 14 6 4 10 10 10 18 0 14-11 22-24 22-10 0-18-7-18-17V24c0-8 6-14 16-14h2Z"
-                fill="#059669"/>
-          <path d="M26 28c0 4 3 7 7 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
+      <div class="iconWrap"><span class="emoji" aria-hidden="true">🫄</span></div>
       <div>
         <p class="title">Gastrointestinal cancer</p>
         <p class="desc">Trials for cancers of the digestive system.</p>
       </div>
     </a>
 
-    <!-- GYNECOLOGIC -->
+    <!-- Gynecologic -->
     <a class="tile" href="trials.html?cancer=Gynecologic%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- uterus -->
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M20 20c0 8 6 12 12 12s12-4 12-12v6c0 10-7 18-12 18S20 36 20 26v-6Z"
-                fill="#db2777"/>
-          <path d="M18 20c-8 4-10 10-10 16 0 6 3 12 10 16" stroke="#db2777" stroke-width="4" stroke-linecap="round"/>
-          <path d="M46 20c8 4 10 10 10 16 0 6-3 12-10 16" stroke="#db2777" stroke-width="4" stroke-linecap="round"/>
-          <circle cx="18" cy="20" r="4" fill="#db2777"/>
-          <circle cx="46" cy="20" r="4" fill="#db2777"/>
-        </svg>
-      </div>
+      <div class="iconWrap"><span class="emoji" aria-hidden="true">♀️</span></div>
       <div>
         <p class="title">Gynecologic cancer</p>
         <p class="desc">Trials for ovarian, uterine, and cervical cancers.</p>
       </div>
     </a>
 
-    <!-- HEAD & NECK -->
+    <!-- Head & neck -->
     <a class="tile" href="trials.html?cancer=Head%20%26%20neck%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- head profile -->
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M34 8c14 0 24 10 24 24v6c0 8-4 14-10 18v12H28V58h-8c-6 0-10-6-10-12V32C10 18 20 8 34 8Z"
-                fill="#9333ea"/>
-          <path d="M40 26c-2 0-4 2-4 4" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
+      <div class="iconWrap"><span class="emoji" aria-hidden="true">🗣️</span></div>
       <div>
         <p class="title">Head &amp; neck cancer</p>
         <p class="desc">Trials for head and neck cancers.</p>
       </div>
     </a>
 
-    <!-- KIDNEY -->
+    <!-- Kidney -->
     <a class="tile" href="trials.html?cancer=Kidney%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- kidney pair -->
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M26 10c-10 0-16 10-16 20 0 14 8 24 20 24 6 0 10-3 12-7V18c0-4-6-8-16-8Z"
-                fill="#0284c7"/>
-          <path d="M38 10c10 0 16 10 16 20 0 14-8 24-20 24-6 0-10-3-12-7V18c0-4 6-8 16-8Z"
-                fill="#0284c7"/>
-          <path d="M32 24v20" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
+      <div class="iconWrap"><span class="emoji" aria-hidden="true">🫘</span></div>
       <div>
         <p class="title">Kidney cancer</p>
         <p class="desc">Trials for kidney cancers.</p>
       </div>
     </a>
 
-    <!-- LUNG (more organ-like) -->
+    <!-- Lung -->
     <a class="tile" href="trials.html?cancer=Lung%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <svg viewBox="0 0 64 64" fill="none">
-          <!-- trachea -->
-          <rect x="30" y="8" width="4" height="22" rx="2" fill="#1d4ed8"/>
-          <!-- left lung -->
-          <path d="M28 18c-8 3-14 11-14 20 0 12 8 20 18 20 4 0 6-2 6-6V22c0-2-4-5-10-4Z"
-                fill="#2563eb"/>
-          <!-- right lung -->
-          <path d="M36 18c8 3 14 11 14 20 0 12-8 20-18 20-4 0-6-2-6-6V22c0-2 4-5 10-4Z"
-                fill="#2563eb"/>
-          <!-- inner detail -->
-          <path d="M22 30c3 2 6 6 6 10M42 30c-3 2-6 6-6 10"
-                stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        </svg>
+      <div class="iconWrap">
+        <img class="iconImg" src="icons/lung.png" alt="Lung icon">
       </div>
       <div>
         <p class="title">Lung cancer</p>
@@ -296,48 +237,27 @@
       </div>
     </a>
 
-    <!-- PROSTATE -->
+    <!-- Prostate -->
     <a class="tile" href="trials.html?cancer=Prostate%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- prostate (abstract gland) -->
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M32 14c12 0 20 8 20 18 0 12-10 20-20 20S12 44 12 32c0-10 8-18 20-18Z"
-                fill="#0f172a"/>
-          <path d="M24 30c0 4 3 7 8 7s8-3 8-7" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
+      <div class="iconWrap"><span class="emoji" aria-hidden="true">♂️</span></div>
       <div>
         <p class="title">Prostate cancer</p>
         <p class="desc">Trials for prostate cancer.</p>
       </div>
     </a>
 
-    <!-- SKIN -->
+    <!-- Skin -->
     <a class="tile" href="trials.html?cancer=Skin%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- sun -->
-        <svg viewBox="0 0 64 64" fill="none">
-          <circle cx="32" cy="32" r="12" fill="#ea580c"/>
-          <path d="M32 6v8M32 50v8M6 32h8M50 32h8M12 12l6 6M46 46l6 6M52 12l-6 6M18 46l-6 6"
-                stroke="#ea580c" stroke-width="4" stroke-linecap="round"/>
-        </svg>
-      </div>
+      <div class="iconWrap"><span class="emoji" aria-hidden="true">🧴</span></div>
       <div>
         <p class="title">Skin cancer</p>
         <p class="desc">Trials for melanoma and other skin cancers.</p>
       </div>
     </a>
 
-    <!-- TESTICULAR -->
+    <!-- Testicular -->
     <a class="tile" href="trials.html?cancer=Testicular%20cancer">
-      <div class="iconBadge" aria-hidden="true">
-        <!-- shield -->
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M32 8l22 8v18c0 16-10 24-22 28C20 58 10 50 10 34V16l22-8Z"
-                fill="#334155"/>
-          <path d="M22 34h20" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
-        </svg>
-      </div>
+      <div class="iconWrap"><span class="emoji" aria-hidden="true">🧬</span></div>
       <div>
         <p class="title">Testicular cancer</p>
         <p class="desc">Trials for testicular cancer.</p>
