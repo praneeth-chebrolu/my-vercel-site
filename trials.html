@@ -6,76 +6,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
-    body {
+    body{
       font-family: Arial, sans-serif;
-      max-width: 1000px;
-      margin: 60px auto;
-      padding: 0 20px;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 16px;
       line-height: 1.6;
       color: #1f2937;
     }
-    header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 24px;
+
+    header{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+      flex-wrap: wrap;
     }
-    nav a {
+
+    nav a{
       margin-left: 14px;
-      text-decoration: none;
-      color: #1f2937;
+      text-decoration:none;
+      color:#1f2937;
+      white-space: nowrap;
     }
-    nav a:hover { text-decoration: underline; }
+    nav a:hover{ text-decoration:underline; }
 
-    .card {
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 18px;
-      margin-top: 16px;
-      background: #ffffff;
+    .card{
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      padding:18px;
+      background:#fff;
     }
 
-    .filters {
-      display: grid;
+    .muted{ color:#6b7280; font-size:14px; }
+
+    .filters{
+      display:grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-      margin-top: 12px;
+      gap:12px;
+      margin-top:12px;
     }
 
-    input, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #d1d5db;
-      background: #ffffff;
+    input, select{
+      width:100%;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid #d1d5db;
+      background:#fff;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 14px;
+    /* Responsive grid: 1 col mobile, 2 tablet, 3 desktop */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    @media (min-width: 700px){
+      .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1000px){
+      .grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
 
-    .trial {
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 14px;
-      background: #ffffff;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .trial{
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      padding:14px;
+      background:#fff;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
       min-height: 220px;
     }
 
-    .badgeRow { display: flex; gap: 8px; flex-wrap: wrap; }
-    .badge {
-      font-size: 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 999px;
-      padding: 4px 10px;
-      background: #f9fafb;
+    .badgeRow{ display:flex; gap:8px; flex-wrap:wrap; }
+    .badge{
+      font-size:12px;
+      border:1px solid #d1d5db;
+      border-radius:999px;
+      padding:4px 10px;
+      background:#f9fafb;
       white-space: nowrap;
     }
 
@@ -91,68 +103,92 @@
       color:#7f1d1d;
     }
 
-    button {
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid #d1d5db;
-      background: #f9fafb;
-      cursor: pointer;
-      font-weight: 600;
-      text-align: left;
+    button{
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid #d1d5db;
+      background:#f9fafb;
+      cursor:pointer;
+      font-weight:600;
+      text-align:left;
     }
-    button:hover { background: #f3f4f6; }
+    button:hover{ background:#f3f4f6; }
 
-    .actions {
-      margin-top: auto;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .muted { color: #6b7280; font-size: 14px; }
-
-    @media (max-width: 900px) {
-      .filters { grid-template-columns: 1fr; }
-      .grid { grid-template-columns: 1fr; }
+    .actions{
+      margin-top:auto;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items: center;
     }
 
-    .modalBackdrop {
+    /* Make filters stack on mobile */
+    @media (max-width: 900px){
+      .filters{ grid-template-columns: 1fr; }
+    }
+
+    /* ===== MODAL FIXES: full-screen overlay + scroll ===== */
+    .modalBackdrop{
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.45);
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 18px;
+      padding: 12px;
+      z-index: 9999;
     }
 
-    .modal {
+    .modal{
       width: 100%;
-      max-width: 750px;
-      background: white;
+      max-width: 820px;
+      background: #fff;
       border-radius: 16px;
       border: 1px solid #e5e7eb;
-      padding: 18px;
+      /* keep modal inside viewport */
+      max-height: calc(100vh - 24px);
+      overflow: hidden; /* header fixed, body scrolls */
+      display:flex;
+      flex-direction: column;
     }
 
-    .modalHeader {
-      display: flex;
+    .modalHeader{
+      display:flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 10px;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #fff;
     }
 
-    .closeBtn {
-      width: auto;
-      text-align: center;
+    .modalHeader h3{
+      margin:0;
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .closeBtn{
+      width:auto;
+      text-align:center;
+      white-space: nowrap;
+    }
+
+    .modalBody{
+      padding: 14px 16px;
+      overflow: auto; /* THIS makes content scroll instead of cutting off */
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .modalBody ul{
+      margin: 8px 0 0 18px;
     }
   </style>
 </head>
 
 <body>
   <header>
-    <h1>OSF Cancer Clinical Trials</h1>
+    <h1 style="margin:0;">OSF Cancer Clinical Trials</h1>
     <nav>
       <a href="index.html">Cancer Types</a>
       <a href="trials.html">Trial List</a>
@@ -161,8 +197,10 @@
   </header>
 
   <section class="card">
-    <h2>Choose a trial</h2>
-    <p class="muted">Filter the list below, then click “View details” for eligibility and contact info.</p>
+    <h2 style="margin:0;">Choose a trial</h2>
+    <p class="muted" style="margin:6px 0 0 0;">
+      Filter the list below, then click “View details” for eligibility and contact info.
+    </p>
 
     <div class="filters">
       <input id="q" placeholder="Search (keyword, ID, drug, cancer type)" />
@@ -184,7 +222,6 @@
         <option>Testicular cancer</option>
       </select>
 
-      <!-- Only the 3 statuses you want -->
       <select id="status">
         <option value="">All statuses</option>
         <option value="Recruiting">Recruiting</option>
@@ -197,29 +234,20 @@
     <p id="count" class="muted"></p>
   </section>
 
-  <div id="backdrop" class="modalBackdrop" role="dialog" aria-modal="true">
+  <div id="backdrop" class="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="mTitle">
     <div class="modal">
       <div class="modalHeader">
-        <h3 id="mTitle" style="margin:0;"></h3>
+        <h3 id="mTitle"></h3>
         <button id="close" class="closeBtn">Close</button>
       </div>
-      <div id="mBody" class="muted"></div>
-      <div style="margin-top:14px;">
+      <div id="mBody" class="modalBody muted"></div>
+      <div style="padding: 0 16px 16px 16px;">
         <a id="mLink" href="#" target="_blank" rel="noreferrer">Open trial link</a>
       </div>
     </div>
   </div>
 
   <script>
-    // =========================================================
-    // TRIAL LIST
-    // - Loads trials from your CSV
-    // - Fetches extra details from ClinicalTrials.gov
-    // - STATUS: only 3 shown (Recruiting, Not yet recruiting, Closed)
-    //   Recruiting => green badge
-    //   the other 2 => red badge
-    // =========================================================
-
     // ✅ Your GitHub RAW CSV URL:
     const CSV_URL = "https://raw.githubusercontent.com/praneeth-chebrolu/my-vercel-site/refs/heads/main/Webpage%20Listing_OSF%20Cancer%20Clinical%20Trials.csv";
 
@@ -237,7 +265,6 @@
     const mLink = document.getElementById("mLink");
 
     // ---------------- Cancer group mapping ----------------
-    // These allow umbrella options (Gynecologic cancer) to match trial cancers like Ovarian, Cervical, etc.
     const CANCER_GROUPS = {
       "Gynecologic cancer": ["ovarian", "cervical", "endometrial", "uterine", "fallopian", "peritoneal", "vulvar", "vaginal"],
       "Gastrointestinal cancer": ["colon", "rectal", "colorectal", "pancreas", "pancreatic", "gastric", "stomach", "esophageal", "liver", "biliary", "cholangiocarcinoma"],
@@ -254,11 +281,11 @@
       "Childhood cancer": ["pediatric", "childhood", "adolescent"]
     };
 
-    function norm(s) {
+    function norm(s){
       return (s || "").toLowerCase().replace(/\s+/g, " ").trim();
     }
 
-    function cancerMatches(selectedCancer, trialCancer) {
+    function cancerMatches(selectedCancer, trialCancer){
       const sel = norm(selectedCancer);
       const tc = norm(trialCancer);
       if (!sel) return true;
@@ -274,23 +301,19 @@
     }
 
     // ---------------- Helpers ----------------
-    function cleanText(s) {
-      return (s || "").replace(/\s+/g, " ").trim();
-    }
+    function cleanText(s){ return (s || "").replace(/\s+/g, " ").trim(); }
 
-    function firstNonEmpty(...vals) {
-      for (const v of vals) {
-        if (typeof v === "string" && v.trim()) return v.trim();
-      }
+    function firstNonEmpty(...vals){
+      for (const v of vals) if (typeof v === "string" && v.trim()) return v.trim();
       return "";
     }
 
-    function getPhaseText(designMod) {
+    function getPhaseText(designMod){
       const phases = Array.isArray(designMod?.phases) ? designMod.phases : [];
       return phases.length ? phases.join(", ").replaceAll("_", " ") : "Phase not listed";
     }
 
-    function getSponsorText(sponsorMod) {
+    function getSponsorText(sponsorMod){
       const lead = sponsorMod?.leadSponsor?.name;
       const cols = Array.isArray(sponsorMod?.collaborators)
         ? sponsorMod.collaborators.map(c => c?.name).filter(Boolean)
@@ -299,7 +322,7 @@
       return all.length ? all.join(" / ") : "Sponsor not listed";
     }
 
-    function listNames(arr, key = "name", max = 4) {
+    function listNames(arr, key="name", max=4){
       if (!Array.isArray(arr)) return [];
       return arr
         .map(x => (typeof x === "string" ? x : x?.[key]))
@@ -308,7 +331,7 @@
         .slice(0, max);
     }
 
-    function getInterventionSummary(armsInterventionsMod, interventionsMod) {
+    function getInterventionSummary(armsInterventionsMod, interventionsMod){
       const names = listNames(interventionsMod?.interventions, "name", 4);
       if (names.length) return names.join(", ");
       const armLabels = listNames(armsInterventionsMod?.armGroups, "label", 2);
@@ -317,57 +340,40 @@
     }
 
     // ---------------- Status mapping (ONLY 3 statuses) ----------------
-    // Anything that indicates recruiting => "Recruiting"
-    // Anything not-yet => "Not yet recruiting"
-    // Everything else => "Closed"
-    function normalizeStatus(anyStatus) {
+    function normalizeStatus(anyStatus){
       const s = norm(anyStatus);
 
       if (s.includes("recruiting")) {
-        // If it's explicitly "not yet recruiting", keep that
         if (s.includes("not yet")) return "Not yet recruiting";
-        // Otherwise treat as Recruiting (includes "Recruiting Patients")
         return "Recruiting";
       }
-
-      // Common not recruiting / closed-ish states => Closed
-      // includes: active not recruiting, completed, terminated, withdrawn, suspended, unknown, etc.
       return "Closed";
     }
 
-    function statusClass(statusText) {
+    function statusClass(statusText){
       return statusText === "Recruiting" ? "status-recruiting" : "status-not-recruiting";
     }
 
     // ---------------- Patient-friendly overview (max 4 bullets) ----------------
-    function makePatientOverview({ phase, diseaseFocus, interventionsSummary }) {
+    function makePatientOverview({ phase, diseaseFocus, interventionsSummary }){
       const bullets = [];
 
-      if (phase && phase !== "Phase not listed") {
-        bullets.push(`This is a ${phase} clinical trial studying a treatment approach.`);
-      } else {
-        bullets.push("This is a clinical trial studying a treatment approach.");
-      }
+      if (phase && phase !== "Phase not listed") bullets.push(`This is a ${phase} clinical trial studying a treatment approach.`);
+      else bullets.push("This is a clinical trial studying a treatment approach.");
 
-      if (diseaseFocus) {
-        bullets.push(`This study is for people with ${diseaseFocus}.`);
-      } else {
-        bullets.push("This study is for people with the condition listed in the trial details.");
-      }
+      if (diseaseFocus) bullets.push(`This study is for people with ${diseaseFocus}.`);
+      else bullets.push("This study is for people with the condition listed in the trial details.");
 
       bullets.push("The goal is to learn whether the treatment is safe and how well it works.");
 
-      if (interventionsSummary) {
-        bullets.push(`People in the study may receive ${interventionsSummary}. The study team will explain the visit schedule, tests, and next steps.`);
-      } else {
-        bullets.push("People in the study may receive study treatment. The study team will explain the visit schedule, tests, and next steps.");
-      }
+      if (interventionsSummary) bullets.push(`People in the study may receive ${interventionsSummary}. The study team will explain the visit schedule, tests, and next steps.`);
+      else bullets.push("People in the study may receive study treatment. The study team will explain the visit schedule, tests, and next steps.");
 
       return bullets.slice(0, 4);
     }
 
-    // ---------------- Eligibility parsing (basic) ----------------
-    function parseEligibilityCriteria(raw) {
+    // ---------------- Eligibility parsing ----------------
+    function parseEligibilityCriteria(raw){
       const text = (raw || "").replace(/\r/g, "");
       if (!text.trim()) return { inclusion: [], exclusion: [] };
 
@@ -379,20 +385,12 @@
       let excText = "";
 
       if (incIdx !== -1 && excIdx !== -1) {
-        if (incIdx < excIdx) {
-          incText = text.slice(incIdx, excIdx);
-          excText = text.slice(excIdx);
-        } else {
-          excText = text.slice(excIdx, incIdx);
-          incText = text.slice(incIdx);
-        }
-      } else if (incIdx !== -1) {
-        incText = text.slice(incIdx);
-      } else if (excIdx !== -1) {
-        excText = text.slice(excIdx);
-      }
+        if (incIdx < excIdx) { incText = text.slice(incIdx, excIdx); excText = text.slice(excIdx); }
+        else { excText = text.slice(excIdx, incIdx); incText = text.slice(incIdx); }
+      } else if (incIdx !== -1) incText = text.slice(incIdx);
+      else if (excIdx !== -1) excText = text.slice(excIdx);
 
-      function toBullets(sectionText) {
+      function toBullets(sectionText){
         const cleaned = sectionText
           .replace(/inclusion criteria[:\s]*/i, "")
           .replace(/exclusion criteria[:\s]*/i, "")
@@ -406,18 +404,14 @@
           .filter(Boolean)
           .map(l => l.replace(/^[-–•\s]*/, "").trim());
 
-        return lines.slice(0, 6);
+        return lines.slice(0, 8);
       }
 
-      return {
-        inclusion: toBullets(incText),
-        exclusion: toBullets(excText)
-      };
+      return { inclusion: toBullets(incText), exclusion: toBullets(excText) };
     }
 
-    function getHighLevelWhoCanJoin({ diseaseFocus, eligibilityModule }) {
+    function getHighLevelWhoCanJoin({ diseaseFocus, eligibilityModule }){
       const who = [];
-
       const minAge = eligibilityModule?.minimumAge;
       const maxAge = eligibilityModule?.maximumAge;
       const sex = eligibilityModule?.sex;
@@ -429,28 +423,19 @@
         who.push(`Age: People who are ${a.join(" and ")}.`);
       }
 
-      if (sex && sex !== "ALL") {
-        who.push(`Sex: This study is only for ${sex.toLowerCase()} participants.`);
-      }
+      if (sex && sex !== "ALL") who.push(`Sex: This study is only for ${sex.toLowerCase()} participants.`);
+      if (diseaseFocus) who.push(`Condition: People diagnosed with ${diseaseFocus}.`);
 
-      if (diseaseFocus) {
-        who.push(`Condition: People diagnosed with ${diseaseFocus}.`);
-      }
-
-      const raw = eligibilityModule?.eligibilityCriteria || "";
-      const parsed = parseEligibilityCriteria(raw);
-
-      if (parsed.inclusion.length) return [...who, ...parsed.inclusion].slice(0, 6);
+      const parsed = parseEligibilityCriteria(eligibilityModule?.eligibilityCriteria || "");
+      if (parsed.inclusion.length) return [...who, ...parsed.inclusion].slice(0, 8);
 
       who.push("Other eligibility rules apply. The study team will confirm eligibility.");
-      return who.slice(0, 6);
+      return who.slice(0, 8);
     }
 
-    function getHighLevelWhoCannotJoin({ eligibilityModule }) {
-      const raw = eligibilityModule?.eligibilityCriteria || "";
-      const parsed = parseEligibilityCriteria(raw);
-
-      if (parsed.exclusion.length) return parsed.exclusion.slice(0, 6);
+    function getHighLevelWhoCannotJoin({ eligibilityModule }){
+      const parsed = parseEligibilityCriteria(eligibilityModule?.eligibilityCriteria || "");
+      if (parsed.exclusion.length) return parsed.exclusion.slice(0, 8);
 
       return [
         "People who do not meet the study’s eligibility requirements.",
@@ -460,26 +445,16 @@
 
     // ===============================
     // CSV loader (your Excel headers)
-    // Expected columns:
-    // NCT ID, Cancer, Principal Investigator, Clinical Research Coordinator, Status
     // ===============================
-    async function loadTrialsFromCSV(csvUrl) {
+    async function loadTrialsFromCSV(csvUrl){
       const response = await fetch(csvUrl);
       const csvText = await response.text();
 
-      const rows = csvText
-        .split("\n")
-        .map(r => r.trim())
-        .filter(r => r.length);
+      const rows = csvText.split("\n").map(r => r.trim()).filter(r => r.length);
+      const headers = rows.shift().split(",").map(h => h.replace(/^"|"$/g, "").trim());
 
-      const headers = rows
-        .shift()
-        .split(",")
-        .map(h => h.replace(/^"|"$/g, "").trim());
-
-      function get(record, key) {
+      function get(record, key){
         if (record[key] != null) return record[key];
-
         const normKey = key.replace(/\s+/g, " ").trim().toLowerCase();
         for (const k of Object.keys(record)) {
           const nk = k.replace(/\s+/g, " ").trim().toLowerCase();
@@ -488,46 +463,30 @@
         return "";
       }
 
-      // NOTE: This simple CSV split fails if your cells contain commas.
-      // If your PI/Coordinator names include commas, remove commas in Excel or save as "CSV UTF-8 (Comma delimited)"
-      // with quotes, OR tell me and I'll give you a robust CSV parser version.
-      return rows
-        .map(row => {
-          const values = row
-            .split(",")
-            .map(v => v.replace(/^"|"$/g, "").trim());
+      return rows.map(row => {
+        const values = row.split(",").map(v => v.replace(/^"|"$/g, "").trim());
+        const record = {};
+        headers.forEach((h, i) => record[h] = values[i] || "");
 
-          const record = {};
-          headers.forEach((h, i) => {
-            record[h] = values[i] || "";
-          });
-
-          const nctId = get(record, "NCT ID");
-          const cancer = get(record, "Cancer");
-          const principalInvestigator = get(record, "Principal Investigator");
-          const coordinator = get(record, "Clinical Research Coordinator");
-          const statusOverrideRaw = get(record, "Status");
-
-          return {
-            nctId,
-            local: {
-              cancer,
-              diseaseFocus: "",
-              principalInvestigator,
-              coordinator,
-              statusOverrideRaw,
-              osfPhone: "(844) 673-4467",
-              osfEmail: "sfmc.clinicaltrials@osfhealthcare.org"
-            }
-          };
-        })
-        .filter(t => t.nctId);
+        return {
+          nctId: get(record, "NCT ID"),
+          local: {
+            cancer: get(record, "Cancer"),
+            principalInvestigator: get(record, "Principal Investigator"),
+            coordinator: get(record, "Clinical Research Coordinator"),
+            statusOverrideRaw: get(record, "Status"),
+            diseaseFocus: "",
+            osfPhone: "(844) 673-4467",
+            osfEmail: "sfmc.clinicaltrials@osfhealthcare.org"
+          }
+        };
+      }).filter(t => t.nctId);
     }
 
     // ===============================
     // Fetch ClinicalTrials.gov study
     // ===============================
-    async function fetchCtgovStudy(nctId) {
+    async function fetchCtgovStudy(nctId){
       const url = `https://clinicaltrials.gov/api/v2/studies/${encodeURIComponent(nctId)}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`ClinicalTrials.gov error ${res.status}`);
@@ -535,7 +494,7 @@
     }
 
     // ---------------- Convert CT.gov -> model ----------------
-    function toTrialModel(study, local, nctId) {
+    function toTrialModel(study, local, nctId){
       const p = study.protocolSection || {};
       const idMod = p.identificationModule || {};
       const statusMod = p.statusModule || {};
@@ -553,13 +512,10 @@
       const phase = getPhaseText(designMod);
       const sponsor = getSponsorText(sponsorMod);
 
-      const ctgovStatusRaw = (statusMod.overallStatus || "Status not listed").replaceAll("_", " ");
+      const ctgovStatusRaw = (statusMod.overallStatus || "").replaceAll("_", " ");
       const sheetStatusRaw = cleanText(local.statusOverrideRaw || "");
-
-      // Choose sheet status if present, else CT.gov
       const chosenRawStatus = sheetStatusRaw || ctgovStatusRaw;
 
-      // Normalize to ONLY the 3 statuses you want
       const status = normalizeStatus(chosenRawStatus);
 
       const defaultCondition =
@@ -571,7 +527,6 @@
       const interventionsSummary = getInterventionSummary(armsInterventionsMod, interventionsMod);
 
       const overviewBullets = makePatientOverview({ phase, diseaseFocus, interventionsSummary });
-
       const whoCanJoin = getHighLevelWhoCanJoin({ diseaseFocus, eligibilityModule: eligMod });
       const whoCannotJoin = getHighLevelWhoCannotJoin({ eligibilityModule: eligMod });
 
@@ -585,7 +540,7 @@
         title,
         cancer: cancerBadge,
         phase,
-        status, // ONLY: Recruiting / Not yet recruiting / Closed
+        status,
         sponsor,
 
         diseaseFocus,
@@ -605,32 +560,26 @@
     // ---------------- App state ----------------
     let EXPANDED_TRIALS = [];
 
-    async function loadTrials() {
+    async function loadTrials(){
       const spreadsheetTrials = await loadTrialsFromCSV(CSV_URL);
-
       const expanded = [];
+
       for (const t of spreadsheetTrials) {
         const study = await fetchCtgovStudy(t.nctId);
         expanded.push(toTrialModel(study, t.local || {}, t.nctId));
       }
-
       EXPANDED_TRIALS = expanded;
     }
 
     // ---------------- Filtering ----------------
-    function matches(trial) {
+    function matches(trial){
       const q = (qEl.value || "").toLowerCase().trim();
       const c = cancerEl.value;
       const s = statusEl.value;
 
       const text = [
-        trial.id,
-        trial.title,
-        trial.cancer,
-        trial.phase,
-        trial.status,
-        trial.sponsor,
-        trial.diseaseFocus
+        trial.id, trial.title, trial.cancer, trial.phase, trial.status,
+        trial.sponsor, trial.diseaseFocus
       ].join(" ").toLowerCase();
 
       if (q && !text.includes(q)) return false;
@@ -641,7 +590,7 @@
     }
 
     // ---------------- Rendering ----------------
-    function render() {
+    function render(){
       const filtered = EXPANDED_TRIALS.filter(matches);
 
       resultsEl.innerHTML = filtered.map(t => `
@@ -670,13 +619,13 @@
       countEl.textContent = `${filtered.length} trial(s) shown.`;
     }
 
-    function bulletsToHtml(arr) {
+    function bulletsToHtml(arr){
       if (!arr || !arr.length) return "<div class='muted'>Not listed.</div>";
       return `<ul>${arr.map(x => `<li>${x}</li>`).join("")}</ul>`;
     }
 
     // ---------------- Modal ----------------
-    window.openModal = function(id) {
+    window.openModal = function(id){
       const t = EXPANDED_TRIALS.find(x => x.id === id);
       if (!t) return;
 
@@ -718,13 +667,21 @@
       backdrop.style.display = "flex";
     };
 
-    function closeModal() {
+    function closeModal(){
       backdrop.style.display = "none";
     }
 
+    // Close: button
     closeBtn.addEventListener("click", closeModal);
+
+    // Close: clicking backdrop
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) closeModal();
+    });
+
+    // Close: Escape key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && backdrop.style.display === "flex") closeModal();
     });
 
     qEl.addEventListener("input", render);
@@ -732,7 +689,7 @@
     statusEl.addEventListener("change", render);
 
     // ---------------- Init ----------------
-    (async function init() {
+    (async function init(){
       resultsEl.innerHTML = `<div class="muted">Loading trials…</div>`;
       countEl.textContent = "";
 
@@ -742,15 +699,12 @@
         // Apply cancer filter if user came from cancer page:
         const params = new URLSearchParams(window.location.search);
         const cancerFromUrl = params.get("cancer");
-        if (cancerFromUrl) {
-          cancerEl.value = cancerFromUrl;
-        }
+        if (cancerFromUrl) cancerEl.value = cancerFromUrl;
 
         render();
       } catch (e) {
         resultsEl.innerHTML = `<div class="muted">Could not load trials right now. Please refresh.</div>`;
         countEl.textContent = "";
-        // console.error(e);
       }
     })();
   </script>
