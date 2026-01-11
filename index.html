@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -21,6 +20,7 @@
       justify-content:space-between;
       align-items:center;
       margin-bottom:24px;
+      gap: 16px;
     }
 
     nav a{
@@ -53,6 +53,7 @@
       gap:16px;
       align-items:flex-start;
       transition: background 0.1s ease-in-out;
+      min-height: 108px;
     }
 
     .tile:hover{
@@ -92,6 +93,7 @@
 
     @media (max-width:900px){
       .grid{ grid-template-columns:1fr; }
+      nav a{ margin-left: 10px; }
     }
   </style>
 </head>
@@ -113,8 +115,10 @@
 
     <!-- All trials -->
     <a class="tile" href="trials.html">
-      <div class="icon">
-        <svg viewBox="0 0 64 64"><path d="M8 10h48v8H8zm0 18h48v8H8zm0 18h48v8H8z"/></svg>
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
+          <path d="M10 12h44v8H10zm0 16h44v8H10zm0 16h44v8H10z"/>
+        </svg>
       </div>
       <div>
         <p class="title">All trials</p>
@@ -122,10 +126,10 @@
       </div>
     </a>
 
-    <!-- Bladder cancer -->
+    <!-- Bladder cancer (bladder icon) -->
     <a class="tile" href="trials.html?cancer=Bladder%20cancer">
-      <div class="icon">
-        <svg viewBox="0 0 64 64">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
           <path d="M26 6c0 8-6 10-6 18 0 7 4 12 12 12s12-5 12-12c0-8-6-10-6-18h-2c0 8 6 10 6 18 0 5-3 8-10 8s-10-3-10-8c0-8 6-10 6-18h-2z"/>
           <path d="M22 36c0 10 4 16 10 16s10-6 10-16h-2c0 9-3 14-8 14s-8-5-8-14h-2z"/>
           <path d="M30 52v6c0 2 1 3 2 3s2-1 2-3v-6h-4z"/>
@@ -137,22 +141,27 @@
       </div>
     </a>
 
-    <!-- Brain -->
+    <!-- Brain cancer -->
     <a class="tile" href="trials.html?cancer=Brain%20cancer">
-      <div class="icon">
-        <svg viewBox="0 0 64 64"><path d="M32 6c-8 0-14 6-14 14v24c0 8 6 14 14 14s14-6 14-14V20c0-8-6-14-14-14z"/></svg>
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
+          <path d="M32 6c-9 0-16 7-16 16v20c0 9 7 16 16 16s16-7 16-16V22c0-9-7-16-16-16z"/>
+          <path d="M24 24h16v4H24zm0 10h16v4H24z" fill="#ffffff"></path>
+        </svg>
       </div>
       <div>
         <p class="title">Brain cancer</p>
-        <p class="desc">Trials for brain tumors.</p>
+        <p class="desc">Trials for brain tumors and related conditions.</p>
       </div>
     </a>
 
-    <!-- Breast cancer -->
+    <!-- Breast cancer (pink ribbon) -->
     <a class="tile" href="trials.html?cancer=Breast%20cancer">
-      <div class="icon ribbon">
-        <svg viewBox="0 0 64 64">
+      <div class="icon ribbon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
           <path d="M40 6c-5 0-9 4-9 9 0 10 12 16 12 26 0 5-3 9-11 9-7 0-10-4-10-9 0-6 4-10 8-15l-3-3c-5 5-9 10-9 18 0 9 6 15 14 15 10 0 15-6 15-15 0-12-12-18-12-26 0-3 2-5 5-5 2 0 4 1 6 3l3-3c-2-2-5-4-9-4z"/>
+          <path d="M22 42 10 58c-1 1-1 3 1 4 1 1 3 0 4-1l11-15c-2-1-3-2-4-4z"/>
+          <path d="M42 42c-1 2-2 3-4 4l11 15c1 1 3 2 4 1 2-1 2-3 1-4L42 42z"/>
         </svg>
       </div>
       <div>
@@ -161,16 +170,130 @@
       </div>
     </a>
 
-    <!-- Colon & rectal -->
+    <!-- Childhood cancer -->
+    <a class="tile" href="trials.html?cancer=Childhood%20cancer">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
+          <circle cx="32" cy="18" r="8"/>
+          <path d="M18 58c1-12 7-20 14-20s13 8 14 20h-4c-1-9-5-16-10-16s-9 7-10 16h-4z"/>
+        </svg>
+      </div>
+      <div>
+        <p class="title">Childhood cancer</p>
+        <p class="desc">Trials for pediatric and adolescent cancers.</p>
+      </div>
+    </a>
+
+    <!-- Colon & rectal cancer (colon icon) -->
     <a class="tile" href="trials.html?cancer=Colon%20%26%20rectal%20cancer">
-      <div class="icon">
-        <svg viewBox="0 0 64 64">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
           <path d="M20 10c-6 0-10 5-10 11 0 3 1 6 3 8-2 2-3 5-3 8 0 6 4 11 10 11h4c3 0 6-1 8-3 2 2 5 3 8 3h4c6 0 10-5 10-11 0-3-1-6-3-8 2-2 3-5 3-8 0-6-4-11-10-11h-6c-4 0-7 2-9 5-2-3-5-5-9-5h-6z"/>
+          <path d="M22 26h4v12h-4zm16 0h4v12h-4z" fill="#ffffff"></path>
         </svg>
       </div>
       <div>
         <p class="title">Colon &amp; rectal cancer</p>
         <p class="desc">Trials for colorectal cancers.</p>
+      </div>
+    </a>
+
+    <!-- Gastrointestinal cancer -->
+    <a class="tile" href="trials.html?cancer=Gastrointestinal%20cancer">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
+          <path d="M22 10c-6 0-10 5-10 11 0 4 2 7 5 9-3 2-5 6-5 10 0 8 6 14 14 14h8c8 0 14-6 14-14 0-5-2-8-5-10 3-2 5-5 5-9 0-6-4-11-10-11H22z"/>
+          <path d="M22 22h20v4H22z" fill="#ffffff"></path>
+        </svg>
+      </div>
+      <div>
+        <p class="title">Gastrointestinal cancer</p>
+        <p class="desc">Trials for cancers of the digestive system.</p>
+      </div>
+    </a>
+
+    <!-- Gynecologic cancer -->
+    <a class="tile" href="trials.html?cancer=Gynecologic%20cancer">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
+          <path d="M32 10c-10 0-14 8-14 16 0 9 5 15 14 15s14-6 14-15c0-8-4-16-14-16z"/>
+          <path d="M28 41v6c0 3-2 5-5 7l2 4c4-2 7-6 7-11v-6h-4z"/>
+          <path d="M36 41v6c0 5 3 9 7 11l2-4c-3-2-5-4-5-7v-6h-4z"/>
+        </svg>
+      </div>
+      <div>
+        <p class="title">Gynecologic cancer</p>
+        <p class="desc">Trials for ovarian, uterine, cervical, and related cancers.</p>
+      </div>
+    </a>
+
+    <!-- Head & neck cancer -->
+    <a class="tile" href="trials.html?cancer=Head%20%26%20neck%20cancer">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
+          <circle cx="32" cy="22" r="12"/>
+          <path d="M22 58c0-10 4-18 10-18s10 8 10 18h-4c0-8-3-14-6-14s-6 6-6 14h-4z"/>
+        </svg>
+      </div>
+      <div>
+        <p class="title">Head &amp; neck cancer</p>
+        <p class="desc">Trials for head and neck cancers.</p>
+      </div>
+    </a>
+
+    <!-- Kidney cancer -->
+    <a class="tile" href="trials.html?cancer=Kidney%20cancer">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
+          <path d="M26 12c-8 0-14 7-14 16 0 8 4 14 12 16 2 1 4 3 4 6v6h4v-6c0-5-3-9-7-10-6-2-9-6-9-12 0-7 4-12 10-12 5 0 8 4 8 9v9h4v-9c0-8-5-13-12-13z"/>
+          <path d="M38 12c-7 0-12 5-12 13v9h4v-9c0-5 3-9 8-9 6 0 10 5 10 12 0 6-3 10-9 12-4 1-7 5-7 10v6h4v-6c0-3 2-5 4-6 8-2 12-8 12-16 0-9-6-16-14-16z"/>
+        </svg>
+      </div>
+      <div>
+        <p class="title">Kidney cancer</p>
+        <p class="desc">Trials for kidney cancers.</p>
+      </div>
+    </a>
+
+    <!-- Lung cancer -->
+    <a class="tile" href="trials.html?cancer=Lung%20cancer">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
+          <path d="M30 10h4v18c6 1 12 6 12 14v12h-6V42c0-5-3-8-6-8v20h-4V10z"/>
+          <path d="M30 28c-6 1-12 6-12 14v12h6V42c0-5 3-8 6-8v20h4V28h-4z"/>
+        </svg>
+      </div>
+      <div>
+        <p class="title">Lung cancer</p>
+        <p class="desc">Trials for lung cancer and related conditions.</p>
+      </div>
+    </a>
+
+    <!-- Prostate cancer -->
+    <a class="tile" href="trials.html?cancer=Prostate%20cancer">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
+          <path d="M32 14c-10 0-16 8-16 18 0 9 6 16 16 16s16-7 16-16c0-10-6-18-16-18z"/>
+          <path d="M30 48v10h4V48h-4z"/>
+        </svg>
+      </div>
+      <div>
+        <p class="title">Prostate cancer</p>
+        <p class="desc">Trials for prostate cancer.</p>
+      </div>
+    </a>
+
+    <!-- Skin cancer -->
+    <a class="tile" href="trials.html?cancer=Skin%20cancer">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img" focusable="false">
+          <path d="M14 16h36v32H14z"/>
+          <path d="M18 22h28v4H18zm0 8h28v4H18zm0 8h28v4H18z" fill="#ffffff"></path>
+        </svg>
+      </div>
+      <div>
+        <p class="title">Skin cancer</p>
+        <p class="desc">Trials for melanoma and other skin cancers.</p>
       </div>
     </a>
 
