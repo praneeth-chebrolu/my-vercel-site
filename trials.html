@@ -76,9 +76,10 @@
       border-radius: 999px;
       padding: 4px 10px;
       background: #f9fafb;
+      white-space: nowrap;
     }
 
-    /* Recruiting = GREEN, everything else = RED */
+    /* Recruiting = GREEN; everything else (Not yet recruiting, Closed) = RED */
     .badge.status-recruiting{
       background:#ecfdf5;
       border-color:#10b981;
@@ -127,7 +128,7 @@
 
     .modal {
       width: 100%;
-      max-width: 700px;
+      max-width: 750px;
       background: white;
       border-radius: 16px;
       border: 1px solid #e5e7eb;
@@ -166,7 +167,6 @@
     <div class="filters">
       <input id="q" placeholder="Search (keyword, ID, drug, cancer type)" />
 
-      <!-- Cancer dropdown matches your Cancer Types page -->
       <select id="cancer">
         <option value="">All cancer types</option>
         <option>Bladder cancer</option>
@@ -184,17 +184,12 @@
         <option>Testicular cancer</option>
       </select>
 
+      <!-- Only the 3 statuses you want -->
       <select id="status">
         <option value="">All statuses</option>
         <option value="Recruiting">Recruiting</option>
         <option value="Not yet recruiting">Not yet recruiting</option>
-        <option value="Active, not recruiting">Active, not recruiting</option>
-        <option value="Completed">Completed</option>
-        <option value="Enrolling by invitation">Enrolling by invitation</option>
-        <option value="Suspended">Suspended</option>
-        <option value="Terminated">Terminated</option>
-        <option value="Withdrawn">Withdrawn</option>
-        <option value="Unknown status">Unknown status</option>
+        <option value="Closed">Closed</option>
       </select>
     </div>
 
@@ -217,15 +212,18 @@
 
   <script>
     // =========================================================
-    // TRIAL LIST: Pull trials from YOUR CSV, then enrich from ClinicalTrials.gov
-    // - Status badge colors: Recruiting = GREEN, everything else = RED
-    // - Cancer filtering supports "group types" like Gynecologic cancer => ovarian/cervical/endometrial, etc.
+    // TRIAL LIST
+    // - Loads trials from your CSV
+    // - Fetches extra details from ClinicalTrials.gov
+    // - STATUS: only 3 shown (Recruiting, Not yet recruiting, Closed)
+    //   Recruiting => green badge
+    //   the other 2 => red badge
     // =========================================================
 
     // ✅ Your GitHub RAW CSV URL:
     const CSV_URL = "https://raw.githubusercontent.com/praneeth-chebrolu/my-vercel-site/refs/heads/main/Webpage%20Listing_OSF%20Cancer%20Clinical%20Trials.csv";
 
-    // --------------- DOM elements ---------------
+    // ---------------- DOM ----------------
     const qEl = document.getElementById("q");
     const cancerEl = document.getElementById("cancer");
     const statusEl = document.getElementById("status");
@@ -238,88 +236,22 @@
     const mBody = document.getElementById("mBody");
     const mLink = document.getElementById("mLink");
 
-    // -----------------------------
-    // Cancer group mapping (EDIT to match YOUR CSV values)
-    // If user selects "Gynecologic cancer", trials labeled "Ovarian" or "Cervical" etc will still match.
-    // -----------------------------
+    // ---------------- Cancer group mapping ----------------
+    // These allow umbrella options (Gynecologic cancer) to match trial cancers like Ovarian, Cervical, etc.
     const CANCER_GROUPS = {
-      "Gynecologic cancer": [
-        "Ovarian",
-        "Cervical",
-        "Endometrial",
-        "Uterine",
-        "Fallopian tube",
-        "Primary peritoneal",
-        "Vulvar",
-        "Vaginal"
-      ],
-      "Gastrointestinal cancer": [
-        "Colon",
-        "Rectal",
-        "Colorectal",
-        "Pancreatic",
-        "Stomach",
-        "Gastric",
-        "Esophageal",
-        "Liver",
-        "Hepatocellular",
-        "Biliary",
-        "Cholangiocarcinoma"
-      ],
-      "Colon & rectal cancer": [
-        "Colon",
-        "Rectal",
-        "Colorectal"
-      ],
-      "Head & neck cancer": [
-        "Head and neck",
-        "Head & neck",
-        "Oral",
-        "Laryngeal",
-        "Pharyngeal",
-        "Nasopharyngeal",
-        "Oropharyngeal"
-      ],
-      "Brain cancer": [
-        "Brain",
-        "Glioblastoma",
-        "GBM",
-        "Astrocytoma",
-        "Glioma"
-      ],
-      "Skin cancer": [
-        "Skin",
-        "Melanoma",
-        "Basal cell",
-        "Squamous cell"
-      ],
-      "Kidney cancer": [
-        "Kidney",
-        "Renal"
-      ],
-      "Lung cancer": [
-        "Lung",
-        "NSCLC",
-        "SCLC"
-      ],
-      "Breast cancer": [
-        "Breast"
-      ],
-      "Bladder cancer": [
-        "Bladder",
-        "Urothelial"
-      ],
-      "Prostate cancer": [
-        "Prostate"
-      ],
-      "Testicular cancer": [
-        "Testicular"
-      ],
-      "Childhood cancer": [
-        "Pediatric",
-        "Childhood",
-        "Adolescent"
-      ]
+      "Gynecologic cancer": ["ovarian", "cervical", "endometrial", "uterine", "fallopian", "peritoneal", "vulvar", "vaginal"],
+      "Gastrointestinal cancer": ["colon", "rectal", "colorectal", "pancreas", "pancreatic", "gastric", "stomach", "esophageal", "liver", "biliary", "cholangiocarcinoma"],
+      "Colon & rectal cancer": ["colon", "rectal", "colorectal"],
+      "Head & neck cancer": ["head and neck", "head & neck", "oral", "laryngeal", "pharyngeal", "nasopharyngeal", "oropharyngeal"],
+      "Brain cancer": ["brain", "glioblastoma", "gbm", "astrocytoma", "glioma"],
+      "Skin cancer": ["skin", "melanoma", "basal cell", "squamous cell"],
+      "Kidney cancer": ["kidney", "renal"],
+      "Lung cancer": ["lung", "nsclc", "sclc"],
+      "Breast cancer": ["breast"],
+      "Bladder cancer": ["bladder", "urothelial"],
+      "Prostate cancer": ["prostate"],
+      "Testicular cancer": ["testicular"],
+      "Childhood cancer": ["pediatric", "childhood", "adolescent"]
     };
 
     function norm(s) {
@@ -329,24 +261,19 @@
     function cancerMatches(selectedCancer, trialCancer) {
       const sel = norm(selectedCancer);
       const tc = norm(trialCancer);
-
       if (!sel) return true;
       if (!tc) return false;
 
-      // Exact match
       if (tc === sel) return true;
 
-      // Group match: selectedCancer is one of the umbrella types
-      const groupList = CANCER_GROUPS[selectedCancer];
-      if (Array.isArray(groupList) && groupList.length) {
-        return groupList.some(item => tc.includes(norm(item)));
+      const group = CANCER_GROUPS[selectedCancer];
+      if (Array.isArray(group) && group.length) {
+        return group.some(g => tc.includes(g));
       }
-
-      // Fallback: contains match
       return tc.includes(sel);
     }
 
-    // --------------- Helpers ---------------
+    // ---------------- Helpers ----------------
     function cleanText(s) {
       return (s || "").replace(/\s+/g, " ").trim();
     }
@@ -356,15 +283,6 @@
         if (typeof v === "string" && v.trim()) return v.trim();
       }
       return "";
-    }
-
-    function listNames(arr, key = "name", max = 4) {
-      if (!Array.isArray(arr)) return [];
-      return arr
-        .map(x => (typeof x === "string" ? x : x?.[key]))
-        .filter(Boolean)
-        .map(x => cleanText(x))
-        .slice(0, max);
     }
 
     function getPhaseText(designMod) {
@@ -381,6 +299,15 @@
       return all.length ? all.join(" / ") : "Sponsor not listed";
     }
 
+    function listNames(arr, key = "name", max = 4) {
+      if (!Array.isArray(arr)) return [];
+      return arr
+        .map(x => (typeof x === "string" ? x : x?.[key]))
+        .filter(Boolean)
+        .map(x => cleanText(x))
+        .slice(0, max);
+    }
+
     function getInterventionSummary(armsInterventionsMod, interventionsMod) {
       const names = listNames(interventionsMod?.interventions, "name", 4);
       if (names.length) return names.join(", ");
@@ -389,13 +316,30 @@
       return "";
     }
 
-    // Recruiting only green, everything else red
-    function statusClass(statusText) {
-      const s = cleanText(statusText).toLowerCase();
-      return s === "recruiting" ? "status-recruiting" : "status-not-recruiting";
+    // ---------------- Status mapping (ONLY 3 statuses) ----------------
+    // Anything that indicates recruiting => "Recruiting"
+    // Anything not-yet => "Not yet recruiting"
+    // Everything else => "Closed"
+    function normalizeStatus(anyStatus) {
+      const s = norm(anyStatus);
+
+      if (s.includes("recruiting")) {
+        // If it's explicitly "not yet recruiting", keep that
+        if (s.includes("not yet")) return "Not yet recruiting";
+        // Otherwise treat as Recruiting (includes "Recruiting Patients")
+        return "Recruiting";
+      }
+
+      // Common not recruiting / closed-ish states => Closed
+      // includes: active not recruiting, completed, terminated, withdrawn, suspended, unknown, etc.
+      return "Closed";
     }
 
-    // --------------- Patient-friendly Study Overview (max 4 bullets) ---------------
+    function statusClass(statusText) {
+      return statusText === "Recruiting" ? "status-recruiting" : "status-not-recruiting";
+    }
+
+    // ---------------- Patient-friendly overview (max 4 bullets) ----------------
     function makePatientOverview({ phase, diseaseFocus, interventionsSummary }) {
       const bullets = [];
 
@@ -422,7 +366,7 @@
       return bullets.slice(0, 4);
     }
 
-    // --------------- Eligibility parsing (simple) ---------------
+    // ---------------- Eligibility parsing (basic) ----------------
     function parseEligibilityCriteria(raw) {
       const text = (raw || "").replace(/\r/g, "");
       if (!text.trim()) return { inclusion: [], exclusion: [] };
@@ -459,11 +403,10 @@
         const lines = cleaned
           .split(/\n+/)
           .map(l => l.trim())
-          .filter(Boolean);
+          .filter(Boolean)
+          .map(l => l.replace(/^[-–•\s]*/, "").trim());
 
-        return lines.slice(0, 6).map(line =>
-          line.replace(/^[-–•\s]*/, "").trim()
-        );
+        return lines.slice(0, 6);
       }
 
       return {
@@ -516,7 +459,7 @@
     }
 
     // ===============================
-    // Load trials from CSV (YOUR Excel headers)
+    // CSV loader (your Excel headers)
     // Expected columns:
     // NCT ID, Cancer, Principal Investigator, Clinical Research Coordinator, Status
     // ===============================
@@ -545,6 +488,9 @@
         return "";
       }
 
+      // NOTE: This simple CSV split fails if your cells contain commas.
+      // If your PI/Coordinator names include commas, remove commas in Excel or save as "CSV UTF-8 (Comma delimited)"
+      // with quotes, OR tell me and I'll give you a robust CSV parser version.
       return rows
         .map(row => {
           const values = row
@@ -560,7 +506,7 @@
           const cancer = get(record, "Cancer");
           const principalInvestigator = get(record, "Principal Investigator");
           const coordinator = get(record, "Clinical Research Coordinator");
-          const statusOverride = get(record, "Status");
+          const statusOverrideRaw = get(record, "Status");
 
           return {
             nctId,
@@ -569,12 +515,9 @@
               diseaseFocus: "",
               principalInvestigator,
               coordinator,
-              statusOverride,
+              statusOverrideRaw,
               osfPhone: "(844) 673-4467",
-              osfEmail: "sfmc.clinicaltrials@osfhealthcare.org",
-              overviewBullets: [],
-              whoCanJoin: [],
-              whoCannotJoin: []
+              osfEmail: "sfmc.clinicaltrials@osfhealthcare.org"
             }
           };
         })
@@ -591,7 +534,7 @@
       return await res.json();
     }
 
-    // --------------- Convert CT.gov -> model ---------------
+    // ---------------- Convert CT.gov -> model ----------------
     function toTrialModel(study, local, nctId) {
       const p = study.protocolSection || {};
       const idMod = p.identificationModule || {};
@@ -609,7 +552,15 @@
       const title = firstNonEmpty(idMod.officialTitle, idMod.briefTitle, "Title not listed");
       const phase = getPhaseText(designMod);
       const sponsor = getSponsorText(sponsorMod);
-      const status = (statusMod.overallStatus || "Status not listed").replaceAll("_", " ");
+
+      const ctgovStatusRaw = (statusMod.overallStatus || "Status not listed").replaceAll("_", " ");
+      const sheetStatusRaw = cleanText(local.statusOverrideRaw || "");
+
+      // Choose sheet status if present, else CT.gov
+      const chosenRawStatus = sheetStatusRaw || ctgovStatusRaw;
+
+      // Normalize to ONLY the 3 statuses you want
+      const status = normalizeStatus(chosenRawStatus);
 
       const defaultCondition =
         (Array.isArray(condMod.conditions) && condMod.conditions.length) ? condMod.conditions[0] : "Cancer";
@@ -619,20 +570,10 @@
 
       const interventionsSummary = getInterventionSummary(armsInterventionsMod, interventionsMod);
 
-      const overviewBullets =
-        Array.isArray(local.overviewBullets) && local.overviewBullets.length
-          ? local.overviewBullets.slice(0, 4)
-          : makePatientOverview({ phase, diseaseFocus, interventionsSummary });
+      const overviewBullets = makePatientOverview({ phase, diseaseFocus, interventionsSummary });
 
-      const whoCanJoin =
-        Array.isArray(local.whoCanJoin) && local.whoCanJoin.length
-          ? local.whoCanJoin
-          : getHighLevelWhoCanJoin({ diseaseFocus, eligibilityModule: eligMod });
-
-      const whoCannotJoin =
-        Array.isArray(local.whoCannotJoin) && local.whoCannotJoin.length
-          ? local.whoCannotJoin
-          : getHighLevelWhoCannotJoin({ eligibilityModule: eligMod });
+      const whoCanJoin = getHighLevelWhoCanJoin({ diseaseFocus, eligibilityModule: eligMod });
+      const whoCannotJoin = getHighLevelWhoCannotJoin({ eligibilityModule: eligMod });
 
       const note =
         "Eligibility shown here is high-level and not complete. Final eligibility is determined by the study team after review in coordination with your cancer care team.";
@@ -644,7 +585,7 @@
         title,
         cancer: cancerBadge,
         phase,
-        status,
+        status, // ONLY: Recruiting / Not yet recruiting / Closed
         sponsor,
 
         diseaseFocus,
@@ -661,7 +602,7 @@
       };
     }
 
-    // --------------- App state ---------------
+    // ---------------- App state ----------------
     let EXPANDED_TRIALS = [];
 
     async function loadTrials() {
@@ -676,7 +617,7 @@
       EXPANDED_TRIALS = expanded;
     }
 
-    // --------------- Filter logic ---------------
+    // ---------------- Filtering ----------------
     function matches(trial) {
       const q = (qEl.value || "").toLowerCase().trim();
       const c = cancerEl.value;
@@ -693,16 +634,13 @@
       ].join(" ").toLowerCase();
 
       if (q && !text.includes(q)) return false;
-
-      // UPDATED: group-based cancer matching
       if (c && !cancerMatches(c, trial.cancer)) return false;
-
       if (s && trial.status !== s) return false;
 
       return true;
     }
 
-    // --------------- Render ---------------
+    // ---------------- Rendering ----------------
     function render() {
       const filtered = EXPANDED_TRIALS.filter(matches);
 
@@ -737,7 +675,7 @@
       return `<ul>${arr.map(x => `<li>${x}</li>`).join("")}</ul>`;
     }
 
-    // --------------- Modal ---------------
+    // ---------------- Modal ----------------
     window.openModal = function(id) {
       const t = EXPANDED_TRIALS.find(x => x.id === id);
       if (!t) return;
@@ -793,7 +731,7 @@
     cancerEl.addEventListener("change", render);
     statusEl.addEventListener("change", render);
 
-    // --------------- Init ---------------
+    // ---------------- Init ----------------
     (async function init() {
       resultsEl.innerHTML = `<div class="muted">Loading trials…</div>`;
       countEl.textContent = "";
@@ -801,7 +739,7 @@
       try {
         await loadTrials();
 
-        // Apply cancer filter if user came from Cancer Types page:
+        // Apply cancer filter if user came from cancer page:
         const params = new URLSearchParams(window.location.search);
         const cancerFromUrl = params.get("cancer");
         if (cancerFromUrl) {
