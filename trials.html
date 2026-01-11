@@ -78,19 +78,19 @@
       background: #f9fafb;
     }
 
-    /* REVERSED COLORS (as requested):
-       Recruiting = RED
-       Everything else = GREEN
+    /* UPDATED COLORS (as requested):
+       Recruiting = GREEN
+       Everything else = RED
     */
     .badge.status-recruiting{
-      background:#fef2f2;
-      border-color:#ef4444;
-      color:#7f1d1d;
-    }
-    .badge.status-not-recruiting{
       background:#ecfdf5;
       border-color:#10b981;
       color:#065f46;
+    }
+    .badge.status-not-recruiting{
+      background:#fef2f2;
+      border-color:#ef4444;
+      color:#7f1d1d;
     }
 
     button {
@@ -156,7 +156,8 @@
   <header>
     <h1>OSF Cancer Clinical Trials</h1>
     <nav>
-      <a href="index.html">Trial List</a>
+      <a href="index.html">Cancer Types</a>
+      <a href="trials.html">Trial List</a>
       <a href="intake.html">Intake</a>
     </nav>
   </header>
@@ -167,19 +168,37 @@
 
     <div class="filters">
       <input id="q" placeholder="Search (keyword, ID, drug, cancer type)" />
+
+      <!-- UPDATED cancer list to match your Cancer Types page -->
       <select id="cancer">
         <option value="">All cancer types</option>
-        <option>GBM</option>
-        <option>Ovarian</option>
-        <option>Lung</option>
-        <option>Breast</option>
+        <option>Bladder cancer</option>
+        <option>Brain cancer</option>
+        <option>Breast cancer</option>
+        <option>Childhood cancer</option>
+        <option>Colon &amp; rectal cancer</option>
+        <option>Gastrointestinal cancer</option>
+        <option>Gynecologic cancer</option>
+        <option>Head &amp; neck cancer</option>
+        <option>Kidney cancer</option>
+        <option>Lung cancer</option>
+        <option>Prostate cancer</option>
+        <option>Skin cancer</option>
+        <option>Testicular cancer</option>
       </select>
+
+      <!-- UPDATED status dropdown (kept values, but only Recruiting will be green) -->
       <select id="status">
         <option value="">All statuses</option>
         <option value="Recruiting">Recruiting</option>
         <option value="Not yet recruiting">Not yet recruiting</option>
         <option value="Active, not recruiting">Active, not recruiting</option>
         <option value="Completed">Completed</option>
+        <option value="Enrolling by invitation">Enrolling by invitation</option>
+        <option value="Suspended">Suspended</option>
+        <option value="Terminated">Terminated</option>
+        <option value="Withdrawn">Withdrawn</option>
+        <option value="Unknown status">Unknown status</option>
       </select>
     </div>
 
@@ -204,12 +223,13 @@
     // =========================================================
     // TRIAL LIST: Pull trials from YOUR CSV, then enrich from ClinicalTrials.gov
     // - Patient-friendly Overview: max 4 bullets (no status repeated there)
-    // - Status badge colors are reversed: Recruiting = red, others = green
+    // - Status badge colors: Recruiting = GREEN, everything else = RED
     // - Eligibility: Inclusion/Exclusion parsed; subpoints shown without bullets
     // =========================================================
 
     // ✅ Paste your GitHub RAW CSV URL here:
-    const CSV_URL = "https://raw.githubusercontent.com/praneeth-chebrolu/my-vercel-site/main/Webpage%20Listing_OSF%20Cancer%20Clinical%20Trials.csv";
+    // IMPORTANT: use /refs/heads/main/ for "raw" links if needed.
+    const CSV_URL = "https://raw.githubusercontent.com/praneeth-chebrolu/my-vercel-site/refs/heads/main/Webpage%20Listing_OSF%20Cancer%20Clinical%20Trials.csv";
 
     // --------------- DOM elements ---------------
     const qEl = document.getElementById("q");
@@ -267,9 +287,11 @@
       return "";
     }
 
-    // --------------- Status class helper (REVERSED COLORS) ---------------
+    // --------------- Status class helper (Recruiting only green) ---------------
     function statusClass(statusText) {
-      return statusText === "Recruiting" ? "status-recruiting" : "status-not-recruiting";
+      // Normalize a bit because CT.gov sometimes returns values like "RECRUITING"
+      const s = cleanText(statusText).toLowerCase();
+      return s === "recruiting" ? "status-recruiting" : "status-not-recruiting";
     }
 
     // --------------- Patient-friendly Study Overview (max 4 bullets) ---------------
@@ -343,18 +365,18 @@
 
         for (const line of lines) {
           const isSubPoint = /^[a-z]\)|^[-–•]/i.test(line) || line.startsWith("(");
-          const text = line
+          const t = line
             .replace(/^[-–•\s]*/, "")
             .replace(/^[a-z]\)\s*/i, "")
             .trim();
 
-          if (!text) continue;
+          if (!t) continue;
 
           if (isSubPoint && current) {
-            current.sub.push(text);
+            current.sub.push(t);
           } else {
             if (current) items.push(current);
-            current = { main: text, sub: [] };
+            current = { main: t, sub: [] };
           }
         }
         if (current) items.push(current);
@@ -504,7 +526,6 @@
       const condMod = p.conditionsModule || {};
       const armsInterventionsMod = p.armsInterventionsModule || {};
       const interventionsMod = p.interventionsModule || {};
-      const descMod = p.descriptionModule || {};
       const eligMod = p.eligibilityModule || {};
 
       const ctgovId = idMod.nctId || nctId;
@@ -514,7 +535,8 @@
       const phase = getPhaseText(designMod);
       const sponsor = getSponsorText(sponsorMod);
 
-      // status from CT.gov (kept for filtering + display)
+      // Use CT.gov status by default. If you want to force the CSV Status, uncomment next line:
+      // const status = local.statusOverride ? cleanText(local.statusOverride) : (statusMod.overallStatus || "Status not listed").replaceAll("_"," ");
       const status = (statusMod.overallStatus || "Status not listed").replaceAll("_", " ");
 
       const defaultCondition =
@@ -548,23 +570,19 @@
         id: ctgovId,
         ctgovLink,
 
-        // Card fields
         title,
         cancer: cancerBadge,
         phase,
         status,
         sponsor,
 
-        // Modal fields
         diseaseFocus,
 
-        // Local OSF fields
         principalInvestigator: local.principalInvestigator || "",
         coordinator: local.coordinator || "",
         osfPhone: local.osfPhone || "",
         osfEmail: local.osfEmail || "",
 
-        // Patient-friendly content
         overviewBullets,
         whoCanJoin,
         whoCannotJoin,
@@ -575,7 +593,6 @@
     // --------------- App state ---------------
     let EXPANDED_TRIALS = [];
 
-    // ✅ Load from CSV, then enrich from CT.gov
     async function loadTrials() {
       const spreadsheetTrials = await loadTrialsFromCSV(CSV_URL);
 
@@ -701,7 +718,6 @@
     cancerEl.addEventListener("change", render);
     statusEl.addEventListener("change", render);
 
-       
     // --------------- Init ---------------
     (async function init() {
       resultsEl.innerHTML = `<div class="muted">Loading trials…</div>`;
@@ -709,17 +725,19 @@
 
       try {
         await loadTrials();
-         // Apply cancer filter if user came from cancer.html
-const params = new URLSearchParams(window.location.search);
-const cancerFromUrl = params.get("cancer");
-if (cancerFromUrl) {
-  cancerEl.value = cancerFromUrl;
-}
+
+        // Apply cancer filter if user came from Cancer Types page:
+        const params = new URLSearchParams(window.location.search);
+        const cancerFromUrl = params.get("cancer");
+        if (cancerFromUrl) {
+          // Example: trials.html?cancer=Lung%20cancer
+          cancerEl.value = cancerFromUrl;
+        }
+
         render();
       } catch (e) {
         resultsEl.innerHTML = `<div class="muted">Could not load trials right now. Please refresh.</div>`;
         countEl.textContent = "";
-        // Uncomment for debugging:
         // console.error(e);
       }
     })();
