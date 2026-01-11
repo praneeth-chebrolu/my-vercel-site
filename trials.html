@@ -91,7 +91,7 @@
       white-space: nowrap;
     }
 
-    /* Recruiting = GREEN; Not yet recruiting + Closed = RED */
+    /* ✅ Recruiting = GREEN; Not yet recruiting + Closed = RED */
     .badge.status-recruiting{
       background:#ecfdf5;
       border-color:#10b981;
@@ -126,7 +126,7 @@
       .filters{ grid-template-columns: 1fr; }
     }
 
-    /* Modal fixes (scroll, not cut off) */
+    /* ✅ Modal fixes (scroll, not cut off) */
     .modalBackdrop{
       position: fixed;
       inset: 0;
@@ -222,7 +222,7 @@
         <option>Testicular cancer</option>
       </select>
 
-      <!-- LIMITED to 3 statuses -->
+      <!-- ✅ LIMITED to 3 statuses -->
       <select id="status">
         <option value="">All statuses</option>
         <option value="Recruiting">Recruiting</option>
@@ -302,22 +302,14 @@
     }
 
     // ---------------- Status handling (CSV ONLY) ----------------
-    // We normalize whatever is in CSV into one of:
-    // Recruiting | Not yet recruiting | Closed
+    // Accept ONLY your 3 status values; anything else defaults to Closed.
     function normalizeCsvStatus(csvStatus){
       const s = norm(csvStatus);
 
-      if (!s) return "Closed";
+      if (s === "recruiting") return "Recruiting";
+      if (s === "not yet recruiting") return "Not yet recruiting";
+      if (s === "closed") return "Closed";
 
-      // Treat any recruiting variant carefully:
-      // "not yet recruiting" -> Not yet recruiting
-      // "recruiting" -> Recruiting
-      if (s.includes("recruiting")) {
-        if (s.includes("not yet")) return "Not yet recruiting";
-        return "Recruiting";
-      }
-
-      // Everything else becomes Closed
       return "Closed";
     }
 
@@ -454,7 +446,7 @@
     }
 
     // ===============================
-    // CSV loader (simple CSV)
+    // ✅ Robust CSV parsing (handles commas inside quotes)
     // Required columns:
     // NCT ID, Cancer, Principal Investigator, Clinical Research Coordinator, Status
     // ===============================
@@ -462,8 +454,43 @@
       const response = await fetch(csvUrl);
       const csvText = await response.text();
 
-      const rows = csvText.split("\n").map(r => r.trim()).filter(r => r.length);
-      const headers = rows.shift().split(",").map(h => h.replace(/^"|"$/g, "").trim());
+      function parseCSV(text) {
+        const rows = [];
+        let row = [];
+        let cell = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+          const ch = text[i];
+          const next = text[i + 1];
+
+          if (ch === '"') {
+            if (inQuotes && next === '"') { cell += '"'; i++; }
+            else { inQuotes = !inQuotes; }
+          } else if (ch === "," && !inQuotes) {
+            row.push(cell.trim());
+            cell = "";
+          } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+            if (ch === "\r" && next === "\n") i++;
+            row.push(cell.trim());
+            cell = "";
+            if (row.some(v => v.length)) rows.push(row);
+            row = [];
+          } else {
+            cell += ch;
+          }
+        }
+
+        row.push(cell.trim());
+        if (row.some(v => v.length)) rows.push(row);
+
+        return rows;
+      }
+
+      const rows = parseCSV(csvText);
+      if (!rows.length) return [];
+
+      const headers = rows.shift().map(h => h.replace(/^"|"$/g, "").trim());
 
       function get(record, key){
         if (record[key] != null) return record[key];
@@ -475,10 +502,11 @@
         return "";
       }
 
-      return rows.map(row => {
-        const values = row.split(",").map(v => v.replace(/^"|"$/g, "").trim());
+      return rows.map(cols => {
         const record = {};
-        headers.forEach((h, i) => record[h] = values[i] || "");
+        headers.forEach((h, i) => {
+          record[h] = String(cols[i] ?? "").replace(/^"|"$/g, "").trim();
+        });
 
         return {
           nctId: get(record, "NCT ID"),
@@ -497,7 +525,7 @@
 
     // ===============================
     // Fetch ClinicalTrials.gov study
-    // (We still fetch title/phase/sponsor/eligibility, but NOT status)
+    // (We fetch title/phase/sponsor/eligibility; NOT status)
     // ===============================
     async function fetchCtgovStudy(nctId){
       const url = `https://clinicaltrials.gov/api/v2/studies/${encodeURIComponent(nctId)}`;
@@ -524,7 +552,7 @@
       const phase = getPhaseText(designMod);
       const sponsor = getSponsorText(sponsorMod);
 
-      // ✅ STATUS COMES ONLY FROM CSV:
+      // ✅ STATUS ONLY FROM CSV:
       const status = normalizeCsvStatus(local.csvStatus);
 
       const defaultCondition =
