@@ -2,8 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Choose Cancer Type | OSF Cancer Clinical Trials</title>
+  <title>Choose Cancer Type | Cancer Clinical Trials</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Font Awesome Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4wWj3K9b4R5z7b+E1w=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
 
   <style>
     body{
@@ -13,14 +22,12 @@
       padding: 0 20px;
       color: #1f2937;
       background: #ffffff;
-      line-height: 1.6;
     }
 
     header{
       display:flex;
       justify-content:space-between;
       align-items:center;
-      gap: 16px;
       margin-bottom: 24px;
     }
 
@@ -29,7 +36,6 @@
       text-decoration:none;
       color:#1f2937;
     }
-    nav a:hover{ text-decoration: underline; }
 
     .card{
       border:1px solid #e5e7eb;
@@ -38,11 +44,9 @@
       background:#ffffff;
     }
 
-    .muted{ color:#6b7280; font-size:14px; margin-top: 6px; }
-
     .grid{
       display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap:16px;
       margin-top:20px;
     }
@@ -50,39 +54,34 @@
     .tile{
       border:1px solid #e5e7eb;
       border-radius:14px;
-      padding:18px;
+      padding:20px;
       text-decoration:none;
       color:inherit;
       display:flex;
-      gap:14px;
+      gap:16px;
       align-items:flex-start;
-      background: #fff;
-      transition: background 0.1s ease-in-out, transform 0.05s ease-in-out;
-      min-height: 120px;
+      transition: background 0.1s ease-in-out;
     }
 
     .tile:hover{
       background:#f9fafb;
-      transform: translateY(-1px);
     }
 
-    .iconImg{
-      width: 44px;
-      height: 44px;
-      object-fit: contain;
-      flex-shrink: 0;
-      filter: invert(18%) sepia(11%) saturate(866%) hue-rotate(175deg) brightness(95%) contrast(92%);
+    .icon{
+      font-size:32px;
+      width:40px;
+      text-align:center;
+      color:#2563eb;
+      flex-shrink:0;
     }
 
-    /* Breast ribbon pink */
-    .iconImg.ribbon{
-      filter: invert(33%) sepia(86%) saturate(2376%) hue-rotate(321deg) brightness(96%) contrast(93%);
+    .icon.ribbon{
+      color:#e11d48; /* pink ribbon */
     }
 
     .title{
       font-weight:700;
       margin:0 0 6px 0;
-      font-size: 16px;
     }
 
     .desc{
@@ -92,7 +91,6 @@
     }
 
     @media (max-width: 900px){
-      body{ margin: 24px auto; }
       .grid{ grid-template-columns: 1fr; }
     }
   </style>
@@ -100,7 +98,7 @@
 
 <body>
 <header>
-  <h1 style="margin:0;">OSF Cancer Clinical Trials</h1>
+  <h1>OSF Cancer Clinical Trials</h1>
   <nav>
     <a href="index.html">Cancer Types</a>
     <a href="trials.html">Trial List</a>
@@ -109,18 +107,13 @@
 </header>
 
 <section class="card">
-  <h2 style="margin:0;">Start here: choose a cancer type</h2>
-  <p class="muted">
-    Pick a cancer type to view matching trials. You can still search all trials from the Trial List.
-  </p>
+  <h2>Start here: choose a cancer type</h2>
 
   <div class="grid">
 
     <!-- All trials -->
     <a class="tile" href="trials.html">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/list-view.svg"
-           alt="All trials">
+      <div class="icon"><i class="fa-solid fa-list-check"></i></div>
       <div>
         <p class="title">All trials</p>
         <p class="desc">Browse every trial currently listed.</p>
@@ -129,9 +122,7 @@
 
     <!-- Bladder -->
     <a class="tile" href="trials.html?cancer=Bladder%20cancer">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/bladder.svg"
-           alt="Bladder cancer">
+      <div class="icon"><i class="fa-solid fa-droplet"></i></div>
       <div>
         <p class="title">Bladder cancer</p>
         <p class="desc">Trials for bladder cancer.</p>
@@ -140,9 +131,7 @@
 
     <!-- Brain -->
     <a class="tile" href="trials.html?cancer=Brain%20cancer">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/brain.svg"
-           alt="Brain cancer">
+      <div class="icon"><i class="fa-solid fa-brain"></i></div>
       <div>
         <p class="title">Brain cancer</p>
         <p class="desc">Trials for brain tumors and related conditions.</p>
@@ -151,9 +140,7 @@
 
     <!-- Breast (pink ribbon) -->
     <a class="tile" href="trials.html?cancer=Breast%20cancer">
-      <img class="iconImg ribbon"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/ribbon.svg"
-           alt="Breast cancer">
+      <div class="icon ribbon"><i class="fa-solid fa-ribbon"></i></div>
       <div>
         <p class="title">Breast cancer</p>
         <p class="desc">Trials for breast cancer and subtypes.</p>
@@ -162,9 +149,7 @@
 
     <!-- Childhood -->
     <a class="tile" href="trials.html?cancer=Childhood%20cancer">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/child-care.svg"
-           alt="Childhood cancer">
+      <div class="icon"><i class="fa-solid fa-child"></i></div>
       <div>
         <p class="title">Childhood cancer</p>
         <p class="desc">Trials for pediatric and adolescent cancers.</p>
@@ -173,9 +158,7 @@
 
     <!-- Colon & rectal -->
     <a class="tile" href="trials.html?cancer=Colon%20%26%20rectal%20cancer">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/intestine.svg"
-           alt="Colon and rectal cancer">
+      <div class="icon"><i class="fa-solid fa-stomach"></i></div>
       <div>
         <p class="title">Colon &amp; rectal cancer</p>
         <p class="desc">Trials for colorectal cancers.</p>
@@ -184,9 +167,7 @@
 
     <!-- Gastrointestinal -->
     <a class="tile" href="trials.html?cancer=Gastrointestinal%20cancer">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/stomach.svg"
-           alt="Gastrointestinal cancer">
+      <div class="icon"><i class="fa-solid fa-notes-medical"></i></div>
       <div>
         <p class="title">Gastrointestinal cancer</p>
         <p class="desc">Trials for cancers of the digestive system.</p>
@@ -195,9 +176,7 @@
 
     <!-- Gynecologic -->
     <a class="tile" href="trials.html?cancer=Gynecologic%20cancer">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/uterus.svg"
-           alt="Gynecologic cancer">
+      <div class="icon"><i class="fa-solid fa-venus"></i></div>
       <div>
         <p class="title">Gynecologic cancer</p>
         <p class="desc">Trials for ovarian, uterine, and cervical cancers.</p>
@@ -206,9 +185,7 @@
 
     <!-- Head & neck -->
     <a class="tile" href="trials.html?cancer=Head%20%26%20neck%20cancer">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/ent.svg"
-           alt="Head and neck cancer">
+      <div class="icon"><i class="fa-solid fa-head-side-virus"></i></div>
       <div>
         <p class="title">Head &amp; neck cancer</p>
         <p class="desc">Trials for head and neck cancers.</p>
@@ -217,9 +194,7 @@
 
     <!-- Kidney -->
     <a class="tile" href="trials.html?cancer=Kidney%20cancer">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/kidneys.svg"
-           alt="Kidney cancer">
+      <div class="icon"><i class="fa-solid fa-filter"></i></div>
       <div>
         <p class="title">Kidney cancer</p>
         <p class="desc">Trials for kidney cancers.</p>
@@ -228,9 +203,7 @@
 
     <!-- Lung -->
     <a class="tile" href="trials.html?cancer=Lung%20cancer">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/lungs.svg"
-           alt="Lung cancer">
+      <div class="icon"><i class="fa-solid fa-lungs"></i></div>
       <div>
         <p class="title">Lung cancer</p>
         <p class="desc">Trials for lung cancer.</p>
@@ -239,9 +212,7 @@
 
     <!-- Prostate -->
     <a class="tile" href="trials.html?cancer=Prostate%20cancer">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/prostate.svg"
-           alt="Prostate cancer">
+      <div class="icon"><i class="fa-solid fa-mars"></i></div>
       <div>
         <p class="title">Prostate cancer</p>
         <p class="desc">Trials for prostate cancer.</p>
@@ -250,9 +221,7 @@
 
     <!-- Skin -->
     <a class="tile" href="trials.html?cancer=Skin%20cancer">
-      <img class="iconImg"
-           src="https://cdn.jsdelivr.net/npm/healthicons@2.1.0/svg/outline/dermatology.svg"
-           alt="Skin cancer">
+      <div class="icon"><i class="fa-solid fa-layer-group"></i></div>
       <div>
         <p class="title">Skin cancer</p>
         <p class="desc">Trials for melanoma and other skin cancers.</p>
