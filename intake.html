@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -38,18 +39,18 @@
 
     label { display:block; margin-top: 10px; }
 
-    input {
+    input, select, textarea {
       width: 100%;
       padding: 10px;
       border-radius: 10px;
       border: 1px solid #d1d5db;
       margin: 6px 0 12px;
       box-sizing: border-box;
+      background: #fff;
+      font-size: 14px;
     }
 
-    .readonly {
-      background: #f9fafb;
-    }
+    .readonly { background:#f9fafb; }
 
     button {
       padding: 10px 14px;
@@ -61,34 +62,32 @@
     }
     button:hover { background: #f3f4f6; }
 
+    .muted { color: #6b7280; font-size: 14px; }
     #msg { margin-top: 12px; font-weight: 600; }
 
-    .muted { color: #6b7280; font-size: 14px; }
-
-    .matchBox {
-      border: 1px dashed #d1d5db;
-      border-radius: 10px;
-      padding: 10px;
-      margin-top: -6px;
+    .hint {
+      margin-top: -8px;
       margin-bottom: 12px;
-      background: #fcfcfd;
+      font-size: 13px;
+      color: #6b7280;
     }
 
-    .pill {
-      display:inline-block;
-      font-size: 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 999px;
-      padding: 4px 10px;
-      background: #f9fafb;
-      margin-top: 6px;
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 900px) {
+      body { margin: 24px auto; }
+      .row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 
 <body>
 <header>
-  <h1>OSF Cancer Clinical Trials</h1>
+  <h1 style="margin:0;">OSF Cancer Clinical Trials</h1>
   <nav>
     <a href="index.html">Cancer Types</a>
     <a href="trials.html">Trial List</a>
@@ -97,58 +96,92 @@
 </header>
 
 <section class="card">
-  <h2>Find a clinical trial</h2>
-  <p class="muted">Share a few details and we’ll guide you to the next step.</p>
+  <h2 style="margin:0 0 6px 0;">Intake form</h2>
+  <p class="muted" style="margin:0 0 14px 0;">Share a few details and we’ll guide you to the next step.</p>
 
   <form id="trialForm">
+    <!-- Selected trial (from URL) -->
     <label>
       Selected trial
       <input id="selectedTrial" name="selectedTrial" class="readonly" readonly>
     </label>
 
-    <label>
-      Your name
-      <input name="name" required>
-    </label>
-
-    <!-- NEW: Free-text cancer field + smart matching -->
-    <label>
-      Cancer (type anything)
-      <input id="cancerFreeText" name="cancerFreeText" placeholder="Example: ovarian cancer, GBM, melanoma, colon tumor, etc." required list="cancerExamples">
-      <datalist id="cancerExamples">
-        <option value="Ovarian cancer"></option>
-        <option value="Cervical cancer"></option>
-        <option value="Endometrial cancer"></option>
-        <option value="Glioblastoma (GBM)"></option>
-        <option value="Non-small cell lung cancer (NSCLC)"></option>
-        <option value="Small cell lung cancer"></option>
-        <option value="Breast cancer"></option>
-        <option value="Melanoma"></option>
-        <option value="Colon cancer"></option>
-        <option value="Rectal cancer"></option>
-        <option value="Prostate cancer"></option>
-        <option value="Kidney cancer"></option>
-        <option value="Bladder cancer"></option>
-        <option value="Head and neck cancer"></option>
-        <option value="Testicular cancer"></option>
-        <option value="Childhood cancer"></option>
-      </datalist>
-    </label>
-
-    <div class="matchBox">
-      <div class="muted">Best match (used to route/filter trials):</div>
-      <div id="matchText" style="font-weight:700;">Not matched yet</div>
-      <div id="matchConfidence" class="pill" style="display:none;"></div>
+    <div class="row">
+      <div>
+        <label>
+          Your name
+          <input name="name" required>
+        </label>
+      </div>
+      <div>
+        <label>
+          City and state (example: Peoria, IL)
+          <input name="location" required>
+        </label>
+      </div>
     </div>
 
-    <!-- Hidden field to store the matched category -->
-    <input type="hidden" id="cancerCategoryMatched" name="cancerCategoryMatched" value="">
-
+    <!-- 1) Cancer diagnosis (free text) -->
     <label>
-      City and state (example: Peoria, IL)
-      <input name="location" required>
+      Cancer diagnosis
+      <input id="diagnosis" name="diagnosis" required placeholder="Example: ovarian cancer, lung cancer, glioblastoma (GBM)">
+    </label>
+    <div class="hint">Type the diagnosis as you know it. The clinical team will confirm details.</div>
+
+    <!-- 2) Disease setting: Newly diagnosed / recurrent / relapsed -->
+    <label>
+      Is this newly diagnosed, recurrent, or relapsed?
+      <select id="diseaseSetting" name="diseaseSetting" required>
+        <option value="" selected disabled>Select one</option>
+        <option>Newly diagnosed</option>
+        <option>Recurrent</option>
+        <option>Relapsed</option>
+      </select>
     </label>
 
+    <!-- 3) Treatments received (dropdown + optional details) -->
+    <label>
+      Treatments received
+      <select id="treatments" name="treatments" required>
+        <option value="" selected disabled>Select one</option>
+        <option>No treatments received</option>
+        <option>Surgery</option>
+        <option>Chemotherapy</option>
+        <option>Radiation therapy</option>
+        <option>Immunotherapy</option>
+        <option>Targeted therapy</option>
+        <option>Hormone therapy</option>
+        <option>Stem cell / bone marrow transplant</option>
+        <option>Other</option>
+      </select>
+    </label>
+
+    <label id="treatmentDetailsLabel" style="display:none;">
+      If you selected a treatment, add details (optional)
+      <textarea id="treatmentDetails" name="treatmentDetails" rows="3"
+        placeholder="Example: carboplatin + paclitaxel, pembrolizumab, radiation 60 Gy, surgery date, etc."></textarea>
+    </label>
+
+    <!-- 4) Genomic tests (dropdown + optional details) -->
+    <label>
+      Genomic testing
+      <select id="genomicTesting" name="genomicTesting" required>
+        <option value="" selected disabled>Select one</option>
+        <option>No genomic testing</option>
+        <option>Yes — tumor testing (example: NGS panel)</option>
+        <option>Yes — blood testing (liquid biopsy)</option>
+        <option>Yes — both tumor and blood testing</option>
+        <option>Not sure</option>
+      </select>
+    </label>
+
+    <label id="genomicDetailsLabel" style="display:none;">
+      If you have results, list key findings (optional)
+      <textarea id="genomicDetails" name="genomicDetails" rows="3"
+        placeholder="Example: EGFR, ALK, KRAS, BRCA1/2, MSI-high, PD-L1, etc."></textarea>
+    </label>
+
+    <!-- Contact -->
     <label>
       Contact information (email or phone)
       <input name="contact" placeholder="Example: email@example.com or (555) 555-5555">
@@ -163,8 +196,8 @@
 <section class="card">
   <h2>How it works</h2>
   <ol>
-    <li>Tell us your cancer type and location.</li>
-    <li>We match you to trials that are open and recruiting.</li>
+    <li>Tell us your diagnosis and treatment history.</li>
+    <li>We match you to trials that may fit your situation.</li>
     <li>A coordinator follows up with next steps.</li>
   </ol>
 </section>
@@ -180,7 +213,7 @@
 
 <script>
   // ----------------------------
-  // 1) Selected trial from URL
+  // Selected trial from URL
   // intake.html?trial=NCT06890338
   // ----------------------------
   (function fillSelectedTrialFromUrl() {
@@ -191,154 +224,38 @@
   })();
 
   // ----------------------------
-  // 2) Cancer matching
-  // Goal: Patient types anything -> match to your site categories.
-  // NOTE: True SNOMED/OMOP coding requires a terminology service.
-  // This is a lightweight on-page matcher using synonyms.
+  // Show/hide detail boxes
   // ----------------------------
-  const CANCER_CATEGORIES = [
-    "Bladder cancer",
-    "Brain cancer",
-    "Breast cancer",
-    "Childhood cancer",
-    "Colon & rectal cancer",
-    "Gastrointestinal cancer",
-    "Gynecologic cancer",
-    "Head & neck cancer",
-    "Kidney cancer",
-    "Lung cancer",
-    "Prostate cancer",
-    "Skin cancer",
-    "Testicular cancer"
-  ];
+  const treatmentsEl = document.getElementById("treatments");
+  const treatmentDetailsLabel = document.getElementById("treatmentDetailsLabel");
+  const treatmentDetails = document.getElementById("treatmentDetails");
 
-  // Synonyms/keywords per category (expand anytime)
-  const SYNONYMS = {
-    "Bladder cancer": [
-      "bladder", "urothelial", "transitional cell", "urothelial carcinoma"
-    ],
-    "Brain cancer": [
-      "brain", "glioblastoma", "gbm", "glioma", "astrocytoma", "oligodendroglioma", "meningioma", "cns"
-    ],
-    "Breast cancer": [
-      "breast", "brca", "ductal", "lobular", "triple negative", "her2"
-    ],
-    "Childhood cancer": [
-      "child", "pediatric", "paediatric", "neuroblastoma", "wilms", "rhabdomyosarcoma", "ewing", "acute lymphoblastic leukemia", "all", "acute myeloid leukemia", "aml"
-    ],
-    "Colon & rectal cancer": [
-      "colon", "colorectal", "rectal", "crc", "sigmoid", "adenocarcinoma colon", "adenocarcinoma rectum"
-    ],
-    "Gastrointestinal cancer": [
-      "gi", "gastrointestinal", "stomach", "gastric", "esophageal", "esophagus", "pancreas", "pancreatic", "liver", "hepatocellular", "hcc", "bile duct", "cholangiocarcinoma", "small bowel", "duodenum"
-    ],
-    "Gynecologic cancer": [
-      "gynecologic", "gyn", "ovarian", "fallopian", "peritoneal", "uterine", "endometrial", "cervical", "vulvar", "vaginal"
-    ],
-    "Head & neck cancer": [
-      "head and neck", "head & neck", "oral", "mouth", "tongue", "throat", "larynx", "laryngeal", "pharynx", "nasopharyngeal", "oropharyngeal", "hpv"
-    ],
-    "Kidney cancer": [
-      "kidney", "renal", "rcc", "renal cell", "clear cell renal"
-    ],
-    "Lung cancer": [
-      "lung", "nsclc", "non small cell", "non-small cell", "small cell", "sclc", "adenocarcinoma lung", "squamous lung"
-    ],
-    "Prostate cancer": [
-      "prostate", "psa", "castration resistant", "mcrpc"
-    ],
-    "Skin cancer": [
-      "skin", "melanoma", "basal cell", "squamous cell skin", "merkel"
-    ],
-    "Testicular cancer": [
-      "testicular", "testis", "germ cell", "seminoma", "nonseminoma"
-    ]
-  };
-
-  function normalize(s) {
-    return (s || "")
-      .toLowerCase()
-      .replace(/[’']/g, "'")
-      .replace(/[^a-z0-9\s&-]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+  function toggleTreatmentDetails() {
+    const v = treatmentsEl.value;
+    const show = v && v !== "No treatments received" && v !== "";
+    treatmentDetailsLabel.style.display = show ? "block" : "none";
+    if (!show) treatmentDetails.value = "";
   }
+  treatmentsEl.addEventListener("change", toggleTreatmentDetails);
 
-  function scoreMatch(input, category) {
-    const txt = normalize(input);
-    if (!txt) return 0;
+  const genomicEl = document.getElementById("genomicTesting");
+  const genomicDetailsLabel = document.getElementById("genomicDetailsLabel");
+  const genomicDetails = document.getElementById("genomicDetails");
 
-    // Direct contains category words
-    const catTxt = normalize(category);
-    let score = 0;
-
-    // Big boost if category keyword is included
-    if (txt.includes(catTxt.replace(" cancer",""))) score += 6;
-
-    // Synonym hits
-    const syns = SYNONYMS[category] || [];
-    for (const syn of syns) {
-      const s = normalize(syn);
-      if (!s) continue;
-      if (txt.includes(s)) score += 4;
-    }
-
-    // Small boost for partial word overlaps
-    const words = txt.split(" ");
-    const catWords = catTxt.split(" ");
-    for (const w of words) {
-      if (w.length >= 4 && catWords.includes(w)) score += 1;
-    }
-
-    return score;
+  function toggleGenomicDetails() {
+    const v = genomicEl.value;
+    const show = v && v.startsWith("Yes");
+    genomicDetailsLabel.style.display = show ? "block" : "none";
+    if (!show) genomicDetails.value = "";
   }
+  genomicEl.addEventListener("change", toggleGenomicDetails);
 
-  function bestCategoryMatch(input) {
-    let best = { category: "", score: 0 };
-    for (const c of CANCER_CATEGORIES) {
-      const sc = scoreMatch(input, c);
-      if (sc > best.score) best = { category: c, score: sc };
-    }
-    return best;
-  }
-
-  const cancerFreeTextEl = document.getElementById("cancerFreeText");
-  const matchTextEl = document.getElementById("matchText");
-  const matchConfEl = document.getElementById("matchConfidence");
-  const matchedHiddenEl = document.getElementById("cancerCategoryMatched");
-
-  function updateMatchUI() {
-    const input = cancerFreeTextEl.value;
-    const best = bestCategoryMatch(input);
-
-    if (!input.trim()) {
-      matchTextEl.textContent = "Not matched yet";
-      matchConfEl.style.display = "none";
-      matchedHiddenEl.value = "";
-      return;
-    }
-
-    // You can tune these thresholds
-    if (best.score >= 4) {
-      matchTextEl.textContent = best.category;
-      matchedHiddenEl.value = best.category;
-
-      matchConfEl.style.display = "inline-block";
-      matchConfEl.textContent = best.score >= 10 ? "High match" : "Possible match";
-    } else {
-      matchTextEl.textContent = "Could not confidently match (we will review)";
-      matchedHiddenEl.value = "";
-
-      matchConfEl.style.display = "inline-block";
-      matchConfEl.textContent = "Low match";
-    }
-  }
-
-  cancerFreeTextEl.addEventListener("input", updateMatchUI);
-  updateMatchUI();
+  // init toggles
+  toggleTreatmentDetails();
+  toggleGenomicDetails();
 
   // ----------------------------
-  // 3) Submit (demo)
+  // Submit (demo only)
   // ----------------------------
   const form = document.getElementById("trialForm");
   const msg = document.getElementById("msg");
@@ -348,23 +265,35 @@
 
     const data = new FormData(form);
     const name = data.get("name");
-    const cancerFreeText = data.get("cancerFreeText");
-    const matchedCategory = data.get("cancerCategoryMatched");
+    const diagnosis = data.get("diagnosis");
+    const setting = data.get("diseaseSetting");
+    const treatments = data.get("treatments");
+    const treatmentDetailsVal = data.get("treatmentDetails") || "";
+    const genomics = data.get("genomicTesting");
+    const genomicDetailsVal = data.get("genomicDetails") || "";
     const location = data.get("location");
     const trial = data.get("selectedTrial");
 
-    msg.textContent =
-      `Thanks, ${name}. We received your request for "${cancerFreeText}"` +
-      (matchedCategory ? ` (matched to: ${matchedCategory}).` : ".") +
-      ` Location: ${location}. Selected trial: ${trial}.`;
+    const parts = [
+      `Thanks, ${name}.`,
+      `Diagnosis: ${diagnosis}.`,
+      `Setting: ${setting}.`,
+      `Treatments: ${treatments}${treatmentDetailsVal ? " (" + treatmentDetailsVal + ")" : ""}.`,
+      `Genomic testing: ${genomics}${genomicDetailsVal ? " (" + genomicDetailsVal + ")" : ""}.`,
+      `Location: ${location}.`,
+      `Selected trial: ${trial}.`
+    ];
 
-    // IMPORTANT: do NOT reset selectedTrial; keep it visible
+    msg.textContent = parts.join(" ");
+
+    // Keep selectedTrial visible after reset
     const selectedTrialValue = document.getElementById("selectedTrial").value;
     form.reset();
     document.getElementById("selectedTrial").value = selectedTrialValue;
 
-    // also re-run match display (since reset clears it)
-    updateMatchUI();
+    // re-init toggles
+    toggleTreatmentDetails();
+    toggleGenomicDetails();
   });
 </script>
 
