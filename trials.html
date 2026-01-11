@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Cancer Clinical Trials | Trial List</title>
+  <title>OSF Cancer Clinical Trials | Trial List</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
@@ -56,7 +56,7 @@
       background:#fff;
     }
 
-    /* Responsive grid: 1 col mobile, 2 tablet, 3 desktop */
+    /* Responsive grid */
     .grid{
       display:grid;
       grid-template-columns: 1fr;
@@ -91,7 +91,7 @@
       white-space: nowrap;
     }
 
-    /* Recruiting = GREEN; everything else (Not yet recruiting, Closed) = RED */
+    /* Recruiting = GREEN; Not yet recruiting + Closed = RED */
     .badge.status-recruiting{
       background:#ecfdf5;
       border-color:#10b981;
@@ -122,12 +122,11 @@
       align-items: center;
     }
 
-    /* Make filters stack on mobile */
     @media (max-width: 900px){
       .filters{ grid-template-columns: 1fr; }
     }
 
-    /* ===== MODAL FIXES: full-screen overlay + scroll ===== */
+    /* Modal fixes (scroll, not cut off) */
     .modalBackdrop{
       position: fixed;
       inset: 0;
@@ -145,9 +144,10 @@
       background: #fff;
       border-radius: 16px;
       border: 1px solid #e5e7eb;
-      /* keep modal inside viewport */
+
       max-height: calc(100vh - 24px);
-      overflow: hidden; /* header fixed, body scrolls */
+      overflow: hidden;
+
       display:flex;
       flex-direction: column;
     }
@@ -176,7 +176,7 @@
 
     .modalBody{
       padding: 14px 16px;
-      overflow: auto; /* THIS makes content scroll instead of cutting off */
+      overflow: auto;
       -webkit-overflow-scrolling: touch;
     }
 
@@ -203,7 +203,7 @@
     </p>
 
     <div class="filters">
-      <input id="q" placeholder="Search (keyword, ID, drug, cancer type)" />
+      <input id="q" placeholder="Search (keyword, NCT ID, cancer type)" />
 
       <select id="cancer">
         <option value="">All cancer types</option>
@@ -222,6 +222,7 @@
         <option>Testicular cancer</option>
       </select>
 
+      <!-- LIMITED to 3 statuses -->
       <select id="status">
         <option value="">All statuses</option>
         <option value="Recruiting">Recruiting</option>
@@ -300,6 +301,30 @@
       return tc.includes(sel);
     }
 
+    // ---------------- Status handling (CSV ONLY) ----------------
+    // We normalize whatever is in CSV into one of:
+    // Recruiting | Not yet recruiting | Closed
+    function normalizeCsvStatus(csvStatus){
+      const s = norm(csvStatus);
+
+      if (!s) return "Closed";
+
+      // Treat any recruiting variant carefully:
+      // "not yet recruiting" -> Not yet recruiting
+      // "recruiting" -> Recruiting
+      if (s.includes("recruiting")) {
+        if (s.includes("not yet")) return "Not yet recruiting";
+        return "Recruiting";
+      }
+
+      // Everything else becomes Closed
+      return "Closed";
+    }
+
+    function statusClass(statusText){
+      return statusText === "Recruiting" ? "status-recruiting" : "status-not-recruiting";
+    }
+
     // ---------------- Helpers ----------------
     function cleanText(s){ return (s || "").replace(/\s+/g, " ").trim(); }
 
@@ -337,21 +362,6 @@
       const armLabels = listNames(armsInterventionsMod?.armGroups, "label", 2);
       if (armLabels.length) return armLabels.join(", ");
       return "";
-    }
-
-    // ---------------- Status mapping (ONLY 3 statuses) ----------------
-    function normalizeStatus(anyStatus){
-      const s = norm(anyStatus);
-
-      if (s.includes("recruiting")) {
-        if (s.includes("not yet")) return "Not yet recruiting";
-        return "Recruiting";
-      }
-      return "Closed";
-    }
-
-    function statusClass(statusText){
-      return statusText === "Recruiting" ? "status-recruiting" : "status-not-recruiting";
     }
 
     // ---------------- Patient-friendly overview (max 4 bullets) ----------------
@@ -444,7 +454,9 @@
     }
 
     // ===============================
-    // CSV loader (your Excel headers)
+    // CSV loader (simple CSV)
+    // Required columns:
+    // NCT ID, Cancer, Principal Investigator, Clinical Research Coordinator, Status
     // ===============================
     async function loadTrialsFromCSV(csvUrl){
       const response = await fetch(csvUrl);
@@ -474,7 +486,7 @@
             cancer: get(record, "Cancer"),
             principalInvestigator: get(record, "Principal Investigator"),
             coordinator: get(record, "Clinical Research Coordinator"),
-            statusOverrideRaw: get(record, "Status"),
+            csvStatus: get(record, "Status"),
             diseaseFocus: "",
             osfPhone: "(844) 673-4467",
             osfEmail: "sfmc.clinicaltrials@osfhealthcare.org"
@@ -485,6 +497,7 @@
 
     // ===============================
     // Fetch ClinicalTrials.gov study
+    // (We still fetch title/phase/sponsor/eligibility, but NOT status)
     // ===============================
     async function fetchCtgovStudy(nctId){
       const url = `https://clinicaltrials.gov/api/v2/studies/${encodeURIComponent(nctId)}`;
@@ -497,7 +510,6 @@
     function toTrialModel(study, local, nctId){
       const p = study.protocolSection || {};
       const idMod = p.identificationModule || {};
-      const statusMod = p.statusModule || {};
       const sponsorMod = p.sponsorCollaboratorsModule || {};
       const designMod = p.designModule || {};
       const condMod = p.conditionsModule || {};
@@ -512,11 +524,8 @@
       const phase = getPhaseText(designMod);
       const sponsor = getSponsorText(sponsorMod);
 
-      const ctgovStatusRaw = (statusMod.overallStatus || "").replaceAll("_", " ");
-      const sheetStatusRaw = cleanText(local.statusOverrideRaw || "");
-      const chosenRawStatus = sheetStatusRaw || ctgovStatusRaw;
-
-      const status = normalizeStatus(chosenRawStatus);
+      // ✅ STATUS COMES ONLY FROM CSV:
+      const status = normalizeCsvStatus(local.csvStatus);
 
       const defaultCondition =
         (Array.isArray(condMod.conditions) && condMod.conditions.length) ? condMod.conditions[0] : "Cancer";
@@ -536,20 +545,16 @@
       return {
         id: ctgovId,
         ctgovLink,
-
         title,
         cancer: cancerBadge,
         phase,
         status,
         sponsor,
-
         diseaseFocus,
-
         principalInvestigator: local.principalInvestigator || "",
         coordinator: local.coordinator || "",
         osfPhone: local.osfPhone || "",
         osfEmail: local.osfEmail || "",
-
         overviewBullets,
         whoCanJoin,
         whoCannotJoin,
@@ -568,6 +573,7 @@
         const study = await fetchCtgovStudy(t.nctId);
         expanded.push(toTrialModel(study, t.local || {}, t.nctId));
       }
+
       EXPANDED_TRIALS = expanded;
     }
 
@@ -667,19 +673,11 @@
       backdrop.style.display = "flex";
     };
 
-    function closeModal(){
-      backdrop.style.display = "none";
-    }
+    function closeModal(){ backdrop.style.display = "none"; }
 
-    // Close: button
     closeBtn.addEventListener("click", closeModal);
+    backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeModal(); });
 
-    // Close: clicking backdrop
-    backdrop.addEventListener("click", (e) => {
-      if (e.target === backdrop) closeModal();
-    });
-
-    // Close: Escape key
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && backdrop.style.display === "flex") closeModal();
     });
