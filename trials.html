@@ -78,10 +78,7 @@
       background: #f9fafb;
     }
 
-    /* UPDATED COLORS (as requested):
-       Recruiting = GREEN
-       Everything else = RED
-    */
+    /* Recruiting = GREEN, everything else = RED */
     .badge.status-recruiting{
       background:#ecfdf5;
       border-color:#10b981;
@@ -169,7 +166,7 @@
     <div class="filters">
       <input id="q" placeholder="Search (keyword, ID, drug, cancer type)" />
 
-      <!-- UPDATED cancer list to match your Cancer Types page -->
+      <!-- Cancer dropdown matches your Cancer Types page -->
       <select id="cancer">
         <option value="">All cancer types</option>
         <option>Bladder cancer</option>
@@ -187,7 +184,6 @@
         <option>Testicular cancer</option>
       </select>
 
-      <!-- UPDATED status dropdown (kept values, but only Recruiting will be green) -->
       <select id="status">
         <option value="">All statuses</option>
         <option value="Recruiting">Recruiting</option>
@@ -222,13 +218,11 @@
   <script>
     // =========================================================
     // TRIAL LIST: Pull trials from YOUR CSV, then enrich from ClinicalTrials.gov
-    // - Patient-friendly Overview: max 4 bullets (no status repeated there)
     // - Status badge colors: Recruiting = GREEN, everything else = RED
-    // - Eligibility: Inclusion/Exclusion parsed; subpoints shown without bullets
+    // - Cancer filtering supports "group types" like Gynecologic cancer => ovarian/cervical/endometrial, etc.
     // =========================================================
 
-    // ✅ Paste your GitHub RAW CSV URL here:
-    // IMPORTANT: use /refs/heads/main/ for "raw" links if needed.
+    // ✅ Your GitHub RAW CSV URL:
     const CSV_URL = "https://raw.githubusercontent.com/praneeth-chebrolu/my-vercel-site/refs/heads/main/Webpage%20Listing_OSF%20Cancer%20Clinical%20Trials.csv";
 
     // --------------- DOM elements ---------------
@@ -243,6 +237,114 @@
     const mTitle = document.getElementById("mTitle");
     const mBody = document.getElementById("mBody");
     const mLink = document.getElementById("mLink");
+
+    // -----------------------------
+    // Cancer group mapping (EDIT to match YOUR CSV values)
+    // If user selects "Gynecologic cancer", trials labeled "Ovarian" or "Cervical" etc will still match.
+    // -----------------------------
+    const CANCER_GROUPS = {
+      "Gynecologic cancer": [
+        "Ovarian",
+        "Cervical",
+        "Endometrial",
+        "Uterine",
+        "Fallopian tube",
+        "Primary peritoneal",
+        "Vulvar",
+        "Vaginal"
+      ],
+      "Gastrointestinal cancer": [
+        "Colon",
+        "Rectal",
+        "Colorectal",
+        "Pancreatic",
+        "Stomach",
+        "Gastric",
+        "Esophageal",
+        "Liver",
+        "Hepatocellular",
+        "Biliary",
+        "Cholangiocarcinoma"
+      ],
+      "Colon & rectal cancer": [
+        "Colon",
+        "Rectal",
+        "Colorectal"
+      ],
+      "Head & neck cancer": [
+        "Head and neck",
+        "Head & neck",
+        "Oral",
+        "Laryngeal",
+        "Pharyngeal",
+        "Nasopharyngeal",
+        "Oropharyngeal"
+      ],
+      "Brain cancer": [
+        "Brain",
+        "Glioblastoma",
+        "GBM",
+        "Astrocytoma",
+        "Glioma"
+      ],
+      "Skin cancer": [
+        "Skin",
+        "Melanoma",
+        "Basal cell",
+        "Squamous cell"
+      ],
+      "Kidney cancer": [
+        "Kidney",
+        "Renal"
+      ],
+      "Lung cancer": [
+        "Lung",
+        "NSCLC",
+        "SCLC"
+      ],
+      "Breast cancer": [
+        "Breast"
+      ],
+      "Bladder cancer": [
+        "Bladder",
+        "Urothelial"
+      ],
+      "Prostate cancer": [
+        "Prostate"
+      ],
+      "Testicular cancer": [
+        "Testicular"
+      ],
+      "Childhood cancer": [
+        "Pediatric",
+        "Childhood",
+        "Adolescent"
+      ]
+    };
+
+    function norm(s) {
+      return (s || "").toLowerCase().replace(/\s+/g, " ").trim();
+    }
+
+    function cancerMatches(selectedCancer, trialCancer) {
+      const sel = norm(selectedCancer);
+      const tc = norm(trialCancer);
+
+      if (!sel) return true;
+      if (!tc) return false;
+
+      // Exact match
+      if (tc === sel) return true;
+
+      // Group match: selectedCancer is one of the umbrella types
+      const groupList = CANCER_GROUPS[selectedCancer];
+      if (Array.isArray(groupList) && groupList.length) {
+        return groupList.some(item => tc.includes(norm(item)));
+      }
+
+      // Fallback: contains match
+      return tc.includes(sel);
+    }
 
     // --------------- Helpers ---------------
     function cleanText(s) {
@@ -287,9 +389,8 @@
       return "";
     }
 
-    // --------------- Status class helper (Recruiting only green) ---------------
+    // Recruiting only green, everything else red
     function statusClass(statusText) {
-      // Normalize a bit because CT.gov sometimes returns values like "RECRUITING"
       const s = cleanText(statusText).toLowerCase();
       return s === "recruiting" ? "status-recruiting" : "status-not-recruiting";
     }
@@ -321,7 +422,7 @@
       return bullets.slice(0, 4);
     }
 
-    // --------------- Eligibility parsing (no bullets for subpoints) ---------------
+    // --------------- Eligibility parsing (simple) ---------------
     function parseEligibilityCriteria(raw) {
       const text = (raw || "").replace(/\r/g, "");
       if (!text.trim()) return { inclusion: [], exclusion: [] };
@@ -360,31 +461,9 @@
           .map(l => l.trim())
           .filter(Boolean);
 
-        const items = [];
-        let current = null;
-
-        for (const line of lines) {
-          const isSubPoint = /^[a-z]\)|^[-–•]/i.test(line) || line.startsWith("(");
-          const t = line
-            .replace(/^[-–•\s]*/, "")
-            .replace(/^[a-z]\)\s*/i, "")
-            .trim();
-
-          if (!t) continue;
-
-          if (isSubPoint && current) {
-            current.sub.push(t);
-          } else {
-            if (current) items.push(current);
-            current = { main: t, sub: [] };
-          }
-        }
-        if (current) items.push(current);
-
-        return items.slice(0, 6).map(b => {
-          if (!b.sub.length) return b.main;
-          return `${b.main}<br>${b.sub.map(s => `&nbsp;&nbsp;${s}`).join("<br>")}`;
-        });
+        return lines.slice(0, 6).map(line =>
+          line.replace(/^[-–•\s]*/, "").trim()
+        );
       }
 
       return {
@@ -418,9 +497,7 @@
       const raw = eligibilityModule?.eligibilityCriteria || "";
       const parsed = parseEligibilityCriteria(raw);
 
-      if (parsed.inclusion.length) {
-        return [...who, ...parsed.inclusion].slice(0, 6);
-      }
+      if (parsed.inclusion.length) return [...who, ...parsed.inclusion].slice(0, 6);
 
       who.push("Other eligibility rules apply. The study team will confirm eligibility.");
       return who.slice(0, 6);
@@ -430,9 +507,7 @@
       const raw = eligibilityModule?.eligibilityCriteria || "";
       const parsed = parseEligibilityCriteria(raw);
 
-      if (parsed.exclusion.length) {
-        return parsed.exclusion.slice(0, 6);
-      }
+      if (parsed.exclusion.length) return parsed.exclusion.slice(0, 6);
 
       return [
         "People who do not meet the study’s eligibility requirements.",
@@ -534,9 +609,6 @@
       const title = firstNonEmpty(idMod.officialTitle, idMod.briefTitle, "Title not listed");
       const phase = getPhaseText(designMod);
       const sponsor = getSponsorText(sponsorMod);
-
-      // Use CT.gov status by default. If you want to force the CSV Status, uncomment next line:
-      // const status = local.statusOverride ? cleanText(local.statusOverride) : (statusMod.overallStatus || "Status not listed").replaceAll("_"," ");
       const status = (statusMod.overallStatus || "Status not listed").replaceAll("_", " ");
 
       const defaultCondition =
@@ -563,7 +635,6 @@
           : getHighLevelWhoCannotJoin({ eligibilityModule: eligMod });
 
       const note =
-        local.note ||
         "Eligibility shown here is high-level and not complete. Final eligibility is determined by the study team after review in coordination with your cancer care team.";
 
       return {
@@ -622,8 +693,12 @@
       ].join(" ").toLowerCase();
 
       if (q && !text.includes(q)) return false;
-      if (c && trial.cancer !== c) return false;
+
+      // UPDATED: group-based cancer matching
+      if (c && !cancerMatches(c, trial.cancer)) return false;
+
       if (s && trial.status !== s) return false;
+
       return true;
     }
 
@@ -730,7 +805,6 @@
         const params = new URLSearchParams(window.location.search);
         const cancerFromUrl = params.get("cancer");
         if (cancerFromUrl) {
-          // Example: trials.html?cancer=Lung%20cancer
           cancerEl.value = cancerFromUrl;
         }
 
