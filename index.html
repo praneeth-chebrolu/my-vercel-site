@@ -701,6 +701,12 @@
     cancerEl.addEventListener("change", render);
     statusEl.addEventListener("change", render);
 
+        // Apply cancer filter if user came from cancer.html
+const params = new URLSearchParams(window.location.search);
+const cancerFromUrl = params.get("cancer");
+if (cancerFromUrl) {
+  cancerEl.value = cancerFromUrl;
+}
     // --------------- Init ---------------
     (async function init() {
       resultsEl.innerHTML = `<div class="muted">Loading trials…</div>`;
