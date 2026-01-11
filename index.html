@@ -1,10 +1,11 @@
-<!-- SAVE AS: index.html (your Cancer Types homepage) -->
+<!-- SAVE AS: index.html (Cancer Types homepage with photo tiles) -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Choose Cancer Type | Cancer Clinical Trials</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <style>
     body{
       font-family: Arial, sans-serif;
@@ -13,7 +14,9 @@
       padding: 0 20px;
       color: #1f2937;
       line-height: 1.6;
+      background: #ffffff;
     }
+
     header{
       display:flex;
       align-items:baseline;
@@ -21,6 +24,7 @@
       gap:16px;
       margin-bottom: 18px;
     }
+
     nav a{
       margin-left: 14px;
       text-decoration:none;
@@ -34,6 +38,7 @@
       padding:18px;
       background:#fff;
     }
+
     .muted{ color:#6b7280; font-size:14px; }
 
     .grid{
@@ -46,14 +51,13 @@
     .tile{
       border:1px solid #e5e7eb;
       border-radius:14px;
-      padding:16px;
       background:#ffffff;
       cursor:pointer;
       display:flex;
       flex-direction:column;
-      gap:10px;
-      min-height: 170px;
-      transition: transform 0.05s ease-in-out;
+      overflow:hidden;
+      min-height: 210px;
+      transition: transform 0.05s ease-in-out, background 0.05s ease-in-out;
       text-decoration: none;
       color: inherit;
     }
@@ -62,10 +66,31 @@
       background:#f9fafb;
     }
 
-    .icon{
-      font-size: 36px;
-      line-height: 1;
+    .thumbWrap{
+      position: relative;
+      height: 118px;
+      background: #f3f4f6;
     }
+    .thumb{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display:block;
+    }
+    .thumbOverlay{
+      position:absolute;
+      inset:0;
+      background: linear-gradient(to top, rgba(17,24,39,0.65), rgba(17,24,39,0.00) 60%);
+    }
+
+    .tileBody{
+      padding:14px 16px 16px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      flex: 1;
+    }
+
     .title{
       font-weight:700;
       font-size:16px;
@@ -107,6 +132,7 @@
 
     @media (max-width: 900px){
       .grid{ grid-template-columns: 1fr; }
+      .thumbWrap{ height: 150px; }
     }
   </style>
 </head>
@@ -128,102 +154,186 @@
     </p>
 
     <div class="grid">
+      <!-- All trials -->
       <a class="tile" href="trials.html">
-        <div class="icon">📋</div>
-        <p class="title">All trials</p>
-        <p class="desc">Browse every trial currently listed.</p>
-        <div class="pillRow"><span class="pill">Browse all</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/all-trials.jpg" alt="Clinical research team reviewing charts" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">All trials</p>
+          <p class="desc">Browse every trial currently listed.</p>
+          <div class="pillRow"><span class="pill">Browse all</span></div>
+        </div>
       </a>
 
+      <!-- Bladder -->
       <a class="tile" href="trials.html?cancer=Bladder%20cancer">
-        <div class="icon">🚻</div>
-        <p class="title">Bladder cancer</p>
-        <p class="desc">Trials for bladder cancer.</p>
-        <div class="pillRow"><span class="pill">Urologic</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/bladder.jpg" alt="Urology themed clinical image" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Bladder cancer</p>
+          <p class="desc">Trials for bladder cancer.</p>
+          <div class="pillRow"><span class="pill">Urologic</span></div>
+        </div>
       </a>
 
+      <!-- Brain -->
       <a class="tile" href="trials.html?cancer=Brain%20cancer">
-        <div class="icon">🧠</div>
-        <p class="title">Brain cancer</p>
-        <p class="desc">Trials for brain tumors and related conditions.</p>
-        <div class="pillRow"><span class="pill">Neuro-oncology</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/brain.jpg" alt="Brain imaging scan" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Brain cancer</p>
+          <p class="desc">Trials for brain tumors and related conditions.</p>
+          <div class="pillRow"><span class="pill">Neuro-oncology</span></div>
+        </div>
       </a>
 
+      <!-- Breast -->
       <a class="tile" href="trials.html?cancer=Breast%20cancer">
-        <div class="icon">🎗️</div>
-        <p class="title">Breast cancer</p>
-        <p class="desc">Trials for breast cancer and subtypes.</p>
-        <div class="pillRow"><span class="pill">Women’s health</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/breast.jpg" alt="Breast cancer awareness and clinical care" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Breast cancer</p>
+          <p class="desc">Trials for breast cancer and subtypes.</p>
+          <div class="pillRow"><span class="pill">Women’s health</span></div>
+        </div>
       </a>
 
+      <!-- Childhood -->
       <a class="tile" href="trials.html?cancer=Childhood%20cancer">
-        <div class="icon">🧸</div>
-        <p class="title">Childhood cancer</p>
-        <p class="desc">Trials for pediatric and adolescent cancers.</p>
-        <div class="pillRow"><span class="pill">Pediatric</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/childhood.jpg" alt="Pediatric oncology care environment" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Childhood cancer</p>
+          <p class="desc">Trials for pediatric and adolescent cancers.</p>
+          <div class="pillRow"><span class="pill">Pediatric</span></div>
+        </div>
       </a>
 
+      <!-- Colon & rectal -->
       <a class="tile" href="trials.html?cancer=Colon%20%26%20rectal%20cancer">
-        <div class="icon">🧻</div>
-        <p class="title">Colon &amp; rectal cancer</p>
-        <p class="desc">Trials for colorectal cancers.</p>
-        <div class="pillRow"><span class="pill">GI</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/colorectal.jpg" alt="Digestive health themed clinical image" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Colon &amp; rectal cancer</p>
+          <p class="desc">Trials for colorectal cancers.</p>
+          <div class="pillRow"><span class="pill">GI</span></div>
+        </div>
       </a>
 
+      <!-- Gastrointestinal -->
       <a class="tile" href="trials.html?cancer=Gastrointestinal%20cancer">
-        <div class="icon">🍽️</div>
-        <p class="title">Gastrointestinal cancer</p>
-        <p class="desc">Trials for cancers of the digestive system.</p>
-        <div class="pillRow"><span class="pill">GI</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/gastrointestinal.jpg" alt="Gastrointestinal care themed clinical image" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Gastrointestinal cancer</p>
+          <p class="desc">Trials for cancers of the digestive system.</p>
+          <div class="pillRow"><span class="pill">GI</span></div>
+        </div>
       </a>
 
+      <!-- Gynecologic -->
       <a class="tile" href="trials.html?cancer=Gynecologic%20cancer">
-        <div class="icon">🟣</div>
-        <p class="title">Gynecologic cancer</p>
-        <p class="desc">Trials for ovarian, uterine, cervical, and related cancers.</p>
-        <div class="pillRow"><span class="pill">Gynecologic</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/gynecologic.jpg" alt="Gynecologic oncology clinic setting" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Gynecologic cancer</p>
+          <p class="desc">Trials for ovarian, uterine, cervical, and related cancers.</p>
+          <div class="pillRow"><span class="pill">Gynecologic</span></div>
+        </div>
       </a>
 
+      <!-- Head & neck -->
       <a class="tile" href="trials.html?cancer=Head%20%26%20neck%20cancer">
-        <div class="icon">👤</div>
-        <p class="title">Head &amp; neck cancer</p>
-        <p class="desc">Trials for head and neck cancers.</p>
-        <div class="pillRow"><span class="pill">ENT</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/head-neck.jpg" alt="Head and neck cancer care themed clinical image" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Head &amp; neck cancer</p>
+          <p class="desc">Trials for head and neck cancers.</p>
+          <div class="pillRow"><span class="pill">ENT</span></div>
+        </div>
       </a>
 
+      <!-- Kidney -->
       <a class="tile" href="trials.html?cancer=Kidney%20cancer">
-        <div class="icon">🫘</div>
-        <p class="title">Kidney cancer</p>
-        <p class="desc">Trials for kidney cancers.</p>
-        <div class="pillRow"><span class="pill">Urologic</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/kidney.jpg" alt="Kidney cancer care themed clinical image" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Kidney cancer</p>
+          <p class="desc">Trials for kidney cancers.</p>
+          <div class="pillRow"><span class="pill">Urologic</span></div>
+        </div>
       </a>
 
+      <!-- Lung -->
       <a class="tile" href="trials.html?cancer=Lung%20cancer">
-        <div class="icon">🫁</div>
-        <p class="title">Lung cancer</p>
-        <p class="desc">Trials for lung cancer and related conditions.</p>
-        <div class="pillRow"><span class="pill">Thoracic</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/lung.jpg" alt="Chest imaging scan" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Lung cancer</p>
+          <p class="desc">Trials for lung cancer and related conditions.</p>
+          <div class="pillRow"><span class="pill">Thoracic</span></div>
+        </div>
       </a>
 
+      <!-- Prostate -->
       <a class="tile" href="trials.html?cancer=Prostate%20cancer">
-        <div class="icon">🔵</div>
-        <p class="title">Prostate cancer</p>
-        <p class="desc">Trials for prostate cancer.</p>
-        <div class="pillRow"><span class="pill">Urologic</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/prostate.jpg" alt="Prostate cancer care themed clinical image" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Prostate cancer</p>
+          <p class="desc">Trials for prostate cancer.</p>
+          <div class="pillRow"><span class="pill">Urologic</span></div>
+        </div>
       </a>
 
+      <!-- Skin -->
       <a class="tile" href="trials.html?cancer=Skin%20cancer">
-        <div class="icon">☀️</div>
-        <p class="title">Skin cancer</p>
-        <p class="desc">Trials for melanoma and other skin cancers.</p>
-        <div class="pillRow"><span class="pill">Dermatology</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/skin.jpg" alt="Dermatology exam setting" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Skin cancer</p>
+          <p class="desc">Trials for melanoma and other skin cancers.</p>
+          <div class="pillRow"><span class="pill">Dermatology</span></div>
+        </div>
       </a>
 
+      <!-- Testicular -->
       <a class="tile" href="trials.html?cancer=Testicular%20cancer">
-        <div class="icon">⚽</div>
-        <p class="title">Testicular cancer</p>
-        <p class="desc">Trials for testicular cancer.</p>
-        <div class="pillRow"><span class="pill">Urologic</span></div>
+        <div class="thumbWrap">
+          <img class="thumb" src="images/testicular.jpg" alt="Men’s health and urology clinical setting" loading="lazy" />
+          <div class="thumbOverlay"></div>
+        </div>
+        <div class="tileBody">
+          <p class="title">Testicular cancer</p>
+          <p class="desc">Trials for testicular cancer.</p>
+          <div class="pillRow"><span class="pill">Urologic</span></div>
+        </div>
       </a>
     </div>
 
@@ -234,3 +344,4 @@
   </section>
 </body>
 </html>
+
