@@ -199,7 +199,20 @@
     <button type="submit">Submit</button>
   </form>
 
+  <p class="muted" style="margin-top:10px;">
+    When you click Submit, your email app will open with a pre-filled message to the OSF Clinical Trials team.
+  </p>
+
   <p id="msg"></p>
+</section>
+
+<section class="card">
+  <h2>Contact Us</h2>
+  <p>
+    Phone: <a href="tel:+18446734467">(844) 673-4467</a><br>
+    OR<br>
+    Email: <a href="mailto:sfmc.clinicaltrials@osfhealthcare.org">sfmc.clinicaltrials@osfhealthcare.org</a>
+  </p>
 </section>
 
 <script>
@@ -222,58 +235,106 @@
     }
   })();
 
+  // ----------------------------
+  // 2) Show/hide detail boxes
+  // ----------------------------
+  const treatmentsEl = document.getElementById("treatments");
+  const treatmentDetailsLabel = document.getElementById("treatmentDetailsLabel");
+  const treatmentDetails = document.getElementById("treatmentDetails");
+
+  function toggleTreatmentDetails() {
+    const v = treatmentsEl.value;
+    const show =
+      v &&
+      v !== "" &&
+      v !== "No treatments received" &&
+      v !== "Not sure / unknown";
+    treatmentDetailsLabel.style.display = show ? "block" : "none";
+    if (!show) treatmentDetails.value = "";
+  }
+  treatmentsEl.addEventListener("change", toggleTreatmentDetails);
+
+  const genomicEl = document.getElementById("genomicTesting");
+  const genomicDetailsLabel = document.getElementById("genomicDetailsLabel");
+  const genomicDetails = document.getElementById("genomicDetails");
+
+  function toggleGenomicDetails() {
+    const v = genomicEl.value;
+    const show = v && v.startsWith("Yes");
+    genomicDetailsLabel.style.display = show ? "block" : "none";
+    if (!show) genomicDetails.value = "";
+  }
+  genomicEl.addEventListener("change", toggleGenomicDetails);
+
+  // init toggles
+  toggleTreatmentDetails();
+  toggleGenomicDetails();
 
   // ----------------------------
-  // 3) Submit (demo only)
+  // 3) Submit -> open email draft to sfmc.clinicaltrials@osfhealthcare.org
   // ----------------------------
   const form = document.getElementById("trialForm");
   const msg = document.getElementById("msg");
-
-<script>
-  const form = document.getElementById("trialForm");
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const data = new FormData(form);
 
+    const selectedTrial = data.get("selectedTrial") || "";
+    const name = data.get("name") || "";
+    const location = data.get("location") || "";
+    const diagnosis = data.get("diagnosis") || "";
+    const setting = data.get("diseaseSetting") || "";
+    const treatments = data.get("treatments") || "";
+    const treatmentDetailsVal = data.get("treatmentDetails") || "";
+    const genomics = data.get("genomicTesting") || "";
+    const genomicDetailsVal = data.get("genomicDetails") || "";
+    const contact = data.get("contact") || "";
+
     const emailBody = `
 Selected Trial:
-${data.get("selectedTrial")}
+${selectedTrial}
 
 Patient Name:
-${data.get("name")}
+${name}
 
 Location:
-${data.get("location")}
+${location}
 
 Cancer Diagnosis:
-${data.get("diagnosis")}
+${diagnosis}
 
 Disease Setting:
-${data.get("diseaseSetting")}
+${setting}
 
 Treatments Received:
-${data.get("treatments")}
-${data.get("treatmentDetails") || ""}
+${treatments}
+${treatmentDetailsVal ? ("Details: " + treatmentDetailsVal) : ""}
 
 Genomic Testing:
-${data.get("genomicTesting")}
-${data.get("genomicDetails") || ""}
+${genomics}
+${genomicDetailsVal ? ("Details: " + genomicDetailsVal) : ""}
 
 Contact Information:
-${data.get("contact")}
+${contact}
     `.trim();
+
+    const subject = "Clinical Trial Intake Submission";
 
     const mailtoLink =
       "mailto:sfmc.clinicaltrials@osfhealthcare.org" +
-      "?subject=" + encodeURIComponent("Clinical Trial Intake Submission") +
+      "?subject=" + encodeURIComponent(subject) +
       "&body=" + encodeURIComponent(emailBody);
 
-    window.location.href = mailtoLink;
-  });
-</script>
+    // Optional on-page confirmation before email app opens
+    msg.textContent = "Opening your email app with your intake details…";
 
+    window.location.href = mailtoLink;
+
+    // NOTE: We do not reset the form here because the email app opening
+    // may interrupt the page flow. If you want to reset after, tell me.
+  });
 </script>
 
 </body>
