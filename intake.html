@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
-    body {
+    body{
       font-family: Arial, sans-serif;
       max-width: 900px;
       margin: 60px auto;
@@ -14,82 +14,83 @@
       line-height: 1.6;
       color: #1f2937;
     }
-    header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 16px;
+    header{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:16px;
       margin-bottom: 24px;
     }
-    nav a {
+    nav a{
       margin-left: 14px;
-      text-decoration: none;
-      color: #1f2937;
+      text-decoration:none;
+      color:#1f2937;
     }
-    nav a:hover { text-decoration: underline; }
+    nav a:hover{ text-decoration:underline; }
 
-    .card {
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 18px;
+    .card{
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      padding:18px;
+      background:#fff;
       margin-top: 16px;
-      background: #ffffff;
     }
 
-    label { display:block; margin-top: 10px; }
+    label{ display:block; margin-top: 10px; }
 
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #d1d5db;
-      margin: 6px 0 12px;
-      box-sizing: border-box;
-      background: #fff;
+    input, select, textarea{
+      width:100%;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid #d1d5db;
+      margin:6px 0 12px;
+      box-sizing:border-box;
       font-size: 14px;
+      background:#fff;
     }
 
-    .readonly { background:#f9fafb; }
-
-    button {
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #d1d5db;
-      background: #f9fafb;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    button:hover { background: #f3f4f6; }
-
-    .muted { color: #6b7280; font-size: 14px; }
-    #msg { margin-top: 12px; font-weight: 600; }
-
-    .hint {
-      margin-top: -8px;
-      margin-bottom: 12px;
-      font-size: 13px;
-      color: #6b7280;
+    .readonly{
+      background:#f9fafb;
     }
 
-    .row {
-      display: grid;
+    .hint{
+      margin-top:-8px;
+      margin-bottom:12px;
+      font-size:13px;
+      color:#6b7280;
+    }
+
+    .muted{ color:#6b7280; font-size:14px; }
+
+    .row{
+      display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap:12px;
     }
 
-    .notice {
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      border-radius: 12px;
-      padding: 12px;
+    button{
+      padding:10px 14px;
+      border-radius:10px;
+      border:1px solid #d1d5db;
+      background:#f9fafb;
+      cursor:pointer;
+      font-weight:600;
+    }
+    button:hover{ background:#f3f4f6; }
+
+    .notice{
+      border:1px solid #e5e7eb;
+      background:#f9fafb;
+      border-radius:12px;
+      padding:12px;
       margin-bottom: 12px;
-      color: #374151;
-      font-size: 14px;
+      font-size:14px;
+      color:#374151;
     }
 
-    @media (max-width: 900px) {
-      body { margin: 24px auto; }
-      .row { grid-template-columns: 1fr; }
+    @media (max-width: 900px){
+      body{ margin: 24px auto; }
+      .row{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -106,38 +107,26 @@
 
 <section class="card">
   <h2 style="margin:0 0 6px 0;">Intake form</h2>
-  <p class="muted" style="margin:0 0 14px 0;">Share a few details and we’ll guide you to the next step.</p>
+  <p class="muted" style="margin:0 0 14px 0;">
+    When you click Submit, your email app will open with a pre-filled message to the OSF Clinical Trials team.
+    You will need to press Send.
+  </p>
 
-  <div id="noTrialNotice" class="notice" style="display:none;">
-    No trial was selected from the Trial List. That’s okay. Please fill out the details below and our team will help guide you.
+  <div class="notice">
+    Please do not include highly sensitive identifiers (MRN, full DOB, full address). A coordinator will follow up.
   </div>
 
   <form id="trialForm">
     <label>
-      Selected trial
+      Selected trial (optional)
       <input id="selectedTrial" name="selectedTrial" class="readonly" readonly>
     </label>
 
-    <div class="row">
-      <div>
-        <label>
-          Your name
-          <input name="name" required>
-        </label>
-      </div>
-      <div>
-        <label>
-          City and state (example: Peoria, IL)
-          <input name="location" required>
-        </label>
-      </div>
-    </div>
-
     <label>
-      Cancer diagnosis
-      <input id="diagnosis" name="diagnosis" required placeholder="Example: ovarian cancer, lung cancer, glioblastoma (GBM)">
+      Cancer diagnosis (free text)
+      <input id="diagnosis" name="diagnosis" required placeholder="Example: ovarian cancer, lung cancer, GBM">
     </label>
-    <div class="hint">If you’re not sure, type what you’ve been told (example: “ovarian tumor”).</div>
+    <div class="hint">Type what you’ve been told. Example: “high-grade serous ovarian cancer”. If unsure, type “not sure”.</div>
 
     <label>
       Is this newly diagnosed, recurrent, or relapsed?
@@ -161,24 +150,23 @@
         <option>Immunotherapy</option>
         <option>Targeted therapy</option>
         <option>Hormone therapy</option>
-        <option>Stem cell / bone marrow transplant</option>
         <option>Other</option>
         <option>Not sure / unknown</option>
       </select>
     </label>
 
     <label id="treatmentDetailsLabel" style="display:none;">
-      If you selected a treatment, add details (optional)
+      Treatment details (optional)
       <textarea id="treatmentDetails" name="treatmentDetails" rows="3"
-        placeholder="Example: carboplatin + paclitaxel, pembrolizumab, radiation 60 Gy, surgery date, etc."></textarea>
+        placeholder="Example: carboplatin + paclitaxel, surgery month/year, radiation, etc."></textarea>
     </label>
 
     <label>
-      Genomic testing
+      Genomic tests (if any)
       <select id="genomicTesting" name="genomicTesting" required>
         <option value="" selected disabled>Select one</option>
         <option>No genomic testing</option>
-        <option>Yes — tumor testing (example: NGS panel)</option>
+        <option>Yes — tumor testing</option>
         <option>Yes — blood testing (liquid biopsy)</option>
         <option>Yes — both tumor and blood testing</option>
         <option>Not sure / unknown</option>
@@ -186,24 +174,33 @@
     </label>
 
     <label id="genomicDetailsLabel" style="display:none;">
-      If you have results, list key findings (optional)
+      Genomic results (optional)
       <textarea id="genomicDetails" name="genomicDetails" rows="3"
         placeholder="Example: EGFR, ALK, KRAS, BRCA1/2, MSI-high, PD-L1, etc."></textarea>
     </label>
 
+    <div class="row">
+      <div>
+        <label>
+          Your name (optional)
+          <input name="name" placeholder="Optional">
+        </label>
+      </div>
+      <div>
+        <label>
+          City and state (optional)
+          <input name="location" placeholder="Optional (example: Peoria, IL)">
+        </label>
+      </div>
+    </div>
+
     <label>
       Contact information (email or phone)
-      <input name="contact" placeholder="Example: email@example.com or (555) 555-5555">
+      <input name="contact" required placeholder="Example: email@example.com or (555) 555-5555">
     </label>
 
     <button type="submit">Submit</button>
   </form>
-
-  <p class="muted" style="margin-top:10px;">
-    When you click Submit, your email app will open with a pre-filled message to the OSF Clinical Trials team.
-  </p>
-
-  <p id="msg"></p>
 </section>
 
 <section class="card">
@@ -217,26 +214,23 @@
 
 <script>
   // ----------------------------
-  // 1) Selected trial from URL
+  // 1) Auto-populate Selected Trial from URL
   // intake.html?trial=NCT06890338
   // ----------------------------
   (function fillSelectedTrialFromUrl() {
     const selectedTrialInput = document.getElementById("selectedTrial");
-    const noTrialNotice = document.getElementById("noTrialNotice");
     const params = new URLSearchParams(window.location.search);
     const trialFromUrl = params.get("trial");
 
     if (trialFromUrl && trialFromUrl.trim()) {
       selectedTrialInput.value = trialFromUrl.trim();
-      noTrialNotice.style.display = "none";
     } else {
-      selectedTrialInput.value = "Not selected (please choose a trial first)";
-      noTrialNotice.style.display = "block";
+      selectedTrialInput.value = "Not selected";
     }
   })();
 
   // ----------------------------
-  // 2) Show/hide detail boxes
+  // 2) Show/hide optional details
   // ----------------------------
   const treatmentsEl = document.getElementById("treatments");
   const treatmentDetailsLabel = document.getElementById("treatmentDetailsLabel");
@@ -244,11 +238,7 @@
 
   function toggleTreatmentDetails() {
     const v = treatmentsEl.value;
-    const show =
-      v &&
-      v !== "" &&
-      v !== "No treatments received" &&
-      v !== "Not sure / unknown";
+    const show = v && v !== "No treatments received" && v !== "Not sure / unknown";
     treatmentDetailsLabel.style.display = show ? "block" : "none";
     if (!show) treatmentDetails.value = "";
   }
@@ -266,15 +256,13 @@
   }
   genomicEl.addEventListener("change", toggleGenomicDetails);
 
-  // init toggles
   toggleTreatmentDetails();
   toggleGenomicDetails();
 
   // ----------------------------
-  // 3) Submit -> open email draft to sfmc.clinicaltrials@osfhealthcare.org
+  // 3) Submit -> mailto (opens email draft)
   // ----------------------------
   const form = document.getElementById("trialForm");
-  const msg = document.getElementById("msg");
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -282,39 +270,41 @@
     const data = new FormData(form);
 
     const selectedTrial = data.get("selectedTrial") || "";
-    const name = data.get("name") || "";
-    const location = data.get("location") || "";
     const diagnosis = data.get("diagnosis") || "";
-    const setting = data.get("diseaseSetting") || "";
+    const diseaseSetting = data.get("diseaseSetting") || "";
     const treatments = data.get("treatments") || "";
     const treatmentDetailsVal = data.get("treatmentDetails") || "";
-    const genomics = data.get("genomicTesting") || "";
+    const genomicTesting = data.get("genomicTesting") || "";
     const genomicDetailsVal = data.get("genomicDetails") || "";
+    const name = data.get("name") || "";
+    const location = data.get("location") || "";
     const contact = data.get("contact") || "";
 
     const emailBody = `
+OSF Clinical Trials Intake
+
 Selected Trial:
 ${selectedTrial}
-
-Patient Name:
-${name}
-
-Location:
-${location}
 
 Cancer Diagnosis:
 ${diagnosis}
 
 Disease Setting:
-${setting}
+${diseaseSetting}
 
 Treatments Received:
 ${treatments}
 ${treatmentDetailsVal ? ("Details: " + treatmentDetailsVal) : ""}
 
 Genomic Testing:
-${genomics}
+${genomicTesting}
 ${genomicDetailsVal ? ("Details: " + genomicDetailsVal) : ""}
+
+Patient Name (optional):
+${name}
+
+City/State (optional):
+${location}
 
 Contact Information:
 ${contact}
@@ -327,13 +317,7 @@ ${contact}
       "?subject=" + encodeURIComponent(subject) +
       "&body=" + encodeURIComponent(emailBody);
 
-    // Optional on-page confirmation before email app opens
-    msg.textContent = "Opening your email app with your intake details…";
-
     window.location.href = mailtoLink;
-
-    // NOTE: We do not reset the form here because the email app opening
-    // may interrupt the page flow. If you want to reset after, tell me.
   });
 </script>
 
