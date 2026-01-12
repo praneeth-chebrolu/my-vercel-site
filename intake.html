@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -78,6 +77,16 @@
       gap: 12px;
     }
 
+    .notice {
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      color: #374151;
+      font-size: 14px;
+    }
+
     @media (max-width: 900px) {
       body { margin: 24px auto; }
       .row { grid-template-columns: 1fr; }
@@ -99,8 +108,11 @@
   <h2 style="margin:0 0 6px 0;">Intake form</h2>
   <p class="muted" style="margin:0 0 14px 0;">Share a few details and we’ll guide you to the next step.</p>
 
+  <div id="noTrialNotice" class="notice" style="display:none;">
+    No trial was selected from the Trial List. That’s okay. Please fill out the details below and our team will help guide you.
+  </div>
+
   <form id="trialForm">
-    <!-- Selected trial (from URL) -->
     <label>
       Selected trial
       <input id="selectedTrial" name="selectedTrial" class="readonly" readonly>
@@ -121,14 +133,12 @@
       </div>
     </div>
 
-    <!-- 1) Cancer diagnosis (free text) -->
     <label>
       Cancer diagnosis
       <input id="diagnosis" name="diagnosis" required placeholder="Example: ovarian cancer, lung cancer, glioblastoma (GBM)">
     </label>
-    <div class="hint">Type the diagnosis as you know it. The clinical team will confirm details.</div>
+    <div class="hint">If you’re not sure, type what you’ve been told (example: “ovarian tumor”).</div>
 
-    <!-- 2) Disease setting: Newly diagnosed / recurrent / relapsed -->
     <label>
       Is this newly diagnosed, recurrent, or relapsed?
       <select id="diseaseSetting" name="diseaseSetting" required>
@@ -136,10 +146,10 @@
         <option>Newly diagnosed</option>
         <option>Recurrent</option>
         <option>Relapsed</option>
+        <option>Not sure / unknown</option>
       </select>
     </label>
 
-    <!-- 3) Treatments received (dropdown + optional details) -->
     <label>
       Treatments received
       <select id="treatments" name="treatments" required>
@@ -153,6 +163,7 @@
         <option>Hormone therapy</option>
         <option>Stem cell / bone marrow transplant</option>
         <option>Other</option>
+        <option>Not sure / unknown</option>
       </select>
     </label>
 
@@ -162,7 +173,6 @@
         placeholder="Example: carboplatin + paclitaxel, pembrolizumab, radiation 60 Gy, surgery date, etc."></textarea>
     </label>
 
-    <!-- 4) Genomic tests (dropdown + optional details) -->
     <label>
       Genomic testing
       <select id="genomicTesting" name="genomicTesting" required>
@@ -171,7 +181,7 @@
         <option>Yes — tumor testing (example: NGS panel)</option>
         <option>Yes — blood testing (liquid biopsy)</option>
         <option>Yes — both tumor and blood testing</option>
-        <option>Not sure</option>
+        <option>Not sure / unknown</option>
       </select>
     </label>
 
@@ -181,7 +191,6 @@
         placeholder="Example: EGFR, ALK, KRAS, BRCA1/2, MSI-high, PD-L1, etc."></textarea>
     </label>
 
-    <!-- Contact -->
     <label>
       Contact information (email or phone)
       <input name="contact" placeholder="Example: email@example.com or (555) 555-5555">
@@ -193,38 +202,28 @@
   <p id="msg"></p>
 </section>
 
-<section class="card">
-  <h2>How it works</h2>
-  <ol>
-    <li>Tell us your diagnosis and treatment history.</li>
-    <li>We match you to trials that may fit your situation.</li>
-    <li>A coordinator follows up with next steps.</li>
-  </ol>
-</section>
-
-<section class="card">
-  <h2>Contact Us</h2>
-  <p>
-    Phone: <a href="tel:+18446734467">(844) 673-4467</a><br>
-    OR<br>
-    Email: <a href="mailto:sfmc.clinicaltrials@osfhealthcare.org">sfmc.clinicaltrials@osfhealthcare.org</a>
-  </p>
-</section>
-
 <script>
   // ----------------------------
-  // Selected trial from URL
+  // 1) Selected trial from URL
   // intake.html?trial=NCT06890338
   // ----------------------------
   (function fillSelectedTrialFromUrl() {
     const selectedTrialInput = document.getElementById("selectedTrial");
+    const noTrialNotice = document.getElementById("noTrialNotice");
     const params = new URLSearchParams(window.location.search);
     const trialFromUrl = params.get("trial");
-    selectedTrialInput.value = trialFromUrl ? trialFromUrl : "Not selected (please choose a trial first)";
+
+    if (trialFromUrl && trialFromUrl.trim()) {
+      selectedTrialInput.value = trialFromUrl.trim();
+      noTrialNotice.style.display = "none";
+    } else {
+      selectedTrialInput.value = "Not selected (please choose a trial first)";
+      noTrialNotice.style.display = "block";
+    }
   })();
 
   // ----------------------------
-  // Show/hide detail boxes
+  // 2) Show/hide detail boxes
   // ----------------------------
   const treatmentsEl = document.getElementById("treatments");
   const treatmentDetailsLabel = document.getElementById("treatmentDetailsLabel");
@@ -232,7 +231,11 @@
 
   function toggleTreatmentDetails() {
     const v = treatmentsEl.value;
-    const show = v && v !== "No treatments received" && v !== "";
+    const show =
+      v &&
+      v !== "" &&
+      v !== "No treatments received" &&
+      v !== "Not sure / unknown";
     treatmentDetailsLabel.style.display = show ? "block" : "none";
     if (!show) treatmentDetails.value = "";
   }
@@ -255,7 +258,7 @@
   toggleGenomicDetails();
 
   // ----------------------------
-  // Submit (demo only)
+  // 3) Submit (demo only)
   // ----------------------------
   const form = document.getElementById("trialForm");
   const msg = document.getElementById("msg");
@@ -264,6 +267,7 @@
     e.preventDefault();
 
     const data = new FormData(form);
+
     const name = data.get("name");
     const diagnosis = data.get("diagnosis");
     const setting = data.get("diseaseSetting");
@@ -274,24 +278,18 @@
     const location = data.get("location");
     const trial = data.get("selectedTrial");
 
-    const parts = [
-      `Thanks, ${name}.`,
-      `Diagnosis: ${diagnosis}.`,
-      `Setting: ${setting}.`,
-      `Treatments: ${treatments}${treatmentDetailsVal ? " (" + treatmentDetailsVal + ")" : ""}.`,
-      `Genomic testing: ${genomics}${genomicDetailsVal ? " (" + genomicDetailsVal + ")" : ""}.`,
-      `Location: ${location}.`,
-      `Selected trial: ${trial}.`
-    ];
-
-    msg.textContent = parts.join(" ");
+    msg.textContent =
+      `Thanks, ${name}. Diagnosis: ${diagnosis}. Setting: ${setting}. ` +
+      `Treatments: ${treatments}${treatmentDetailsVal ? " (" + treatmentDetailsVal + ")" : ""}. ` +
+      `Genomic testing: ${genomics}${genomicDetailsVal ? " (" + genomicDetailsVal + ")" : ""}. ` +
+      `Location: ${location}. Selected trial: ${trial}.`;
 
     // Keep selectedTrial visible after reset
     const selectedTrialValue = document.getElementById("selectedTrial").value;
     form.reset();
     document.getElementById("selectedTrial").value = selectedTrialValue;
 
-    // re-init toggles
+    // re-init toggles after reset
     toggleTreatmentDetails();
     toggleGenomicDetails();
   });
