@@ -263,36 +263,51 @@
   const form = document.getElementById("trialForm");
   const msg = document.getElementById("msg");
 
+<script>
+  const form = document.getElementById("trialForm");
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const data = new FormData(form);
 
-    const name = data.get("name");
-    const diagnosis = data.get("diagnosis");
-    const setting = data.get("diseaseSetting");
-    const treatments = data.get("treatments");
-    const treatmentDetailsVal = data.get("treatmentDetails") || "";
-    const genomics = data.get("genomicTesting");
-    const genomicDetailsVal = data.get("genomicDetails") || "";
-    const location = data.get("location");
-    const trial = data.get("selectedTrial");
+    const emailBody = `
+Selected Trial:
+${data.get("selectedTrial")}
 
-    msg.textContent =
-      `Thanks, ${name}. Diagnosis: ${diagnosis}. Setting: ${setting}. ` +
-      `Treatments: ${treatments}${treatmentDetailsVal ? " (" + treatmentDetailsVal + ")" : ""}. ` +
-      `Genomic testing: ${genomics}${genomicDetailsVal ? " (" + genomicDetailsVal + ")" : ""}. ` +
-      `Location: ${location}. Selected trial: ${trial}.`;
+Patient Name:
+${data.get("name")}
 
-    // Keep selectedTrial visible after reset
-    const selectedTrialValue = document.getElementById("selectedTrial").value;
-    form.reset();
-    document.getElementById("selectedTrial").value = selectedTrialValue;
+Location:
+${data.get("location")}
 
-    // re-init toggles after reset
-    toggleTreatmentDetails();
-    toggleGenomicDetails();
+Cancer Diagnosis:
+${data.get("diagnosis")}
+
+Disease Setting:
+${data.get("diseaseSetting")}
+
+Treatments Received:
+${data.get("treatments")}
+${data.get("treatmentDetails") || ""}
+
+Genomic Testing:
+${data.get("genomicTesting")}
+${data.get("genomicDetails") || ""}
+
+Contact Information:
+${data.get("contact")}
+    `.trim();
+
+    const mailtoLink =
+      "mailto:sfmc.clinicaltrials@osfhealthcare.org" +
+      "?subject=" + encodeURIComponent("Clinical Trial Intake Submission") +
+      "&body=" + encodeURIComponent(emailBody);
+
+    window.location.href = mailtoLink;
   });
+</script>
+
 </script>
 
 </body>
