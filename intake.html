@@ -222,40 +222,6 @@
     }
   })();
 
-  // ----------------------------
-  // 2) Show/hide detail boxes
-  // ----------------------------
-  const treatmentsEl = document.getElementById("treatments");
-  const treatmentDetailsLabel = document.getElementById("treatmentDetailsLabel");
-  const treatmentDetails = document.getElementById("treatmentDetails");
-
-  function toggleTreatmentDetails() {
-    const v = treatmentsEl.value;
-    const show =
-      v &&
-      v !== "" &&
-      v !== "No treatments received" &&
-      v !== "Not sure / unknown";
-    treatmentDetailsLabel.style.display = show ? "block" : "none";
-    if (!show) treatmentDetails.value = "";
-  }
-  treatmentsEl.addEventListener("change", toggleTreatmentDetails);
-
-  const genomicEl = document.getElementById("genomicTesting");
-  const genomicDetailsLabel = document.getElementById("genomicDetailsLabel");
-  const genomicDetails = document.getElementById("genomicDetails");
-
-  function toggleGenomicDetails() {
-    const v = genomicEl.value;
-    const show = v && v.startsWith("Yes");
-    genomicDetailsLabel.style.display = show ? "block" : "none";
-    if (!show) genomicDetails.value = "";
-  }
-  genomicEl.addEventListener("change", toggleGenomicDetails);
-
-  // init toggles
-  toggleTreatmentDetails();
-  toggleGenomicDetails();
 
   // ----------------------------
   // 3) Submit (demo only)
