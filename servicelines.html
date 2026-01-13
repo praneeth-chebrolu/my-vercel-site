@@ -41,9 +41,7 @@
       margin-bottom: 20px;
     }
 
-    .topBar h1{
-      margin:0;
-    }
+    .topBar h1{ margin:0; }
 
     select{
       padding:10px 14px;
@@ -61,9 +59,7 @@
       background:#ffffff;
     }
 
-    h2{
-      margin-top:0;
-    }
+    h2{ margin-top:0; }
 
     .muted{
       color:#6b7280;
@@ -85,6 +81,7 @@
       color:inherit;
       background:#fff;
       transition: background 0.1s ease-in-out, transform 0.05s ease-in-out;
+      display:block;
     }
 
     .dept:hover{
@@ -158,8 +155,7 @@
 <section class="card">
   <h2>Explore clinical research by department</h2>
   <p class="muted">
-    Select a department to view ongoing and upcoming clinical research studies
-    across the OSF HealthCare system.
+    Select a department to explore research studies and clinical trials across the OSF HealthCare system.
   </p>
 
   <div class="grid">
@@ -199,7 +195,8 @@
       <p class="deptDesc">Digestive diseases and liver research</p>
     </a>
 
-    <a class="dept" href="trials.html">
+    <!-- ✅ KEY CHANGE: Hematology and Oncology goes to the Cancer Trials page (index.html) -->
+    <a class="dept" href="index.html">
       <p class="deptTitle">Hematology and Oncology</p>
       <p class="deptDesc">Blood disorders and cancer clinical research</p>
     </a>
@@ -256,6 +253,35 @@
     <a class="btn" href="trials.html">View all trials</a>
   </div>
 </section>
+
+<!-- ✅ Adds location to whatever link you click (index.html or trials.html) -->
+<script>
+  const locationSelect = document.getElementById("locationSelect");
+
+  function withLocation(url) {
+    const loc = locationSelect.value;
+    if (!loc) return url;
+
+    const u = new URL(url, window.location.origin);
+    u.searchParams.set("location", loc);
+    return u.pathname + u.search;
+  }
+
+  document.querySelectorAll("a.dept").forEach(a => {
+    const original = a.getAttribute("href");
+    a.addEventListener("click", () => {
+      a.setAttribute("href", withLocation(original));
+    });
+  });
+
+  // Also apply to the bottom buttons
+  document.querySelectorAll("a.btn").forEach(a => {
+    const original = a.getAttribute("href");
+    a.addEventListener("click", () => {
+      a.setAttribute("href", withLocation(original));
+    });
+  });
+</script>
 
 </body>
 </html>
