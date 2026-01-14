@@ -97,6 +97,16 @@
       font-weight:700;
     }
 
+    .warn{
+      border:1px solid #fde68a;
+      background:#fffbeb;
+      border-radius:12px;
+      padding:12px;
+      margin-top: 12px;
+      color:#92400e;
+      font-size:14px;
+    }
+
     @media (max-width: 900px){
       body{ margin: 24px auto; }
     }
@@ -138,6 +148,10 @@
     <div id="titleValue" class="value">Loading…</div>
   </div>
 
+  <div id="noMatchBox" class="warn" style="display:none;">
+    This NCT number was not found in the OSF trial list. You can still contact the OSF Clinical Trials team using the phone or email below, and include the NCT number in your message.
+  </div>
+
   <div class="trialBox" style="margin-top:14px;">
     <div class="label">Contact</div>
 
@@ -154,22 +168,32 @@
     </div>
 
     <p class="muted" style="margin:10px 0 0 0;">
-      Clicking Email will open a pre-filled message with the NCT #, OSF ID, and study title.
+      Clicking Email will open a pre-filled message with the NCT number, OSF ID, and study title when available.
     </p>
   </div>
 </section>
 
 <script>
+  // OSF contact
   const OSF_EMAIL = "sfmc.clinicaltrials@osfhealthcare.org";
 
+  // Your published Google Sheet CSV URL (used to auto-populate OSF ID and confirm the trial exists in your list)
+  const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQnB5fRz0NAfm8mZVi-q6RaeVdUxCZpD2E6MaaWLZh9PlRvPykmg2HzVwZ0cbdAk1vcpTX8_qaQtV-Q/pub?output=csv";
+
+  // DOM
   const nctEl = document.getElementById("nctValue");
   const osfEl = document.getElementById("osfValue");
   const titleEl = document.getElementById("titleValue");
   const emailLink = document.getElementById("emailLink");
+  const noMatchBox = document.getElementById("noMatchBox");
 
   function firstNonEmpty(...vals){
     for (const v of vals) if (typeof v === "string" && v.trim()) return v.trim();
     return "";
+  }
+
+  function normalizeKey(s){
+    return String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
   }
 
   function getParamsFromUrl(){
@@ -210,37 +234,46 @@ Thank you,
     return `mailto:${OSF_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
 
-  function setNotSelected(){
-    nctEl.textContent = "Not selected";
-    osfEl.textContent = "—";
-    titleEl.textContent = "Please go back to the Trial List and click “I’m interested”.";
-    emailLink.href = `mailto:${OSF_EMAIL}`;
+  function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let cell = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      const next = text[i + 1];
+
+      if (ch === '"') {
+        if (inQuotes && next === '"') { cell += '"'; i++; }
+        else { inQuotes = !inQuotes; }
+      } else if (ch === "," && !inQuotes) {
+        row.push(cell);
+        cell = "";
+      } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+        if (ch === "\r" && next === "\n") i++;
+        row.push(cell);
+        cell = "";
+        if (row.some(v => String(v || "").trim().length)) rows.push(row);
+        row = [];
+      } else {
+        cell += ch;
+      }
+    }
+
+    row.push(cell);
+    if (row.some(v => String(v || "").trim().length)) rows.push(row);
+
+    return rows;
   }
 
-  (async function init(){
-    const { nct, osf } = getParamsFromUrl();
+  async function findRowInSheetByNct(nctId){
+    const res = await fetch(SHEET_CSV_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Sheet CSV error ${res.status}`);
+    const csvText = await res.text();
 
-    if (!nct) {
-      setNotSelected();
-      return;
-    }
+    const rows = parseCSV(csvText);
+    if (!rows.length) return { found: false, osfId: "", trialTitle: "" };
 
-    nctEl.textContent = nct;
-    osfEl.textContent = osf || "—";
-    titleEl.textContent = "Loading from ClinicalTrials.gov…";
+    const headers = rows.shift().map(h => String(h || "").r
 
-    try {
-      const study = await fetchCtgovStudy(nct);
-      const title = getStudyTitle(study) || "Title not listed on ClinicalTrials.gov";
-      titleEl.textContent = title;
-
-      emailLink.href = buildMailto(nct, osf, title);
-    } catch (e) {
-      titleEl.textContent = "Could not load study title right now.";
-      emailLink.href = buildMailto(nct, osf, "");
-    }
-  })();
-</script>
-
-</body>
-</html>
