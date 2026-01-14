@@ -20,11 +20,13 @@
       justify-content:space-between;
       gap:16px;
       margin-bottom: 24px;
+      flex-wrap: wrap;
     }
     nav a{
       margin-left: 14px;
       text-decoration:none;
       color:#1f2937;
+      white-space: nowrap;
     }
     nav a:hover{ text-decoration:underline; }
 
@@ -36,47 +38,7 @@
       margin-top: 16px;
     }
 
-    label{ display:block; margin-top: 10px; }
-
-    input, select, textarea{
-      width:100%;
-      padding:10px;
-      border-radius:10px;
-      border:1px solid #d1d5db;
-      margin:6px 0 12px;
-      box-sizing:border-box;
-      font-size: 14px;
-      background:#fff;
-    }
-
-    .readonly{
-      background:#f9fafb;
-    }
-
-    .hint{
-      margin-top:-8px;
-      margin-bottom:12px;
-      font-size:13px;
-      color:#6b7280;
-    }
-
     .muted{ color:#6b7280; font-size:14px; }
-
-    .row{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
-
-    button{
-      padding:10px 14px;
-      border-radius:10px;
-      border:1px solid #d1d5db;
-      background:#f9fafb;
-      cursor:pointer;
-      font-weight:600;
-    }
-    button:hover{ background:#f3f4f6; }
 
     .notice{
       border:1px solid #e5e7eb;
@@ -88,9 +50,55 @@
       color:#374151;
     }
 
+    .trialBox{
+      border:1px solid #e5e7eb;
+      background:#fff;
+      border-radius:12px;
+      padding:12px;
+      margin-top: 12px;
+    }
+
+    .label{
+      font-weight:700;
+      font-size:13px;
+      color:#374151;
+      margin-bottom: 4px;
+    }
+
+    .value{
+      font-size:15px;
+      color:#111827;
+      word-break: break-word;
+    }
+
+    .contactRow{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .pill{
+      display:inline-block;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid #d1d5db;
+      background:#f9fafb;
+      font-weight:700;
+      text-decoration:none;
+      color:#111827;
+      cursor:pointer;
+    }
+    .pill:hover{ background:#f3f4f6; }
+
+    .or{
+      color:#6b7280;
+      font-weight:700;
+    }
+
     @media (max-width: 900px){
       body{ margin: 24px auto; }
-      .row{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -106,219 +114,132 @@
 </header>
 
 <section class="card">
-  <h2 style="margin:0 0 6px 0;">Intake form</h2>
+  <h2 style="margin:0 0 6px 0;">Interested in a trial?</h2>
   <p class="muted" style="margin:0 0 14px 0;">
-    When you click Submit, your email app will open with a pre-filled message to the OSF Clinical Trials team.
-    You will need to press Send.
+    Review the trial details below and contact the OSF Clinical Trials team.
   </p>
 
   <div class="notice">
     Please do not include highly sensitive identifiers (MRN, full DOB, full address). A coordinator will follow up.
   </div>
 
-  <form id="trialForm">
-    <label>
-      Selected trial (optional)
-      <input id="selectedTrial" name="selectedTrial" class="readonly" readonly>
-    </label>
+  <div class="trialBox" aria-live="polite">
+    <div class="label">NCT #</div>
+    <div id="nctValue" class="value">Loading…</div>
 
-    <label>
-      Cancer diagnosis (free text)
-      <input id="diagnosis" name="diagnosis" required placeholder="Example: ovarian cancer, lung cancer, GBM">
-    </label>
-    <div class="hint">Type what you’ve been told. Example: “high-grade serous ovarian cancer”. If unsure, type “not sure”.</div>
+    <div style="height:10px;"></div>
 
-    <label>
-      Is this newly diagnosed, recurrent, or relapsed?
-      <select id="diseaseSetting" name="diseaseSetting" required>
-        <option value="" selected disabled>Select one</option>
-        <option>Newly diagnosed</option>
-        <option>Recurrent</option>
-        <option>Relapsed</option>
-        <option>Not sure / unknown</option>
-      </select>
-    </label>
+    <div class="label">OSF ID</div>
+    <div id="osfValue" class="value">Loading…</div>
 
-    <label>
-      Treatments received
-      <select id="treatments" name="treatments" required>
-        <option value="" selected disabled>Select one</option>
-        <option>No treatments received</option>
-        <option>Surgery</option>
-        <option>Chemotherapy</option>
-        <option>Radiation therapy</option>
-        <option>Immunotherapy</option>
-        <option>Targeted therapy</option>
-        <option>Hormone therapy</option>
-        <option>Other</option>
-        <option>Not sure / unknown</option>
-      </select>
-    </label>
+    <div style="height:10px;"></div>
 
-    <label id="treatmentDetailsLabel" style="display:none;">
-      Treatment details (optional)
-      <textarea id="treatmentDetails" name="treatmentDetails" rows="3"
-        placeholder="Example: carboplatin + paclitaxel, surgery month/year, radiation, etc."></textarea>
-    </label>
+    <div class="label">Study title</div>
+    <div id="titleValue" class="value">Loading…</div>
+  </div>
 
-    <label>
-      Genomic tests (if any)
-      <select id="genomicTesting" name="genomicTesting" required>
-        <option value="" selected disabled>Select one</option>
-        <option>No genomic testing</option>
-        <option>Yes — tumor testing</option>
-        <option>Yes — blood testing (liquid biopsy)</option>
-        <option>Yes — both tumor and blood testing</option>
-        <option>Not sure / unknown</option>
-      </select>
-    </label>
+  <div class="trialBox" style="margin-top:14px;">
+    <div class="label">Contact</div>
 
-    <label id="genomicDetailsLabel" style="display:none;">
-      Genomic results (optional)
-      <textarea id="genomicDetails" name="genomicDetails" rows="3"
-        placeholder="Example: EGFR, ALK, KRAS, BRCA1/2, MSI-high, PD-L1, etc."></textarea>
-    </label>
+    <div class="contactRow">
+      <a class="pill" href="tel:+18446734467" aria-label="Call OSF Clinical Trials at (844) 673-4467">
+        Phone: (844) 673-4467
+      </a>
 
-    <div class="row">
-      <div>
-        <label>
-          Your name (optional)
-          <input name="name" placeholder="Optional">
-        </label>
-      </div>
-      <div>
-        <label>
-          City and state (optional)
-          <input name="location" placeholder="Optional (example: Peoria, IL)">
-        </label>
-      </div>
+      <span class="or">OR</span>
+
+      <a id="emailLink" class="pill" href="#" aria-label="Email OSF Clinical Trials">
+        Email: sfmc.clinicaltrials@osfhealthcare.org
+      </a>
     </div>
 
-    <label>
-      Contact information (email or phone)
-      <input name="contact" required placeholder="Example: email@example.com or (555) 555-5555">
-    </label>
-
-    <button type="submit">Submit</button>
-  </form>
-</section>
-
-<section class="card">
-  <h2>Contact Us</h2>
-  <p>
-    Phone: <a href="tel:+18446734467">(844) 673-4467</a><br>
-    OR<br>
-    Email: <a href="mailto:sfmc.clinicaltrials@osfhealthcare.org">sfmc.clinicaltrials@osfhealthcare.org</a>
-  </p>
+    <p class="muted" style="margin:10px 0 0 0;">
+      Clicking Email will open a pre-filled message with the NCT #, OSF ID, and study title.
+    </p>
+  </div>
 </section>
 
 <script>
-  // ----------------------------
-  // 1) Auto-populate Selected Trial from URL
-  // intake.html?trial=NCT06890338
-  // ----------------------------
-  (function fillSelectedTrialFromUrl() {
-    const selectedTrialInput = document.getElementById("selectedTrial");
-    const params = new URLSearchParams(window.location.search);
-    const trialFromUrl = params.get("trial");
+  const OSF_EMAIL = "sfmc.clinicaltrials@osfhealthcare.org";
 
-    if (trialFromUrl && trialFromUrl.trim()) {
-      selectedTrialInput.value = trialFromUrl.trim();
-    } else {
-      selectedTrialInput.value = "Not selected";
+  const nctEl = document.getElementById("nctValue");
+  const osfEl = document.getElementById("osfValue");
+  const titleEl = document.getElementById("titleValue");
+  const emailLink = document.getElementById("emailLink");
+
+  function firstNonEmpty(...vals){
+    for (const v of vals) if (typeof v === "string" && v.trim()) return v.trim();
+    return "";
+  }
+
+  function getParamsFromUrl(){
+    const params = new URLSearchParams(window.location.search);
+    const nct = params.get("trial") ? params.get("trial").trim() : "";
+    const osf = params.get("osf") ? params.get("osf").trim() : "";
+    return { nct, osf };
+  }
+
+  async function fetchCtgovStudy(nctId){
+    const url = `https://clinicaltrials.gov/api/v2/studies/${encodeURIComponent(nctId)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`ClinicalTrials.gov error ${res.status}`);
+    return await res.json();
+  }
+
+  function getStudyTitle(study){
+    const idMod = study?.protocolSection?.identificationModule || {};
+    return firstNonEmpty(idMod.officialTitle, idMod.briefTitle, "");
+  }
+
+  function buildMailto(nctId, osfId, title){
+    const subject = "Clinical Trial Interest";
+    const body = `
+Hello OSF Clinical Trials Team,
+
+I am interested in the following clinical trial:
+
+NCT #: ${nctId || "Not provided"}
+OSF ID: ${osfId || "Not provided"}
+Study title: ${title || "Not provided"}
+
+Please contact me with next steps.
+
+Thank you,
+`.trim();
+
+    return `mailto:${OSF_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
+  function setNotSelected(){
+    nctEl.textContent = "Not selected";
+    osfEl.textContent = "—";
+    titleEl.textContent = "Please go back to the Trial List and click “I’m interested”.";
+    emailLink.href = `mailto:${OSF_EMAIL}`;
+  }
+
+  (async function init(){
+    const { nct, osf } = getParamsFromUrl();
+
+    if (!nct) {
+      setNotSelected();
+      return;
+    }
+
+    nctEl.textContent = nct;
+    osfEl.textContent = osf || "—";
+    titleEl.textContent = "Loading from ClinicalTrials.gov…";
+
+    try {
+      const study = await fetchCtgovStudy(nct);
+      const title = getStudyTitle(study) || "Title not listed on ClinicalTrials.gov";
+      titleEl.textContent = title;
+
+      emailLink.href = buildMailto(nct, osf, title);
+    } catch (e) {
+      titleEl.textContent = "Could not load study title right now.";
+      emailLink.href = buildMailto(nct, osf, "");
     }
   })();
-
-  // ----------------------------
-  // 2) Show/hide optional details
-  // ----------------------------
-  const treatmentsEl = document.getElementById("treatments");
-  const treatmentDetailsLabel = document.getElementById("treatmentDetailsLabel");
-  const treatmentDetails = document.getElementById("treatmentDetails");
-
-  function toggleTreatmentDetails() {
-    const v = treatmentsEl.value;
-    const show = v && v !== "No treatments received" && v !== "Not sure / unknown";
-    treatmentDetailsLabel.style.display = show ? "block" : "none";
-    if (!show) treatmentDetails.value = "";
-  }
-  treatmentsEl.addEventListener("change", toggleTreatmentDetails);
-
-  const genomicEl = document.getElementById("genomicTesting");
-  const genomicDetailsLabel = document.getElementById("genomicDetailsLabel");
-  const genomicDetails = document.getElementById("genomicDetails");
-
-  function toggleGenomicDetails() {
-    const v = genomicEl.value;
-    const show = v && v.startsWith("Yes");
-    genomicDetailsLabel.style.display = show ? "block" : "none";
-    if (!show) genomicDetails.value = "";
-  }
-  genomicEl.addEventListener("change", toggleGenomicDetails);
-
-  toggleTreatmentDetails();
-  toggleGenomicDetails();
-
-  // ----------------------------
-  // 3) Submit -> mailto (opens email draft)
-  // ----------------------------
-  const form = document.getElementById("trialForm");
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const data = new FormData(form);
-
-    const selectedTrial = data.get("selectedTrial") || "";
-    const diagnosis = data.get("diagnosis") || "";
-    const diseaseSetting = data.get("diseaseSetting") || "";
-    const treatments = data.get("treatments") || "";
-    const treatmentDetailsVal = data.get("treatmentDetails") || "";
-    const genomicTesting = data.get("genomicTesting") || "";
-    const genomicDetailsVal = data.get("genomicDetails") || "";
-    const name = data.get("name") || "";
-    const location = data.get("location") || "";
-    const contact = data.get("contact") || "";
-
-    const emailBody = `
-OSF Clinical Trials Intake
-
-Selected Trial:
-${selectedTrial}
-
-Cancer Diagnosis:
-${diagnosis}
-
-Disease Setting:
-${diseaseSetting}
-
-Treatments Received:
-${treatments}
-${treatmentDetailsVal ? ("Details: " + treatmentDetailsVal) : ""}
-
-Genomic Testing:
-${genomicTesting}
-${genomicDetailsVal ? ("Details: " + genomicDetailsVal) : ""}
-
-Patient Name (optional):
-${name}
-
-City/State (optional):
-${location}
-
-Contact Information:
-${contact}
-    `.trim();
-
-    const subject = "Clinical Trial Intake Submission";
-
-    const mailtoLink =
-      "mailto:sfmc.clinicaltrials@osfhealthcare.org" +
-      "?subject=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(emailBody);
-
-    window.location.href = mailtoLink;
-  });
 </script>
 
 </body>
