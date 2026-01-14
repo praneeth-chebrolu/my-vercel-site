@@ -127,6 +127,7 @@
   <h2 style="margin:0 0 6px 0;">Interested in a trial?</h2>
   <p class="muted" style="margin:0 0 14px 0;">
     Review the trial details below and contact the OSF Clinical Trials team.
+    If you are unsure which trial may be right for you, please contact us using the information below and a research coordinator will be in touch with you.
   </p>
 
   <div class="notice">
@@ -174,13 +175,10 @@
 </section>
 
 <script>
-  // OSF contact
   const OSF_EMAIL = "sfmc.clinicaltrials@osfhealthcare.org";
 
-  // Your published Google Sheet CSV URL (used to auto-populate OSF ID and confirm the trial exists in your list)
   const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQnB5fRz0NAfm8mZVi-q6RaeVdUxCZpD2E6MaaWLZh9PlRvPykmg2HzVwZ0cbdAk1vcpTX8_qaQtV-Q/pub?output=csv";
 
-  // DOM
   const nctEl = document.getElementById("nctValue");
   const osfEl = document.getElementById("osfValue");
   const titleEl = document.getElementById("titleValue");
@@ -324,18 +322,15 @@ Thank you,
     let osfIdFinal = osf || "";
     let sheetTitle = "";
 
-    // 1) Look up OSF ID from your Google Sheet (and confirm trial exists in OSF list)
     try {
       const sheetRow = await findRowInSheetByNct(nct);
       sheetFound = sheetRow.found;
       if (!osfIdFinal) osfIdFinal = sheetRow.osfId || "";
       sheetTitle = sheetRow.trialTitle || "";
     } catch (e) {
-      // If the sheet is temporarily unavailable, we still allow contact
       sheetFound = true;
     }
 
-    // 2) Get title from ClinicalTrials.gov (fallback to sheet title)
     let titleFinal = "";
     try {
       const study = await fetchCtgovStudy(nct);
@@ -348,12 +343,10 @@ Thank you,
     osfEl.textContent = osfIdFinal ? osfIdFinal : "—";
     titleEl.textContent = titleFinal;
 
-    // 3) If the trial is not in your OSF trial list, show guidance
     if (!sheetFound) {
       noMatchBox.style.display = "block";
     }
 
-    // 4) Always set the email link to include whatever we have
     emailLink.href = buildMailto(nct, osfEl.textContent === "—" ? "" : osfEl.textContent, titleFinal);
   })();
 </script>
