@@ -1,355 +1,43 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>OSF Cancer Clinical Trials | Intake</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <style>
-    body{
-      font-family: Arial, sans-serif;
-      max-width: 900px;
-      margin: 60px auto;
-      padding: 0 20px;
-      line-height: 1.6;
-      color: #1f2937;
-    }
-    header{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-    nav a{
-      margin-left: 14px;
-      text-decoration:none;
-      color:#1f2937;
-      white-space: nowrap;
-    }
-    nav a:hover{ text-decoration:underline; }
-
-    .card{
-      border:1px solid #e5e7eb;
-      border-radius:14px;
-      padding:18px;
-      background:#fff;
-      margin-top: 16px;
-    }
-
-    .muted{ color:#6b7280; font-size:14px; }
-
-    .notice{
-      border:1px solid #e5e7eb;
-      background:#f9fafb;
-      border-radius:12px;
-      padding:12px;
-      margin-bottom: 12px;
-      font-size:14px;
-      color:#374151;
-    }
-
-    .trialBox{
-      border:1px solid #e5e7eb;
-      background:#fff;
-      border-radius:12px;
-      padding:12px;
-      margin-top: 12px;
-    }
-
-    .label{
-      font-weight:700;
-      font-size:13px;
-      color:#374151;
-      margin-bottom: 4px;
-    }
-
-    .value{
-      font-size:15px;
-      color:#111827;
-      word-break: break-word;
-    }
-
-    .contactRow{
-      display:flex;
-      gap:10px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-top: 8px;
-    }
-
-    .pill{
-      display:inline-block;
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid #d1d5db;
-      background:#f9fafb;
-      font-weight:700;
-      text-decoration:none;
-      color:#111827;
-      cursor:pointer;
-    }
-    .pill:hover{ background:#f3f4f6; }
-
-    .or{
-      color:#6b7280;
-      font-weight:700;
-    }
-
-    .warn{
-      border:1px solid #fde68a;
-      background:#fffbeb;
-      border-radius:12px;
-      padding:12px;
-      margin-top: 12px;
-      color:#92400e;
-      font-size:14px;
-    }
-
-    @media (max-width: 900px){
-      body{ margin: 24px auto; }
-    }
-  </style>
-</head>
-
-<body>
-<header>
-  <h1 style="margin:0;">OSF Cancer Clinical Trials</h1>
-  <nav>
-    <a href="index.html">Cancer Types</a>
-    <a href="trials.html">Trial List</a>
-    <a href="intake.html">Intake</a>
-  </nav>
-</header>
-
-<section class="card">
-  <h2 style="margin:0 0 6px 0;">Interested in a trial?</h2>
-  <p class="muted" style="margin:0 0 14px 0;">
+<section class="trial-contact">
+  <p>
     Review the trial details below and contact the OSF Clinical Trials team.
-    If you are unsure which trial may be right for you, please contact us using the information below and a research coordinator will be in touch with you.
+    If you are unsure which trial may be right for you, please contact us and a
+    research coordinator will be in touch with you.
   </p>
 
-  <div class="notice">
-    Please do not include highly sensitive identifiers (MRN, full DOB, full address). A coordinator will follow up.
-  </div>
+  <h3>Study title</h3>
+  <p>
+    A Single-Arm, Phase 2 Study of Neoadjuvant Carboplatin and Mirvetuximab
+    Soravtansine in Subjects With FRα-Expressing Advanced-Stage Serous Epithelial
+    Ovarian, Fallopian Tube or Primary Peritoneal Cancer
+  </p>
 
-  <div class="trialBox" aria-live="polite">
-    <div class="label">NCT #</div>
-    <div id="nctValue" class="value">Loading…</div>
+  <h3>Contact</h3>
+  <p>
+    <strong>Phone:</strong>
+    <a href="tel:18446734467">(844) 673-4467</a>
+  </p>
 
-    <div style="height:10px;"></div>
+  <p><strong>OR</strong></p>
 
-    <div class="label">OSF ID</div>
-    <div id="osfValue" class="value">Loading…</div>
+  <p>
+    <strong>Email:</strong>
+    <a
+      href="mailto:sfmc.clinicaltrials@osfhealthcare.org
+        ?subject=Clinical%20Trial%20Inquiry
+        &body=Hello%20OSF%20Clinical%20Trials%20Team%2C%0D%0A%0D%0A
+        I%20am%20interested%20in%20learning%20more%20about%20the%20following%20clinical%20trial%3A%0D%0A%0D%0A
+        Study%20Title%3A%20A%20Single-Arm%2C%20Phase%202%20Study%20of%20Neoadjuvant%20Carboplatin%20and%20Mirvetuximab%20Soravtansine%0D%0A
+        NCT%20Number%3A%20NCT06890338%0D%0A
+        OSF%20ID%3A%20ONC_PEO_101%0D%0A%0D%0A
+        Thank%20you."
+    >
+      sfmc.clinicaltrials@osfhealthcare.org
+    </a>
+  </p>
 
-    <div style="height:10px;"></div>
-
-    <div class="label">Study title</div>
-    <div id="titleValue" class="value">Loading…</div>
-  </div>
-
-  <div id="noMatchBox" class="warn" style="display:none;">
-    This NCT number was not found in the OSF trial list. You can still contact the OSF Clinical Trials team using the phone or email below, and include the NCT number in your message.
-  </div>
-
-  <div class="trialBox" style="margin-top:14px;">
-    <div class="label">Contact</div>
-
-    <div class="contactRow">
-      <a class="pill" href="tel:+18446734467" aria-label="Call OSF Clinical Trials at (844) 673-4467">
-        Phone: (844) 673-4467
-      </a>
-
-      <span class="or">OR</span>
-
-      <a id="emailLink" class="pill" href="#" aria-label="Email OSF Clinical Trials">
-        Email: sfmc.clinicaltrials@osfhealthcare.org
-      </a>
-    </div>
-
-    <p class="muted" style="margin:10px 0 0 0;">
-      Clicking Email will open a pre-filled message with the NCT number, OSF ID, and study title when available.
-    </p>
-  </div>
+  <p class="email-note">
+    Clicking Email will open a pre-filled message with the NCT number, OSF ID, and
+    study title when available.
+  </p>
 </section>
-
-<script>
-  const OSF_EMAIL = "sfmc.clinicaltrials@osfhealthcare.org";
-
-  const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQnB5fRz0NAfm8mZVi-q6RaeVdUxCZpD2E6MaaWLZh9PlRvPykmg2HzVwZ0cbdAk1vcpTX8_qaQtV-Q/pub?output=csv";
-
-  const nctEl = document.getElementById("nctValue");
-  const osfEl = document.getElementById("osfValue");
-  const titleEl = document.getElementById("titleValue");
-  const emailLink = document.getElementById("emailLink");
-  const noMatchBox = document.getElementById("noMatchBox");
-
-  function firstNonEmpty(...vals){
-    for (const v of vals) if (typeof v === "string" && v.trim()) return v.trim();
-    return "";
-  }
-
-  function normalizeKey(s){
-    return String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
-  }
-
-  function getParamsFromUrl(){
-    const params = new URLSearchParams(window.location.search);
-    const nct = params.get("trial") ? params.get("trial").trim() : "";
-    const osf = params.get("osf") ? params.get("osf").trim() : "";
-    return { nct, osf };
-  }
-
-  async function fetchCtgovStudy(nctId){
-    const url = `https://clinicaltrials.gov/api/v2/studies/${encodeURIComponent(nctId)}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`ClinicalTrials.gov error ${res.status}`);
-    return await res.json();
-  }
-
-  function getStudyTitle(study){
-    const idMod = study?.protocolSection?.identificationModule || {};
-    return firstNonEmpty(idMod.officialTitle, idMod.briefTitle, "");
-  }
-
-  function buildMailto(nctId, osfId, title){
-    const subject = "Clinical Trial Interest";
-    const body = `
-Hello OSF Clinical Trials Team,
-
-I am interested in the following clinical trial:
-
-NCT #: ${nctId || "Not provided"}
-OSF ID: ${osfId || "Not provided"}
-Study title: ${title || "Not provided"}
-
-Please contact me with next steps.
-
-Thank you,
-`.trim();
-
-    return `mailto:${OSF_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }
-
-  function parseCSV(text) {
-    const rows = [];
-    let row = [];
-    let cell = "";
-    let inQuotes = false;
-
-    for (let i = 0; i < text.length; i++) {
-      const ch = text[i];
-      const next = text[i + 1];
-
-      if (ch === '"') {
-        if (inQuotes && next === '"') { cell += '"'; i++; }
-        else { inQuotes = !inQuotes; }
-      } else if (ch === "," && !inQuotes) {
-        row.push(cell);
-        cell = "";
-      } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
-        if (ch === "\r" && next === "\n") i++;
-        row.push(cell);
-        cell = "";
-        if (row.some(v => String(v || "").trim().length)) rows.push(row);
-        row = [];
-      } else {
-        cell += ch;
-      }
-    }
-
-    row.push(cell);
-    if (row.some(v => String(v || "").trim().length)) rows.push(row);
-
-    return rows;
-  }
-
-  async function findRowInSheetByNct(nctId){
-    const res = await fetch(SHEET_CSV_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Sheet CSV error ${res.status}`);
-    const csvText = await res.text();
-
-    const rows = parseCSV(csvText);
-    if (!rows.length) return { found: false, osfId: "", trialTitle: "" };
-
-    const headers = rows.shift().map(h => String(h || "").replace(/^"|"$/g, "").trim());
-    const headerIndex = {};
-    headers.forEach((h, i) => { headerIndex[normalizeKey(h)] = i; });
-
-    const nctIdx = headerIndex["nct id"] ?? headerIndex["nct_id"];
-    const osfIdx = headerIndex["osf id"] ?? headerIndex["osf_id"];
-    const titleIdx = headerIndex["trial"] ?? headerIndex["trial_title"] ?? headerIndex["study title"];
-
-    if (nctIdx == null) return { found: false, osfId: "", trialTitle: "" };
-
-    const target = normalizeKey(nctId);
-
-    for (const r of rows) {
-      const rowNct = normalizeKey(String(r[nctIdx] ?? "").replace(/^"|"$/g, "").trim());
-      if (rowNct && rowNct === target) {
-        const osfId = osfIdx != null ? String(r[osfIdx] ?? "").replace(/^"|"$/g, "").trim() : "";
-        const trialTitle = titleIdx != null ? String(r[titleIdx] ?? "").replace(/^"|"$/g, "").trim() : "";
-        return { found: true, osfId, trialTitle };
-      }
-    }
-
-    return { found: false, osfId: "", trialTitle: "" };
-  }
-
-  function setNotSelected(){
-    nctEl.textContent = "Not selected";
-    osfEl.textContent = "—";
-    titleEl.textContent = "Please go back to the Trial List and click “I’m interested”.";
-    noMatchBox.style.display = "none";
-    emailLink.href = `mailto:${OSF_EMAIL}`;
-  }
-
-  (async function init(){
-    const { nct, osf } = getParamsFromUrl();
-
-    if (!nct) {
-      setNotSelected();
-      return;
-    }
-
-    nctEl.textContent = nct;
-    osfEl.textContent = "Loading…";
-    titleEl.textContent = "Loading…";
-    noMatchBox.style.display = "none";
-
-    let sheetFound = false;
-    let osfIdFinal = osf || "";
-    let sheetTitle = "";
-
-    try {
-      const sheetRow = await findRowInSheetByNct(nct);
-      sheetFound = sheetRow.found;
-      if (!osfIdFinal) osfIdFinal = sheetRow.osfId || "";
-      sheetTitle = sheetRow.trialTitle || "";
-    } catch (e) {
-      sheetFound = true;
-    }
-
-    let titleFinal = "";
-    try {
-      const study = await fetchCtgovStudy(nct);
-      titleFinal = getStudyTitle(study) || "";
-    } catch (e) {
-      titleFinal = "";
-    }
-
-    titleFinal = firstNonEmpty(titleFinal, sheetTitle, "Title not listed");
-    osfEl.textContent = osfIdFinal ? osfIdFinal : "—";
-    titleEl.textContent = titleFinal;
-
-    if (!sheetFound) {
-      noMatchBox.style.display = "block";
-    }
-
-    emailLink.href = buildMailto(nct, osfEl.textContent === "—" ? "" : osfEl.textContent, titleFinal);
-  })();
-</script>
-
-</body>
-</html>
