@@ -275,5 +275,88 @@ Thank you,
     const rows = parseCSV(csvText);
     if (!rows.length) return { found: false, osfId: "", trialTitle: "" };
 
-    const headers = rows.shift().map(h => String(h || "").r
+    const headers = rows.shift().map(h => String(h || "").replace(/^"|"$/g, "").trim());
+    const headerIndex = {};
+    headers.forEach((h, i) => { headerIndex[normalizeKey(h)] = i; });
 
+    const nctIdx = headerIndex["nct id"] ?? headerIndex["nct_id"];
+    const osfIdx = headerIndex["osf id"] ?? headerIndex["osf_id"];
+    const titleIdx = headerIndex["trial"] ?? headerIndex["trial_title"] ?? headerIndex["study title"];
+
+    if (nctIdx == null) return { found: false, osfId: "", trialTitle: "" };
+
+    const target = normalizeKey(nctId);
+
+    for (const r of rows) {
+      const rowNct = normalizeKey(String(r[nctIdx] ?? "").replace(/^"|"$/g, "").trim());
+      if (rowNct && rowNct === target) {
+        const osfId = osfIdx != null ? String(r[osfIdx] ?? "").replace(/^"|"$/g, "").trim() : "";
+        const trialTitle = titleIdx != null ? String(r[titleIdx] ?? "").replace(/^"|"$/g, "").trim() : "";
+        return { found: true, osfId, trialTitle };
+      }
+    }
+
+    return { found: false, osfId: "", trialTitle: "" };
+  }
+
+  function setNotSelected(){
+    nctEl.textContent = "Not selected";
+    osfEl.textContent = "—";
+    titleEl.textContent = "Please go back to the Trial List and click “I’m interested”.";
+    noMatchBox.style.display = "none";
+    emailLink.href = `mailto:${OSF_EMAIL}`;
+  }
+
+  (async function init(){
+    const { nct, osf } = getParamsFromUrl();
+
+    if (!nct) {
+      setNotSelected();
+      return;
+    }
+
+    nctEl.textContent = nct;
+    osfEl.textContent = "Loading…";
+    titleEl.textContent = "Loading…";
+    noMatchBox.style.display = "none";
+
+    let sheetFound = false;
+    let osfIdFinal = osf || "";
+    let sheetTitle = "";
+
+    // 1) Look up OSF ID from your Google Sheet (and confirm trial exists in OSF list)
+    try {
+      const sheetRow = await findRowInSheetByNct(nct);
+      sheetFound = sheetRow.found;
+      if (!osfIdFinal) osfIdFinal = sheetRow.osfId || "";
+      sheetTitle = sheetRow.trialTitle || "";
+    } catch (e) {
+      // If the sheet is temporarily unavailable, we still allow contact
+      sheetFound = true;
+    }
+
+    // 2) Get title from ClinicalTrials.gov (fallback to sheet title)
+    let titleFinal = "";
+    try {
+      const study = await fetchCtgovStudy(nct);
+      titleFinal = getStudyTitle(study) || "";
+    } catch (e) {
+      titleFinal = "";
+    }
+
+    titleFinal = firstNonEmpty(titleFinal, sheetTitle, "Title not listed");
+    osfEl.textContent = osfIdFinal ? osfIdFinal : "—";
+    titleEl.textContent = titleFinal;
+
+    // 3) If the trial is not in your OSF trial list, show guidance
+    if (!sheetFound) {
+      noMatchBox.style.display = "block";
+    }
+
+    // 4) Always set the email link to include whatever we have
+    emailLink.href = buildMailto(nct, osfEl.textContent === "—" ? "" : osfEl.textContent, titleFinal);
+  })();
+</script>
+
+</body>
+</html>
