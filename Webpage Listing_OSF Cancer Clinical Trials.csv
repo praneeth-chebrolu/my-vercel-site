@@ -1,13 +1,9 @@
-NCT ID	Trial 	Cancer	Principal Investigator	Clinical Research Coordinator	Status 
-NCT06890338	A Single-Arm, Phase 2 Study of Neoadjuvant Carboplatin and Mirvetuximab Soravtansine in Subjects With FRα-Expressing Advanced-Stage Serous Epithelial Ovarian, Fallopian Tube or Primary Peritoneal Cancer	Ovarian	Michelle Rowland MD PhD MPH	Lisa Gale MSN RN CCRC	Recruiting
-NCT06343402	A Phase 1a/1b Open-Label Study Evaluating the Safety, Tolerability, Pharmacokinetics, and Efficacy of BBO-8520 in Subjects With Advanced KRASG12C Mutant Non-Small Cell Lung Cancer - The ONKORAS-101 Study	Lung	Jun Zhang MD PhD	Vishnu JaiShree Mohandas MBBS MPH	Recruiting
-NCT06931626	Study of NMS-03305293, a Non-Trapping PARP1-Specific PARP Inhibitor in Relapsed Small Cell Lung Cancer	Lung 	Jun Zhang MD PhD	Vishnu JaiShree Mohandas MBBS MPH	Recruiting
-NCT07027514	A Phase 1b, Two-Part Study of Tolododekin Alfa (ANK-101) in Combination With an Anti-PD-1/PD-L1 Antibody in Participants With Advanced Non-Small Cell Lung Cancer	Lung 	Jun Zhang MD PhD	Vishnu JaiShree Mohandas MBBS MPH	Recruiting
-NCT06952660	A PROSPECTIVE LOW-INTERVENTIONAL PHASE 4 SINGLE ARM STUDY OF OCULAR ASSESSMENTS IN PATIENTS TREATED WITH TIVDAK® IN RECURRENT OR METASTATIC CERVICAL CANCER	Cervical 	Michelle Rowland MD PhD MPH	Lisa Gale MSN RN CCRC	Recruiting
-NCT07218146	A Randomized, Open-Label, Phase 3 Study of ZL-1310, a DLL3 Antibody-Drug Conjugate (ADC), Compared to Investigator's Choice Therapy in Participants With Relapsed Small Cell Lung Cancer	Lung	Jun Zhang, MD PhD	Vishnu JaiShree Mohandas	Recruiting
-NCT06930755	Study of NMS-03305293, a Non-Trapping PARP1-Specific PARP Inhibitor in Relapsed Ovarian Cancer	Ovarian	Michelle Rowland MD PhD MPH	Lisa Gale MSN RN CCRC	Recruiting
-NCT07044336	Puxitatug Samrotecan (AZD8205) Monotherapy vs Chemotherapy in B7-H4 Selected Advanced/Metastatic Endometrial Cancer Who Progressed On or After Platinum Based Chemotherapy and Anti-PD-1/Anti-PD-L1 Therapy (Bluestar-Endometrial01)	Endometrial	Michelle Rowland MD PhD MPH	Lisa Gale MSN RN CCRC	Recruiting
-
-
-
-
+NCT ID,Trial,Cancer,Principal Investigator,Clinical Research Coordinator,Status
+NCT06890338,"A Single-Arm, Phase 2 Study of Neoadjuvant Carboplatin and Mirvetuximab Soravtansine in Subjects With FRα-Expressing Advanced-Stage Serous Epithelial Ovarian, Fallopian Tube or Primary Peritoneal Cancer",Ovarian,"Michelle Rowland MD PhD MPH","Lisa Gale MSN RN CCRC",Recruiting
+NCT06343402,"A Phase 1a/1b Open-Label Study Evaluating the Safety, Tolerability, Pharmacokinetics, and Efficacy of BBO-8520 in Subjects With Advanced KRASG12C Mutant Non-Small Cell Lung Cancer - The ONKORAS-101 Study",Lung,"Jun Zhang MD PhD","Vishnu JaiShree Mohandas MBBS MPH",Recruiting
+NCT06931626,"Study of NMS-03305293, a Non-Trapping PARP1-Specific PARP Inhibitor in Relapsed Small Cell Lung Cancer",Lung,"Jun Zhang MD PhD","Vishnu JaiShree Mohandas MBBS MPH",Recruiting
+NCT07027514,"A Phase 1b, Two-Part Study of Tolododekin Alfa (ANK-101) in Combination With an Anti-PD-1/PD-L1 Antibody in Participants With Advanced Non-Small Cell Lung Cancer",Lung,"Jun Zhang MD PhD","Vishnu JaiShree Mohandas MBBS MPH",Recruiting
+NCT06952660,"A PROSPECTIVE LOW-INTERVENTIONAL PHASE 4 SINGLE ARM STUDY OF OCULAR ASSESSMENTS IN PATIENTS TREATED WITH TIVDAK® IN RECURRENT OR METASTATIC CERVICAL CANCER",Cervical,"Michelle Rowland MD PhD MPH","Lisa Gale MSN RN CCRC",Recruiting
+NCT07218146,"A Randomized, Open-Label, Phase 3 Study of ZL-1310, a DLL3 Antibody-Drug Conjugate (ADC), Compared to Investigator's Choice Therapy in Participants With Relapsed Small Cell Lung Cancer",Lung,"Jun Zhang, MD PhD","Vishnu JaiShree Mohandas",Recruiting
+NCT06930755,"Study of NMS-03305293, a Non-Trapping PARP1-Specific PARP Inhibitor in Relapsed Ovarian Cancer",Ovarian,"Michelle Rowland MD PhD MPH","Lisa Gale MSN RN CCRC",Recruiting
+NCT07044336,"Puxitatug Samrotecan (AZD8205) Monotherapy vs Chemotherapy in B7-H4 Selected Advanced/Metastatic Endometrial Cancer Who Progressed On or After Platinum Based Chemotherapy and Anti-PD-1/Anti-PD-L1 Therapy (Bluestar-Endometrial01)",Endometrial,"Michelle Rowland MD PhD MPH","Lisa Gale MSN RN CCRC",Recruiting
