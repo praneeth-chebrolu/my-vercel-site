@@ -56,7 +56,6 @@
       background:#fff;
     }
 
-    /* Responsive grid */
     .grid{
       display:grid;
       grid-template-columns: 1fr;
@@ -91,7 +90,6 @@
       white-space: nowrap;
     }
 
-    /* ✅ Recruiting = GREEN; Not yet recruiting + Closed = RED */
     .badge.status-recruiting{
       background:#ecfdf5;
       border-color:#10b981;
@@ -126,7 +124,6 @@
       .filters{ grid-template-columns: 1fr; }
     }
 
-    /* ✅ Modal fixes (scroll, not cut off) */
     .modalBackdrop{
       position: fixed;
       inset: 0;
@@ -222,7 +219,6 @@
         <option>Testicular cancer</option>
       </select>
 
-      <!-- ✅ LIMITED to 3 statuses -->
       <select id="status">
         <option value="">All statuses</option>
         <option value="Recruiting">Recruiting</option>
@@ -249,10 +245,9 @@
   </div>
 
   <script>
-    // ✅ Your GitHub RAW CSV URL:
-    const CSV_URL = "https://raw.githubusercontent.com/praneeth-chebrolu/my-vercel-site/refs/heads/main/Webpage%20Listing_OSF%20Cancer%20Clinical%20Trials.csv";
+    // Your Google Sheet CSV URL (already provided by you)
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQnB5fRz0NAfm8mZVi-q6RaeVdUxCZpD2E6MaaWLZh9PlRvPykmg2HzVwZ0cbdAk1vcpTX8_qaQtV-Q/pub?output=csv";
 
-    // ---------------- DOM ----------------
     const qEl = document.getElementById("q");
     const cancerEl = document.getElementById("cancer");
     const statusEl = document.getElementById("status");
@@ -265,7 +260,6 @@
     const mBody = document.getElementById("mBody");
     const mLink = document.getElementById("mLink");
 
-    // ---------------- Cancer group mapping ----------------
     const CANCER_GROUPS = {
       "Gynecologic cancer": ["ovarian", "cervical", "endometrial", "uterine", "fallopian", "peritoneal", "vulvar", "vaginal"],
       "Gastrointestinal cancer": ["colon", "rectal", "colorectal", "pancreas", "pancreatic", "gastric", "stomach", "esophageal", "liver", "biliary", "cholangiocarcinoma"],
@@ -301,8 +295,6 @@
       return tc.includes(sel);
     }
 
-    // ---------------- Status handling (CSV ONLY) ----------------
-    // Accept ONLY your 3 status values; anything else defaults to Closed.
     function normalizeCsvStatus(csvStatus){
       const s = norm(csvStatus);
 
@@ -317,12 +309,20 @@
       return statusText === "Recruiting" ? "status-recruiting" : "status-not-recruiting";
     }
 
-    // ---------------- Helpers ----------------
     function cleanText(s){ return (s || "").replace(/\s+/g, " ").trim(); }
 
     function firstNonEmpty(...vals){
       for (const v of vals) if (typeof v === "string" && v.trim()) return v.trim();
       return "";
+    }
+
+    function escapeHtml(s){
+      return String(s || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
     function getPhaseText(designMod){
@@ -356,25 +356,50 @@
       return "";
     }
 
-    // ---------------- Patient-friendly overview (max 4 bullets) ----------------
-    function makePatientOverview({ phase, diseaseFocus, interventionsSummary }){
-      const bullets = [];
+    /*
+      CHANGE 1 (requested): Study Overview now uses ClinicalTrials.gov overview text.
+      We take briefSummary first, then fall back to detailedDescription.
+      We then make a short, patient-friendly high-level snippet by taking the first few sentences.
+    */
+    function getCtgovOverviewText(study){
+      const p = study?.protocolSection || {};
+      const desc = p.descriptionModule || {};
 
-      if (phase && phase !== "Phase not listed") bullets.push(`This is a ${phase} clinical trial studying a treatment approach.`);
-      else bullets.push("This is a clinical trial studying a treatment approach.");
+      const raw = firstNonEmpty(desc.briefSummary, desc.detailedDescription, "");
+      if (!raw) return "";
 
-      if (diseaseFocus) bullets.push(`This study is for people with ${diseaseFocus}.`);
-      else bullets.push("This study is for people with the condition listed in the trial details.");
+      const cleaned = raw
+        .replace(/\r/g, " ")
+        .replace(/\n+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
 
-      bullets.push("The goal is to learn whether the treatment is safe and how well it works.");
-
-      if (interventionsSummary) bullets.push(`People in the study may receive ${interventionsSummary}. The study team will explain the visit schedule, tests, and next steps.`);
-      else bullets.push("People in the study may receive study treatment. The study team will explain the visit schedule, tests, and next steps.");
-
-      return bullets.slice(0, 4);
+      return cleaned;
     }
 
-    // ---------------- Eligibility parsing ----------------
+    function makeHighLevelOverviewFromCtgov(overviewText, { phase, diseaseFocus, interventionsSummary }){
+      const parts = [];
+      if (phase && phase !== "Phase not listed") parts.push(`This is a ${phase} clinical trial.`);
+      if (diseaseFocus) parts.push(`It focuses on ${diseaseFocus}.`);
+      if (interventionsSummary) parts.push(`Treatment may include ${interventionsSummary}.`);
+
+      const prefix = parts.length ? parts.join(" ") + " " : "";
+
+      if (!overviewText) {
+        return prefix || "Study overview is not listed on ClinicalTrials.gov.";
+      }
+
+      const sentences = overviewText
+        .split(/(?<=[.?!])\s+/)
+        .filter(Boolean);
+
+      const short = sentences.slice(0, 3).join(" ");
+      const maxLen = 650;
+      const trimmed = short.length > maxLen ? short.slice(0, maxLen).trim() + "…" : short;
+
+      return (prefix + trimmed).trim();
+    }
+
     function parseEligibilityCriteria(raw){
       const text = (raw || "").replace(/\r/g, "");
       if (!text.trim()) return { inclusion: [], exclusion: [] };
@@ -445,13 +470,9 @@
       ];
     }
 
-    // ===============================
-    // ✅ Robust CSV parsing (handles commas inside quotes)
-    // Required columns:
-    // NCT ID, Cancer, Principal Investigator, Clinical Research Coordinator, Status
-    // ===============================
     async function loadTrialsFromCSV(csvUrl){
-      const response = await fetch(csvUrl);
+      const response = await fetch(csvUrl, { cache: "no-store" });
+      if (!response.ok) throw new Error(`CSV fetch error ${response.status}`);
       const csvText = await response.text();
 
       function parseCSV(text) {
@@ -468,21 +489,21 @@
             if (inQuotes && next === '"') { cell += '"'; i++; }
             else { inQuotes = !inQuotes; }
           } else if (ch === "," && !inQuotes) {
-            row.push(cell.trim());
+            row.push(cell);
             cell = "";
           } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
             if (ch === "\r" && next === "\n") i++;
-            row.push(cell.trim());
+            row.push(cell);
             cell = "";
-            if (row.some(v => v.length)) rows.push(row);
+            if (row.some(v => String(v || "").trim().length)) rows.push(row);
             row = [];
           } else {
             cell += ch;
           }
         }
 
-        row.push(cell.trim());
-        if (row.some(v => v.length)) rows.push(row);
+        row.push(cell);
+        if (row.some(v => String(v || "").trim().length)) rows.push(row);
 
         return rows;
       }
@@ -490,7 +511,7 @@
       const rows = parseCSV(csvText);
       if (!rows.length) return [];
 
-      const headers = rows.shift().map(h => h.replace(/^"|"$/g, "").trim());
+      const headers = rows.shift().map(h => String(h || "").replace(/^"|"$/g, "").trim());
 
       function get(record, key){
         if (record[key] != null) return record[key];
@@ -511,6 +532,8 @@
         return {
           nctId: get(record, "NCT ID"),
           local: {
+            osfId: get(record, "OSF ID"),
+            localTitle: get(record, "Trial"),
             cancer: get(record, "Cancer"),
             principalInvestigator: get(record, "Principal Investigator"),
             coordinator: get(record, "Clinical Research Coordinator"),
@@ -523,10 +546,6 @@
       }).filter(t => t.nctId);
     }
 
-    // ===============================
-    // Fetch ClinicalTrials.gov study
-    // (We fetch title/phase/sponsor/eligibility; NOT status)
-    // ===============================
     async function fetchCtgovStudy(nctId){
       const url = `https://clinicaltrials.gov/api/v2/studies/${encodeURIComponent(nctId)}`;
       const res = await fetch(url);
@@ -534,7 +553,6 @@
       return await res.json();
     }
 
-    // ---------------- Convert CT.gov -> model ----------------
     function toTrialModel(study, local, nctId){
       const p = study.protocolSection || {};
       const idMod = p.identificationModule || {};
@@ -548,11 +566,12 @@
       const ctgovId = idMod.nctId || nctId;
       const ctgovLink = `https://clinicaltrials.gov/study/${ctgovId}`;
 
-      const title = firstNonEmpty(idMod.officialTitle, idMod.briefTitle, "Title not listed");
+      const titleFromCtgov = firstNonEmpty(idMod.officialTitle, idMod.briefTitle, "");
+      const title = firstNonEmpty(titleFromCtgov, local.localTitle, "Title not listed");
+
       const phase = getPhaseText(designMod);
       const sponsor = getSponsorText(sponsorMod);
 
-      // ✅ STATUS ONLY FROM CSV:
       const status = normalizeCsvStatus(local.csvStatus);
 
       const defaultCondition =
@@ -563,7 +582,9 @@
 
       const interventionsSummary = getInterventionSummary(armsInterventionsMod, interventionsMod);
 
-      const overviewBullets = makePatientOverview({ phase, diseaseFocus, interventionsSummary });
+      const ctgovOverviewRaw = getCtgovOverviewText(study);
+      const overviewText = makeHighLevelOverviewFromCtgov(ctgovOverviewRaw, { phase, diseaseFocus, interventionsSummary });
+
       const whoCanJoin = getHighLevelWhoCanJoin({ diseaseFocus, eligibilityModule: eligMod });
       const whoCannotJoin = getHighLevelWhoCannotJoin({ eligibilityModule: eligMod });
 
@@ -572,6 +593,7 @@
 
       return {
         id: ctgovId,
+        osfId: local.osfId || "",
         ctgovLink,
         title,
         cancer: cancerBadge,
@@ -583,14 +605,13 @@
         coordinator: local.coordinator || "",
         osfPhone: local.osfPhone || "",
         osfEmail: local.osfEmail || "",
-        overviewBullets,
+        overviewText,
         whoCanJoin,
         whoCannotJoin,
         note
       };
     }
 
-    // ---------------- App state ----------------
     let EXPANDED_TRIALS = [];
 
     async function loadTrials(){
@@ -605,15 +626,15 @@
       EXPANDED_TRIALS = expanded;
     }
 
-    // ---------------- Filtering ----------------
     function matches(trial){
       const q = (qEl.value || "").toLowerCase().trim();
       const c = cancerEl.value;
       const s = statusEl.value;
 
       const text = [
-        trial.id, trial.title, trial.cancer, trial.phase, trial.status,
-        trial.sponsor, trial.diseaseFocus
+        trial.id, trial.osfId, trial.title, trial.cancer, trial.phase, trial.status,
+        trial.sponsor, trial.diseaseFocus, trial.principalInvestigator, trial.coordinator,
+        trial.overviewText
       ].join(" ").toLowerCase();
 
       if (q && !text.includes(q)) return false;
@@ -623,28 +644,28 @@
       return true;
     }
 
-    // ---------------- Rendering ----------------
     function render(){
       const filtered = EXPANDED_TRIALS.filter(matches);
 
       resultsEl.innerHTML = filtered.map(t => `
         <div class="trial">
           <div class="badgeRow">
-            <span class="badge">${t.cancer}</span>
-            <span class="badge">${t.phase}</span>
-            <span class="badge ${statusClass(t.status)}">${t.status}</span>
+            <span class="badge">${escapeHtml(t.cancer)}</span>
+            <span class="badge">${escapeHtml(t.phase)}</span>
+            ${t.osfId ? `<span class="badge">${escapeHtml(t.osfId)}</span>` : ""}
+            <span class="badge ${statusClass(t.status)}">${escapeHtml(t.status)}</span>
           </div>
 
           <div>
-            <div style="font-weight:700; font-size:16px;">${t.title}</div>
+            <div style="font-weight:700; font-size:16px;">${escapeHtml(t.title)}</div>
             <div class="muted">
-              <a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${t.id}</a>
-              • ${t.sponsor}
+              <a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${escapeHtml(t.id)}</a>
+              ${t.sponsor ? `• ${escapeHtml(t.sponsor)}` : ""}
             </div>
           </div>
 
           <div class="actions">
-            <button type="button" onclick="openModal('${t.id}')">View details</button>
+            <button type="button" onclick="openModal('${escapeHtml(t.id)}')">View details</button>
             <a href="intake.html?trial=${encodeURIComponent(t.id)}">I’m interested</a>
           </div>
         </div>
@@ -655,10 +676,9 @@
 
     function bulletsToHtml(arr){
       if (!arr || !arr.length) return "<div class='muted'>Not listed.</div>";
-      return `<ul>${arr.map(x => `<li>${x}</li>`).join("")}</ul>`;
+      return `<ul>${arr.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>`;
     }
 
-    // ---------------- Modal ----------------
     window.openModal = function(id){
       const t = EXPANDED_TRIALS.find(x => x.id === id);
       if (!t) return;
@@ -666,23 +686,24 @@
       mTitle.textContent = `${t.title} (${t.id})`;
 
       mBody.innerHTML = `
-        <div><strong>Cancer:</strong> ${t.cancer}</div>
-        <div><strong>Study Phase:</strong> ${t.phase}</div>
-        <div><strong>Status:</strong> <span class="badge ${statusClass(t.status)}">${t.status}</span></div>
-        <div><strong>Sponsor:</strong> ${t.sponsor}</div>
+        ${t.osfId ? `<div><strong>OSF ID:</strong> ${escapeHtml(t.osfId)}</div>` : ""}
+        <div><strong>Cancer:</strong> ${escapeHtml(t.cancer)}</div>
+        <div><strong>Study Phase:</strong> ${escapeHtml(t.phase)}</div>
+        <div><strong>Status:</strong> <span class="badge ${statusClass(t.status)}">${escapeHtml(t.status)}</span></div>
+        <div><strong>Sponsor:</strong> ${escapeHtml(t.sponsor)}</div>
 
         <div style="margin-top:10px;">
           <strong>ClinicalTrials.gov Identifier:</strong>
-          <a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${t.id}</a>
+          <a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${escapeHtml(t.id)}</a>
         </div>
 
-        <div style="margin-top:10px;"><strong>Disease Focus:</strong> ${t.diseaseFocus}</div>
+        <div style="margin-top:10px;"><strong>Disease Focus:</strong> ${escapeHtml(t.diseaseFocus)}</div>
 
-        ${t.principalInvestigator ? `<div style="margin-top:10px;"><strong>Principal Investigator:</strong> ${t.principalInvestigator}</div>` : ""}
-        ${t.coordinator ? `<div><strong>Clinical Research Coordinator:</strong> ${t.coordinator}</div>` : ""}
+        ${t.principalInvestigator ? `<div style="margin-top:10px;"><strong>Principal Investigator:</strong> ${escapeHtml(t.principalInvestigator)}</div>` : ""}
+        ${t.coordinator ? `<div><strong>Clinical Research Coordinator:</strong> ${escapeHtml(t.coordinator)}</div>` : ""}
 
         <div style="margin-top:14px;"><strong>Study Overview</strong></div>
-        ${bulletsToHtml(t.overviewBullets)}
+        <div style="margin-top:6px;">${escapeHtml(t.overviewText || "Study overview is not listed on ClinicalTrials.gov.")}</div>
 
         <div style="margin-top:14px;"><strong>Eligibility</strong></div>
         <div style="margin-top:10px;"><strong>Who Can Join This Study</strong></div>
@@ -691,10 +712,10 @@
         <div style="margin-top:10px;"><strong>Who Cannot Join</strong></div>
         ${bulletsToHtml(t.whoCannotJoin)}
 
-        <div style="margin-top:10px;" class="muted"><strong>Note:</strong> ${t.note}</div>
+        <div style="margin-top:10px;" class="muted"><strong>Note:</strong> ${escapeHtml(t.note)}</div>
 
         <div style="margin-top:14px;"><strong>How to contact</strong></div>
-        <div>${t.osfPhone ? t.osfPhone : ""}${t.osfPhone && t.osfEmail ? " or " : ""}${t.osfEmail ? t.osfEmail : ""}</div>
+        <div>${escapeHtml(t.osfPhone)}${t.osfPhone && t.osfEmail ? " or " : ""}${escapeHtml(t.osfEmail)}</div>
       `;
 
       mLink.href = t.ctgovLink;
@@ -714,7 +735,6 @@
     cancerEl.addEventListener("change", render);
     statusEl.addEventListener("change", render);
 
-    // ---------------- Init ----------------
     (async function init(){
       resultsEl.innerHTML = `<div class="muted">Loading trials…</div>`;
       countEl.textContent = "";
@@ -722,14 +742,14 @@
       try {
         await loadTrials();
 
-        // Apply cancer filter if user came from cancer page:
         const params = new URLSearchParams(window.location.search);
         const cancerFromUrl = params.get("cancer");
         if (cancerFromUrl) cancerEl.value = cancerFromUrl;
 
         render();
       } catch (e) {
-        resultsEl.innerHTML = `<div class="muted">Could not load trials right now. Please refresh.</div>`;
+        resultsEl.innerHTML = `<div class="muted">Could not load trials right now. Please refresh.</div>
+          <div class="muted" style="margin-top:8px;">${escapeHtml(e.message || "")}</div>`;
         countEl.textContent = "";
       }
     })();
