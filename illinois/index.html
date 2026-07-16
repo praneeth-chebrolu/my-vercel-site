@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Illinois Access-to-Innovation Index | Cancer Clinical Trials</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="vendor/leaflet.css" />
+  <style>
+    :root{
+      --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --bg:#ffffff;
+      --blue:#2563eb; --panel:#f9fafb;
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family: Arial, Helvetica, sans-serif;
+      max-width:1180px; margin:48px auto; padding:0 20px;
+      color:var(--ink); background:var(--bg); line-height:1.55;
+    }
+    header{display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:14px; flex-wrap:wrap;}
+    header h1{font-size:22px; margin:0;}
+    nav a{margin-left:16px; text-decoration:none; color:var(--ink); font-weight:500;}
+    nav a:hover{text-decoration:underline;}
+    .lead{color:var(--muted); margin:0 0 20px; max-width:820px;}
+
+    .banner{
+      background:#fffbeb; border:1px solid #fde68a; color:#92400e;
+      border-radius:10px; padding:10px 14px; font-size:13px; margin-bottom:20px;
+    }
+
+    .layout{display:grid; grid-template-columns: 1fr 320px; gap:20px; align-items:start;}
+    .card{border:1px solid var(--line); border-radius:14px; background:var(--bg); overflow:hidden;}
+    #map{height:560px; width:100%;}
+
+    .controls{display:flex; flex-wrap:wrap; gap:8px; padding:14px; border-bottom:1px solid var(--line); align-items:center;}
+    .controls .label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-right:4px;}
+    .chip{
+      border:1px solid var(--line); background:#fff; border-radius:999px;
+      padding:6px 12px; font-size:13px; cursor:pointer; color:var(--ink);
+    }
+    .chip:hover{background:var(--panel);}
+    .chip.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+    .toggle{margin-left:auto; font-size:13px; display:flex; align-items:center; gap:6px; color:var(--muted); cursor:pointer;}
+
+    .side{display:flex; flex-direction:column; gap:16px;}
+    .panel{border:1px solid var(--line); border-radius:14px; padding:16px; background:var(--bg);}
+    .panel h3{margin:0 0 10px; font-size:15px;}
+    .legend .row{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); margin:4px 0;}
+    .swatch{width:18px; height:12px; border-radius:3px; flex-shrink:0; border:1px solid rgba(0,0,0,.08);}
+
+    .detail .name{font-weight:700; font-size:16px; margin-bottom:4px;}
+    .detail .sub{color:var(--muted); font-size:12px; margin-bottom:10px;}
+    .stat{display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--line); font-size:13px;}
+    .stat:last-child{border-bottom:none;}
+    .stat b{font-variant-numeric:tabular-nums;}
+    .idxbadge{display:inline-block; padding:2px 10px; border-radius:999px; color:#fff; font-weight:700; font-size:13px;}
+
+    table{border-collapse:collapse; width:100%; font-size:13px; margin-top:8px;}
+    th,td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap;}
+    th{cursor:pointer; user-select:none; color:var(--muted); font-weight:600; position:sticky; top:0; background:#fff;}
+    th:hover{color:var(--ink);}
+    td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
+    tbody tr:hover{background:var(--panel);}
+    tbody tr.sel{background:#eff6ff;}
+    .tablewrap{max-height:440px; overflow:auto; border:1px solid var(--line); border-radius:14px;}
+    .tabletop{display:flex; justify-content:space-between; align-items:center; margin:36px 0 6px;}
+    .tabletop h2{font-size:18px; margin:0;}
+    .search{border:1px solid var(--line); border-radius:8px; padding:7px 10px; font-size:13px; width:220px;}
+
+    .method{margin-top:40px; border-top:1px solid var(--line); padding-top:24px; color:#374151;}
+    .method h2{font-size:18px;}
+    .method h3{font-size:14px; margin-bottom:4px;}
+    .method code{background:var(--panel); padding:1px 5px; border-radius:4px; font-size:12px;}
+    .cols{display:grid; grid-template-columns:repeat(2,1fr); gap:24px;}
+    footer{margin-top:36px; color:var(--muted); font-size:12px; border-top:1px solid var(--line); padding-top:16px;}
+    .leaflet-popup-content{font-family:Arial,sans-serif;}
+    @media (max-width:960px){
+      .layout{grid-template-columns:1fr;}
+      .cols{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Illinois Access-to-Innovation Index</h1>
+  <nav>
+    <a href="../index.html">Cancer Types</a>
+    <a href="../trials.html">Trial List</a>
+    <a href="../intake.html">Intake</a>
+    <a href="index.html">IL Map</a>
+  </nav>
+</header>
+
+<p class="lead">
+  A county-level access-to-care model for Illinois oncology. It combines cancer burden,
+  population, and the geographic reach of clinical-trial centers to find where disease need is
+  high but trial access is poor &mdash; the state's <strong>research deserts</strong>.
+</p>
+
+<div class="banner" id="banner">Loading Illinois data&hellip;</div>
+
+<div class="layout">
+  <div class="card">
+    <div class="controls">
+      <span class="label">Map layer</span>
+      <button class="chip active" data-metric="index">Access-to-Innovation Index</button>
+      <button class="chip" data-metric="est_annual_cases">Cancer burden</button>
+      <button class="chip" data-metric="density">Population density</button>
+      <button class="chip" data-metric="drive_min">Drive time to center</button>
+      <button class="chip" data-metric="trials_90">Trials within 90 min</button>
+      <label class="toggle"><input type="checkbox" id="showCenters" checked> Show cancer centers</label>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <div class="side">
+    <div class="panel detail" id="detail">
+      <div class="name">Hover or click a county</div>
+      <div class="sub">County-level detail appears here.</div>
+    </div>
+    <div class="panel legend">
+      <h3 id="legendTitle">Access-to-Innovation Index</h3>
+      <div id="legendRows"></div>
+      <div class="row" style="margin-top:10px;"><span class="swatch" style="background:#111827"></span> Cancer / trial center</div>
+    </div>
+  </div>
+</div>
+
+<div class="tabletop">
+  <h2>County rankings</h2>
+  <input class="search" id="search" placeholder="Filter counties&hellip;" />
+</div>
+<div class="tablewrap">
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th data-k="rank" class="num">#</th>
+        <th data-k="county">County</th>
+        <th data-k="population" class="num">Population</th>
+        <th data-k="density" class="num">Density</th>
+        <th data-k="est_annual_cases" class="num">Est. cases/yr</th>
+        <th data-k="nearest_city">Nearest center</th>
+        <th data-k="drive_min" class="num">Drive (min)</th>
+        <th data-k="trials_90" class="num">Trials &le;90m</th>
+        <th data-k="index" class="num">Index</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div class="method">
+  <h2>How the index is built</h2>
+  <div class="cols">
+    <div>
+      <h3>1. Cancer burden</h3>
+      <p>Estimated annual cases per county = county population &times; a statewide age-adjusted
+      incidence rate (<span id="rateNote">~445/100k</span>). This is a transparent estimate;
+      swap in true county rates from the <strong>Illinois State Cancer Registry (ISCR)</strong>
+      by editing <code>build_data.py</code>.</p>
+
+      <h3>2. Population &amp; density</h3>
+      <p>Real county population, land area, and density (U.S. Census). Geometry is the
+      Census county boundary set, filtered to Illinois (FIPS&nbsp;17).</p>
+
+      <h3>3. Trial centers</h3>
+      <p>Real Illinois oncology centers geocoded to their facilities. Active-trial and
+      Phase&nbsp;I counts are illustrative placeholders &mdash; wire them to
+      <strong>ClinicalTrials.gov</strong> for live volumes.</p>
+    </div>
+    <div>
+      <h3>4. Geographic accessibility</h3>
+      <p>For each county centroid we compute straight-line distance to every center, convert
+      to a road estimate (&times;1.27) and drive time (~52&nbsp;mph), then count centers and
+      trials reachable within 30 / 60 / 90 minutes.</p>
+
+      <h3>5. Access-to-Innovation Index</h3>
+      <p>Index = 100&nbsp;&times;&nbsp;&radic;(burden &times; access-gap), where
+      <em>burden</em> is normalized estimated cases and <em>access-gap</em> blends drive time
+      (55%) and scarcity of nearby trials (45%). Higher = greater unmet need.
+      It highlights counties where many people face cancer but the nearest research site is far.</p>
+
+      <h3>Reproduce the data</h3>
+      <p>Run <code>python3 illinois/build_data.py</code> after dropping real ISCR and
+      ClinicalTrials.gov inputs in place. It regenerates <code>data/counties.json</code>.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong>Data provenance.</strong> Population, land area, density, and county geometry are real
+  (U.S. Census). Cancer incidence is a statewide-rate estimate, not true county rates. Trial
+  counts and drive times are modeled estimates for planning, not clinical or navigational advice.
+  Built as a prototype of a Clinical Intelligence Engine / Access-to-Innovation Index.
+</footer>
+
+<script src="vendor/leaflet.js"></script>
+<script>
+const METRICS = {
+  index:            {title:"Access-to-Innovation Index", fmt:v=>v.toFixed(1), scale:"warm", desc:"unmet need"},
+  est_annual_cases: {title:"Estimated annual cancer cases", fmt:v=>v.toLocaleString(), scale:"warm", desc:"cases/yr"},
+  density:          {title:"Population density (people / sq mi)", fmt:v=>v.toLocaleString(), scale:"blue", desc:"per sq mi"},
+  drive_min:        {title:"Drive time to nearest center (min)", fmt:v=>v+" min", scale:"warm", desc:"minutes"},
+  trials_90:        {title:"Active trials within 90 minutes", fmt:v=>v.toLocaleString(), scale:"green", desc:"trials"},
+};
+const RAMPS = {
+  warm:  ["#fff5eb","#fed9a6","#fdae6b","#f16913","#d94801","#8c2d04"],
+  blue:  ["#f7fbff","#c6dbef","#9ecae1","#6baed6","#3182bd","#08519c"],
+  green: ["#f7fcf5","#c7e9c0","#a1d99b","#74c476","#31a354","#006d2c"],
+};
+
+let counties, centers, geo, map, geoLayer, centerLayer;
+let current = "index";
+let sortKey = "rank", sortDir = 1;
+
+function colorFor(metric, v, stops){
+  const r = RAMPS[METRICS[metric].scale];
+  const t = (v - stops.min) / (stops.max - stops.min || 1);
+  const i = Math.min(r.length-1, Math.max(0, Math.floor(t * r.length)));
+  return r[i];
+}
+function metricStops(metric){
+  const vals = counties.map(c=>c[metric]).sort((a,b)=>a-b);
+  return {min: vals[0], max: vals[vals.length-1], vals};
+}
+
+function styleFeature(feature){
+  const c = byFips[feature.properties.GEO_ID.slice(-5)];
+  const stops = STOPS[current];
+  return {
+    fillColor: c ? colorFor(current, c[current], stops) : "#eee",
+    weight: 1, color: "#ffffff", fillOpacity: 0.82,
+  };
+}
+
+function showDetail(c){
+  const idxColor = colorFor("index", c.index, STOPS.index);
+  document.getElementById("detail").innerHTML = `
+    <div class="name">${c.county} County</div>
+    <div class="sub">FIPS ${c.fips} &middot; rank #${c.rank} of ${counties.length} for unmet need</div>
+    <div style="margin-bottom:10px;"><span class="idxbadge" style="background:${idxColor}">Index ${c.index.toFixed(1)}</span></div>
+    <div class="stat"><span>Population</span><b>${c.population.toLocaleString()}</b></div>
+    <div class="stat"><span>Density (/sq mi)</span><b>${c.density.toLocaleString()}</b></div>
+    <div class="stat"><span>Est. annual cancer cases</span><b>${c.est_annual_cases.toLocaleString()}</b></div>
+    <div class="stat"><span>Nearest center</span><b>${c.nearest_city}</b></div>
+    <div class="stat"><span>Drive to nearest</span><b>${c.drive_min} min &middot; ${c.nearest_miles} mi</b></div>
+    <div class="stat"><span>Centers &le; 60 min</span><b>${c.centers_60}</b></div>
+    <div class="stat"><span>Trials &le; 90 min</span><b>${c.trials_90.toLocaleString()}</b></div>
+    <div class="sub" style="margin-top:8px;">${c.nearest_center}</div>`;
+  document.querySelectorAll("#tbl tbody tr").forEach(tr=>tr.classList.toggle("sel", tr.dataset.fips===c.fips));
+}
+
+function buildLegend(){
+  const m = METRICS[current];
+  document.getElementById("legendTitle").textContent = m.title;
+  const r = RAMPS[m.scale], stops = STOPS[current];
+  let html = "";
+  for(let i=0;i<r.length;i++){
+    const lo = stops.min + (stops.max-stops.min)*i/r.length;
+    const hi = stops.min + (stops.max-stops.min)*(i+1)/r.length;
+    html += `<div class="row"><span class="swatch" style="background:${r[i]}"></span>${m.fmt(Math.round(lo))} – ${m.fmt(Math.round(hi))}</div>`;
+  }
+  document.getElementById("legendRows").innerHTML = html;
+}
+
+let byFips = {}, STOPS = {};
+function computeStops(){ Object.keys(METRICS).forEach(k=>STOPS[k]=metricStops(k)); }
+
+function renderTable(){
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const rows = counties
+    .filter(c=>!q || c.county.toLowerCase().includes(q))
+    .sort((a,b)=>{
+      const A=a[sortKey], B=b[sortKey];
+      if(typeof A==="string") return sortDir*A.localeCompare(B);
+      return sortDir*(A-B);
+    });
+  const tb = document.querySelector("#tbl tbody");
+  tb.innerHTML = rows.map(c=>`
+    <tr data-fips="${c.fips}">
+      <td class="num">${c.rank}</td>
+      <td>${c.county}</td>
+      <td class="num">${c.population.toLocaleString()}</td>
+      <td class="num">${c.density.toLocaleString()}</td>
+      <td class="num">${c.est_annual_cases.toLocaleString()}</td>
+      <td>${c.nearest_city}</td>
+      <td class="num">${c.drive_min}</td>
+      <td class="num">${c.trials_90.toLocaleString()}</td>
+      <td class="num"><b>${c.index.toFixed(1)}</b></td>
+    </tr>`).join("");
+  tb.querySelectorAll("tr").forEach(tr=>{
+    tr.onclick = ()=>{ const c=byFips[tr.dataset.fips]; showDetail(c);
+      if(c._layer){ map.fitBounds(c._layer.getBounds(), {maxZoom:9, padding:[40,40]}); } };
+  });
+}
+
+function setMetric(metric){
+  current = metric;
+  document.querySelectorAll(".chip").forEach(ch=>ch.classList.toggle("active", ch.dataset.metric===metric));
+  geoLayer.setStyle(styleFeature);
+  buildLegend();
+}
+
+async function init(){
+  [counties, centers, geo] = await Promise.all([
+    fetch("data/counties.json").then(r=>r.json()),
+    fetch("data/centers.json").then(r=>r.json()),
+    fetch("data/il-counties.geojson").then(r=>r.json()),
+  ]);
+  const meta = counties; counties = meta.counties;
+  counties.forEach(c=>byFips[c.fips]=c);
+  document.getElementById("rateNote") && (document.getElementById("rateNote").textContent = "~"+meta.il_rate_per100k+"/100k");
+  computeStops();
+
+  map = L.map("map", {scrollWheelZoom:false}).setView([40.0,-89.2], 6);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:"abcd", maxZoom:12
+  }).addTo(map);
+
+  geoLayer = L.geoJSON(geo, {
+    style: styleFeature,
+    onEachFeature:(f,layer)=>{
+      const c = byFips[f.properties.GEO_ID.slice(-5)];
+      if(c) c._layer = layer;
+      layer.on({
+        mouseover:()=>{ layer.setStyle({weight:2.5, color:"#111827"}); layer.bringToFront(); if(c) showDetail(c); },
+        mouseout:()=>{ geoLayer.resetStyle(layer); },
+        click:()=>{ if(c) showDetail(c); }
+      });
+    }
+  }).addTo(map);
+
+  centerLayer = L.layerGroup(centers.centers.map(c=>{
+    const nci = c.nci!=="None";
+    return L.circleMarker([c.lat,c.lng], {
+      radius: nci?8:6, color:"#111827", weight:1.5,
+      fillColor: nci?"#e11d48":"#111827", fillOpacity:0.9
+    }).bindPopup(`<b>${c.name}</b><br>${c.city}, IL${nci?`<br><em>NCI-designated ${c.nci}</em>`:""}<br>~${c.trials_active} active trials · ${c.phase1} Phase I`);
+  })).addTo(map);
+
+  document.getElementById("showCenters").onchange = e=>{
+    if(e.target.checked) centerLayer.addTo(map); else map.removeLayer(centerLayer);
+  };
+  document.querySelectorAll(".chip").forEach(ch=> ch.onclick=()=>setMetric(ch.dataset.metric));
+  document.querySelectorAll("#tbl th").forEach(th=> th.onclick=()=>{
+    const k=th.dataset.k; sortDir = (sortKey===k)? -sortDir : 1; sortKey=k; renderTable();
+  });
+  document.getElementById("search").oninput = renderTable;
+
+  buildLegend(); renderTable();
+  document.getElementById("banner").innerHTML =
+    `Loaded <b>${counties.length}</b> Illinois counties and <b>${centers.centers.length}</b> cancer centers. ` +
+    `${meta.generated_note}`;
+}
+init().catch(e=>{ document.getElementById("banner").textContent = "Failed to load data: "+e.message; });
+</script>
+</body>
+</html>
