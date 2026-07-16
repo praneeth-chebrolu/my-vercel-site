@@ -1,0 +1,112 @@
+{
+  "centers": [
+    {
+      "name": "Robert H. Lurie Comprehensive Cancer Center (Northwestern)",
+      "city": "Chicago",
+      "lat": 41.8969,
+      "lng": -87.6212,
+      "nci": "Comprehensive",
+      "trials_active": 420,
+      "phase1": 95
+    },
+    {
+      "name": "University of Chicago Medicine Comprehensive Cancer Center",
+      "city": "Chicago",
+      "lat": 41.7886,
+      "lng": -87.6044,
+      "nci": "Comprehensive",
+      "trials_active": 380,
+      "phase1": 88
+    },
+    {
+      "name": "University of Illinois Cancer Center",
+      "city": "Chicago",
+      "lat": 41.867,
+      "lng": -87.6706,
+      "nci": "None",
+      "trials_active": 140,
+      "phase1": 22
+    },
+    {
+      "name": "RUSH MD Anderson Cancer Center",
+      "city": "Chicago",
+      "lat": 41.8743,
+      "lng": -87.6693,
+      "nci": "None",
+      "trials_active": 160,
+      "phase1": 28
+    },
+    {
+      "name": "City of Hope Chicago",
+      "city": "Zion",
+      "lat": 42.4592,
+      "lng": -87.829,
+      "nci": "None",
+      "trials_active": 110,
+      "phase1": 20
+    },
+    {
+      "name": "OSF HealthCare Cancer Institute",
+      "city": "Peoria",
+      "lat": 40.6936,
+      "lng": -89.5923,
+      "nci": "None",
+      "trials_active": 60,
+      "phase1": 8
+    },
+    {
+      "name": "Carle Cancer Institute",
+      "city": "Urbana",
+      "lat": 40.1106,
+      "lng": -88.2073,
+      "nci": "None",
+      "trials_active": 75,
+      "phase1": 10
+    },
+    {
+      "name": "Simmons Cancer Institute at SIU Medicine",
+      "city": "Springfield",
+      "lat": 39.7817,
+      "lng": -89.6501,
+      "nci": "None",
+      "trials_active": 55,
+      "phase1": 7
+    },
+    {
+      "name": "Memorial Care / Springfield Clinic Oncology",
+      "city": "Springfield",
+      "lat": 39.799,
+      "lng": -89.654,
+      "nci": "None",
+      "trials_active": 40,
+      "phase1": 4
+    },
+    {
+      "name": "UW Health Cancer Center (Rockford)",
+      "city": "Rockford",
+      "lat": 42.2711,
+      "lng": -89.094,
+      "nci": "None",
+      "trials_active": 45,
+      "phase1": 5
+    },
+    {
+      "name": "Southern Illinois Healthcare Cancer Institute",
+      "city": "Carbondale",
+      "lat": 37.7273,
+      "lng": -89.2168,
+      "nci": "None",
+      "trials_active": 30,
+      "phase1": 3
+    },
+    {
+      "name": "Edward-Elmhurst / Northwestern Medicine (Naperville)",
+      "city": "Naperville",
+      "lat": 41.7508,
+      "lng": -88.1535,
+      "nci": "None",
+      "trials_active": 50,
+      "phase1": 6
+    }
+  ]
+}
