@@ -154,9 +154,19 @@ for r in rows:
     r['access_gap']=round(access_gap*100,1)
     r['index']=round(idx,1)
 
-# rank
+# rank (general unmet-need index)
 for i,r in enumerate(sorted(rows,key=lambda x:-x['index']),1):
     r['rank']=i
+
+# ---- Research-desert score ----
+# A desert requires POOR ACCESS, so the access gap is the primary axis; burden only
+# amplifies it (a populous poorly-served county is a worse desert than a tiny one).
+# Well-served counties (short drive, many nearby trials) score low regardless of burden.
+for r in rows:
+    burden_weight = 0.5 + 0.5*min(1.0, r['annual_cases']/1500.0)   # 0.5..1.0, saturates at 1500 cases/yr
+    r['desert_score'] = round(r['access_gap']*burden_weight, 1)     # access_gap is 0..100
+for i,r in enumerate(sorted(rows,key=lambda x:-x['desert_score']),1):
+    r['desert_rank']=i
 
 real_n=sum(1 for r in rows if r['incidence_real'])
 json.dump({"generated_note":f"Population, density, geography, and cancer incidence are REAL: county age-adjusted incidence and annual case counts are from NCI & CDC State Cancer Profiles (All Cancer Sites, 2018-2022). Trial counts remain illustrative placeholders pending a ClinicalTrials.gov load.",
