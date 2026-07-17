@@ -739,6 +739,11 @@ a{color:var(--accent-ink)}
   border-radius:999px;padding:6px 12px;cursor:pointer;transition:all .12s;}
 .chip:hover{border-color:var(--accent);color:var(--accent-ink);}
 .chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.ctsep{width:1px;align-self:stretch;background:var(--line-strong);margin:2px 4px;}
+.chip.ctoggle{display:inline-flex;align-items:center;gap:6px;}
+.chip.ctoggle .dot{width:9px;height:9px;border-radius:50%;background:#0E6B6B;border:1.5px solid #fff;box-shadow:0 0 0 1px var(--line-strong);}
+.chip.ctoggle.active{background:transparent;border-color:var(--accent);color:var(--accent-ink);}
+.chip.ctoggle:not(.active){opacity:.5;text-decoration:line-through;}
 #map{height:520px;width:100%;background:var(--ground);}
 .leaflet-container{background:var(--ground);font-family:var(--sans);}
 .legend{display:flex;flex-wrap:wrap;gap:14px;padding:12px 18px 18px;font-size:11.5px;color:var(--muted);}
@@ -808,6 +813,8 @@ a{color:var(--accent-ink)}
         <button class="chip" data-m="annual_cases">Cancer cases</button>
         <button class="chip" data-m="drive_min">Drive to center</button>
         <button class="chip" data-m="trials_90">Trials &le;90 min</button>
+        <span class="ctsep"></span>
+        <button class="chip ctoggle active" id="toggleCenters"><span class="dot"></span>Centers</button>
       </div>
       <div id="map"></div>
       <div class="legend" id="legend"></div>
@@ -837,6 +844,7 @@ a{color:var(--accent-ink)}
       <span class="tag">Real</span> Cancer incidence (NCI &amp; CDC State Cancer Profiles &mdash; U.S. Cancer Statistics / NPCR + SEER, 2018&ndash;2022).
       <span class="tag">Real</span> Cancer-center locations.
       <span class="tag">Estimate</span> Per-center trial counts &amp; drive times are modeled for planning &mdash; not clinical or navigational advice.
+      Overlapping Chicago-area centers are spread slightly on the map for legibility; drive-time analytics use their true locations.
     </p>
   </section>
 </div></div>
@@ -882,15 +890,41 @@ gLayer=L.geoJSON(GEO,{style,onEachFeature:(f,l)=>{
         mouseout:()=>gLayer.resetStyle(l), click:()=>{if(c){detail(c);map.fitBounds(l.getBounds(),{maxZoom:9,padding:[30,30]});}}});
 }}).addTo(map);
 map.fitBounds(gLayer.getBounds(),{padding:[10,10]});
+// Spread near-coincident centers (e.g. the Chicago cluster) on a small circle so
+// each is visible/clickable. TRUE coordinates are used for all drive-time analytics
+// in build_data.py; only the on-map pin is nudged for legibility.
+function declutter(items){
+  const pos=items.map(c=>[c.lat,c.lng]), used=items.map(()=>false), TH=0.15;
+  for(let i=0;i<items.length;i++){
+    if(used[i]) continue;
+    const grp=[i];
+    for(let j=i+1;j<items.length;j++)
+      if(!used[j] && Math.hypot(items[i].lat-items[j].lat, items[i].lng-items[j].lng)<TH) grp.push(j);
+    if(grp.length>1){
+      const clat=grp.reduce((a,k)=>a+items[k].lat,0)/grp.length;
+      const clng=grp.reduce((a,k)=>a+items[k].lng,0)/grp.length, R=0.085;
+      grp.forEach((k,n)=>{const a=2*Math.PI*n/grp.length - Math.PI/2;
+        pos[k]=[clat+R*Math.sin(a), clng+R*Math.cos(a)];});
+    }
+    grp.forEach(k=>used[k]=true);
+  }
+  return pos;
+}
+const POS=declutter(CENTERS);
 map.createPane('centers'); map.getPane('centers').style.zIndex=650;
-const cMarkers=CENTERS.map(c=>{const nci=c.nci!=='None';
-  return L.circleMarker([c.lat,c.lng],{pane:'centers',radius:nci?10:8,color:'#FFFFFF',weight:2.5,
+const cMarkers=CENTERS.map((c,i)=>{const nci=c.nci!=='None';
+  return L.circleMarker(POS[i],{pane:'centers',radius:nci?10:8,color:'#FFFFFF',weight:2.5,
     fillColor:nci?'#7C2A12':'#0E6B6B',fillOpacity:1})
     .bindTooltip(`<b>${c.name}</b><br>${c.city}, IL${nci?' &middot; NCI '+c.nci:''}<br>~${c.trials_active} trials &middot; ${c.phase1} Phase I`);
 });
 const centersLayer=L.layerGroup(cMarkers).addTo(map);
-function focusCenter(i){const c=CENTERS[i];map.setView([c.lat,c.lng],9);cMarkers[i].openTooltip();
+function focusCenter(i){map.setView(POS[i],9);cMarkers[i].openTooltip();
   cMarkers[i].setStyle({radius:14,weight:3.5});setTimeout(()=>cMarkers[i].setStyle({radius:CENTERS[i].nci!=='None'?10:8,weight:2.5}),1400);}
+let centersOn=true;
+document.getElementById('toggleCenters').onclick=function(){
+  centersOn=!centersOn; this.classList.toggle('active',centersOn);
+  if(centersOn) centersLayer.addTo(map); else map.removeLayer(centersLayer);
+};
 function legend(){const m=METRICS[current],r=RAMPS[m.ramp],s=STOPS[current];let h='';
   for(let i=0;i<r.length;i++){const lo=s.min+(s.max-s.min)*i/r.length;
     h+=`<div class="row"><span class="sw" style="background:${r[i]}"></span>${m.fmt(Math.round(lo))}</div>`;}
@@ -924,9 +958,9 @@ function renderList(){
   document.querySelectorAll('.di').forEach(d=>d.onclick=()=>{const c=byFips[d.dataset.f];
     detail(c); if(c._l)map.fitBounds(c._l.getBounds(),{maxZoom:9,padding:[30,30]});});
 }
-function setMetric(m){current=m;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x.dataset.m===m));
+function setMetric(m){current=m;document.querySelectorAll('.chip[data-m]').forEach(x=>x.classList.toggle('active',x.dataset.m===m));
   gLayer.setStyle(style);legend();}
-document.querySelectorAll('.chip').forEach(x=>x.onclick=()=>setMetric(x.dataset.m));
+document.querySelectorAll('.chip[data-m]').forEach(x=>x.onclick=()=>setMetric(x.dataset.m));
 
 function renderCenters(){
   const order=CENTERS.map((c,i)=>({c,i})).sort((a,b)=>b.c.trials_active-a.c.trials_active);
