@@ -1,0 +1,146 @@
+Incidence Rate Report for Illinois by County,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+"All Cancer Sites (All Stages^), 2018-2022",,,,,,,,,,,,,
+,,,,,,,,,,,,,
+"All Races (includes Hispanic), Both Sexes, All Ages",,,,,,,,,,,,,
+,,,,,,,,,,,,,
+Sorted by Rate,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+County,FIPS,2023 Rural-Urban Continuum Codes([rural urban note]),"Age-Adjusted Incidence Rate([rate note]) - cases per 100,000",Lower 95% Confidence Interval,Upper 95% Confidence Interval,CI*Rank([rank note]),Lower CI (CI*Rank),Upper CI (CI*Rank),Average Annual Count,Recent Trend,Recent 5-Year Trend ([trend note]) in Incidence Rates,Lower 95% Confidence Interval,Upper 95% Confidence Interval
+Illinois(7),17000,N/A,464.2,462.6,465.7,N/A , N/A , N/A,72068,falling,-0.4,-0.5,-0.2
+US (SEER+NPCR)(1),0,N/A,448.6,448.3,448.9,N/A , N/A , N/A,1821045,falling,-1,-1.6,-0.5
+Alexander County(7),17003,Urban,603.7,525.9,691.2,1,1,61,52,stable,0.2,-1.8,1.9
+Clay County(7),17025,Rural,587,536.9,640.8,2,1,35,111,stable,0.9,0,1.9
+Pulaski County(7),17153,Rural,579.7,501,668.4,3,1,85,45,rising,1.5,0.5,2.6
+Menard County(7),17129,Urban,579.6,528.1,635.2,4,1,49,102,stable,0.7,0,1.5
+Greene County(7),17061,Rural,577.3,525.4,633.4,5,1,44,99,rising,2.6,1,7.3
+DeKalb County(7),17037,Urban,568.1,547.1,589.6,6,1,21,581,rising,0.9,0.6,1.3
+Mason County(7),17125,Rural,564.9,517,616.5,7,1,54,113,stable,-0.1,-0.9,0.6
+Pike County(7),17149,Rural,563.9,517.7,613.5,9,1,53,121,stable,1.8,-0.2,5.9
+Morgan County(7),17137,Rural,562.5,531.5,595.1,8,1,33,266,rising,0.8,0.3,1.4
+Macon County(7),17115,Urban,558.2,540.3,576.5,10,1,24,813,stable,0,-0.3,0.2
+Christian County(7),17021,Rural,555.7,525.4,587.4,11,1,38,268,stable,0.1,-0.2,0.5
+Marion County(7),17121,Rural,553.3,524,584,12,1,38,289,stable,0.1,-0.3,0.6
+Sangamon County(7),17167,Urban,552.9,539.8,566.4,13,4,24,1441,stable,0.3,0,0.7
+Vermilion County(7),17183,Rural,546.5,525.6,568.1,15,3,34,560,stable,0.2,-0.4,0.9
+Shelby County(7),17173,Rural,546.4,508.7,586.5,14,1,57,177,rising,1,0.1,2
+Logan County(7),17107,Rural,543.3,509.7,578.8,16,1,54,206,stable,0.5,-0.2,1.1
+Brown County(7),17009,Rural,542.3,468.8,624.6,18,1,96,40,stable,1.3,-0.4,3.2
+Jasper County(7),17079,Rural,542.2,484.7,605.3,17,1,87,72,stable,0.3,-1.1,1.8
+Macoupin County(7),17117,Urban,538.8,512.9,565.8,19,3,45,356,stable,0.3,-0.2,0.8
+Fulton County(7),17057,Rural,537.7,508,568.8,20,2,51,263,stable,0.3,-0.4,1.1
+Jackson County(7),17077,Rural,531.4,504.6,559.3,21,4,51,320,rising,2.9,0.5,8.1
+Franklin County(7),17055,Rural,529.2,501,558.7,22,4,58,286,stable,0,-0.6,0.7
+Grundy County(7),17063,Urban,527.7,501.4,555,23,5,56,315,stable,-0.1,-0.6,0.5
+Mercer County(7),17131,Urban,517.6,474.3,564.3,24,2,86,117,stable,0.5,-0.4,1.4
+Adams County(7),17001,Rural,515.7,494.1,538.1,26,12,59,469,stable,0.3,-0.2,0.8
+Jersey County(7),17083,Urban,515.2,478.2,554.6,25,5,80,157,stable,0.4,-0.4,1.4
+Bond County(7),17005,Urban,511.6,468.8,557.6,27,3,86,113,stable,-0.4,-1.1,0.3
+Madison County(7),17119,Urban,509.7,498.7,520.8,28,20,50,1760,stable,0,-0.3,0.4
+Montgomery County(7),17135,Rural,508.7,476.7,542.4,29,8,78,206,stable,-0.2,-0.9,0.5
+Peoria County(7),17143,Urban,507.9,494.5,521.5,31,20,57,1163,stable,-0.3,-0.6,0
+Clinton County(7),17027,Urban,506.9,478,537.1,32,9,77,246,stable,0.4,-0.2,1
+Scott County(7),17171,Rural,506.4,431.5,591.9,30,1,101,36,falling,-15.4,-23.9,-6.7
+Washington County(7),17189,Rural,505.2,459.6,554.5,34,4,93,100,stable,0,-1,1.1
+Tazewell County(7),17179,Urban,505,490,520.5,33,19,59,906,stable,-0.3,-0.6,0.1
+Moultrie County(7),17139,Rural,503.7,458,552.9,37,3,94,96,stable,0.2,-0.8,1.2
+La Salle County(7),17099,Rural,503.5,487,520.6,35,19,64,761,falling,-0.7,-2.7,-0.3
+Bureau County(7),17011,Rural,503.2,473.9,533.9,36,11,79,250,stable,0,-0.7,0.7
+Cass County(7),17017,Rural,502.5,454.5,554.4,39,4,94,85,stable,0.4,-0.7,1.6
+Perry County(7),17145,Rural,501.8,464.6,541.4,38,7,88,144,stable,0.3,-0.5,1.2
+Iroquois County(7),17075,Rural,500.1,468,534.1,40,12,86,202,stable,0.4,-0.2,1.1
+Kankakee County(7),17091,Urban,499.6,482.4,517.2,41,22,69,680,stable,-0.4,-0.8,0
+Williamson County(7),17199,Rural,499.1,478.2,520.8,42,19,73,456,stable,0.1,-0.4,0.5
+Marshall County(7),17123,Urban,496.7,448.4,549.4,43,4,98,90,stable,0.1,-0.8,1
+Calhoun County(7),17013,Urban,496.5,425.3,578.4,44,1,101,38,stable,-0.2,-1.4,1.1
+McHenry County(7),17111,Urban,495.8,485.5,506.4,45,27,62,1871,rising,1.6,1.1,2.4
+Woodford County(7),17203,Urban,495.2,467.1,524.6,46,16,84,251,stable,0,-0.5,0.7
+Jefferson County(7),17081,Rural,493.6,465.8,522.7,47,16,84,253,stable,0.1,-0.5,0.6
+Union County(7),17181,Rural,493.3,454,535.5,48,11,93,128,stable,0.6,-0.1,1.4
+St. Clair County(7),17163,Urban,492.1,480.9,503.5,49,30,67,1571,stable,-0.4,-0.7,0
+Ford County(7),17053,Urban,491.9,445.3,542.2,50,4,98,89,stable,-0.2,-1.1,0.8
+Ogle County(7),17141,Rural,490.7,467,515.3,51,21,84,349,rising,1.2,0.4,3.4
+De Witt County(7),17039,Rural,488.9,447.2,533.7,52,9,96,110,stable,0.1,-0.7,1
+Effingham County(7),17049,Rural,487,457.8,517.7,54,18,89,222,stable,-0.2,-0.7,0.4
+Douglas County(7),17041,Rural,486.7,447.8,528.2,53,11,96,124,stable,-0.3,-1,0.5
+Schuyler County(7),17169,Rural,485.6,426.3,552,55,3,101,53,rising,1.2,0.1,2.4
+Carroll County(7),17015,Rural,484.8,444.2,528.6,56,12,97,120,stable,-0.3,-1.3,0.7
+Warren County(7),17187,Rural,483.4,442,527.8,57,12,97,111,stable,-0.3,-1.4,0.9
+Randolph County(7),17157,Rural,482.6,452.8,514.1,59,20,91,211,stable,0.3,-0.4,1
+Hardin County(7),17069,Rural,482.2,400.7,578,58,1,102,31,stable,-0.4,-1.8,0.9
+Stark County(7),17175,Urban,481.6,413.7,558.8,60,2,102,40,stable,-0.5,-1.7,0.8
+Henry County(7),17073,Urban,479.9,456.4,504.4,61,27,89,342,stable,-0.3,-0.7,0.1
+Whiteside County(7),17195,Rural,479,457,502,62,27,87,391,stable,-0.1,-0.7,0.5
+Will County(7),17197,Urban,477.1,470.1,484.2,63,48,74,3696,falling,-0.3,-0.6,-0.1
+Lake County(7),17097,Urban,476,469.2,482.9,64,49,75,3941,stable,0.9,0,2
+Kendall County(7),17093,Urban,475.8,458.2,493.9,65,34,86,587,stable,-0.2,-0.6,0.3
+Hancock County(7),17067,Rural,474.3,435.9,515.6,66,16,98,130,stable,0,-0.8,0.8
+Lee County(7),17103,Rural,473.9,445.7,503.6,68,27,95,231,stable,-0.4,-0.8,0
+Piatt County(7),17147,Urban,473.5,433.3,516.6,67,18,100,113,stable,0,-0.7,0.7
+Putnam County(7),17155,Rural,472.6,406.6,547.7,69,3,102,42,stable,-1.3,-2.5,0
+Knox County(7),17095,Rural,471,447.7,495.4,70,30,92,342,stable,-0.1,-0.5,0.3
+Johnson County(7),17087,Rural,469.2,425.2,517,71,15,100,88,stable,-0.8,-1.5,0
+Livingston County(7),17105,Rural,469,441.5,497.9,72,29,96,234,falling,-3.2,-7.7,-0.5
+Champaign County(7),17019,Urban,467.2,453.7,481,73,49,88,957,stable,0.7,0,1.8
+Monroe County(7),17133,Urban,460.3,432.2,489.8,74,34,98,218,stable,-0.3,-1.1,0.6
+Winnebago County(7),17201,Urban,459.8,449.7,470.1,75,58,88,1681,stable,-0.3,-0.6,0
+Wabash County(7),17185,Rural,459.6,412.3,511.2,76,16,101,77,stable,-8.8,-18.1,0.6
+Fayette County(7),17051,Rural,458.9,423.8,496.4,77,24,100,132,stable,-0.2,-1,0.6
+Kane County(7),17089,Urban,457.4,449.5,465.4,79,64,89,2690,stable,0.5,-0.3,1.9
+Cumberland County(7),17035,Rural,456.8,406.5,512.1,78,17,102,67,stable,-0.5,-1.4,0.4
+Saline County(7),17165,Rural,454.6,421.9,489.5,80,33,100,155,falling,-6.9,-12.3,-0.7
+McDonough County(7),17109,Rural,454.3,421.2,489.3,82,32,100,156,stable,0.1,-0.6,0.8
+DuPage County(7),17043,Urban,454.1,448.4,459.8,81,68,89,5211,falling,-0.3,-0.6,-0.1
+Gallatin County(7),17059,Rural,453.8,384.8,533.2,83,4,102,35,falling,-1.5,-2.5,-0.6
+Henderson County(7),17071,Rural,452.6,394.8,518.1,84,9,102,51,stable,0.3,-0.7,1.4
+Stephenson County(7),17177,Rural,447.8,423.9,472.7,85,53,99,305,stable,0,-0.4,0.4
+Edgar County(7),17045,Rural,447.4,409,488.8,87,29,101,115,falling,-1.1,-2,-0.1
+Richland County(7),17159,Rural,447.4,408,489.8,86,27,101,103,stable,-0.1,-1.1,1
+Coles County(7),17029,Rural,446,421.5,471.6,88,49,99,268,falling,-5.5,-9.8,-0.8
+Boone County(7),17007,Urban,444.4,421.3,468.4,89,50,99,292,stable,-0.2,-0.6,0.2
+Rock Island County(7),17161,Urban,441.9,428.4,455.8,90,70,98,876,falling,-0.7,-1.1,-0.4
+Massac County(7),17127,Urban,435,394,479.6,91,34,102,91,stable,-0.3,-1.5,0.9
+Cook County(7),17031,Urban,435,432.6,437.4,92,83,97,26413,stable,-0.5,-0.9,0.3
+Edwards County(7),17047,Rural,434.5,372.3,505.1,93,15,102,39,stable,-0.9,-2.3,0.5
+Jo Daviess County(7),17085,Rural,433.5,401,468.4,94,51,102,169,stable,-0.4,-1.3,0.5
+McLean County(7),17113,Urban,428.8,415.1,442.8,95,80,100,778,falling,-1.1,-2.1,-0.8
+Crawford County(7),17033,Rural,427.4,391.7,465.8,96,49,102,113,falling,-14.4,-21,-4.8
+Wayne County(7),17191,Rural,421.4,384.5,461.3,97,56,102,105,stable,-0.5,-1.6,0.6
+Lawrence County(7),17101,Rural,421.4,381.3,464.8,98,48,102,85,falling,-13.3,-20.8,-4.5
+Clark County(7),17023,Rural,410.8,371.5,453.3,99,61,102,87,falling,-8.8,-16.9,-1.5
+Pope County(7),17151,Rural,406.6,336.3,491.4,100,21,102,30,stable,-12.1,-24.4,2
+White County(7),17193,Rural,386.5,348.2,428.4,101,76,102,84,falling,-15.5,-25.7,-4.5
+Hamilton County(7),17065,Rural,371.6,321.5,428,102,75,102,44,stable,-0.2,-1.6,1.4
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+Notes:,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+Created by statecancerprofiles.cancer.gov on 07/16/2026 9:27 pm.,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+State Cancer Registries [ https://www.cdc.gov/national-program-cancer-registries/contact/index.html ] may provide more current or more local data.,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+"
+
+Trend
+   Rising when 95% confidence interval of average annual percent change is above 0.
+   Stable when 95% confidence interval of average annual percent change includes 0.
+   Falling when 95% confidence interval of average annual percent change is below 0.
+",,,,,,,,,,,,,
+,,,,,,,,,,,,,
+"[rate note] Incidence rates (cases per 100,000 population per year) are age-adjusted to the 2000 US standard population [ http://www.seer.cancer.gov/stdpopulations/ ] (SEER areas use 20 age groups and NPCR areas use 19 age groups). Rates are for invasive cancer only (except for bladder cancer which is invasive and in situ) or unless otherwise specified. Rates calculated using SEER*Stat [ https://seer.cancer.gov/seerstat/ ]. Population counts for denominators are based on Census populations as modified [https://seer.cancer.gov/popdata/] by NCI. The US Population Data File [https://seer.cancer.gov/popdata/] is used for SEER and NPCR incidence rates.",,,,,,,,,,,,,
+,,,,,,,,,,,,,
+"[recent trend note] Incidence data come from different sources. The Average Annual Percent Change (AAPC) is based on the APCs calculated by Joinpoint [ https://surveillance.cancer.gov/joinpoint/ ]. Due to data availability issues, the time period used in the calculation of the joinpoint regression model may differ [ https://statecancerprofiles.cancer.gov/historicaltrend/differences.html ] for selected counties.",,,,,,,,,,,,,
+,,,,,,,,,,,,,
+Rates and trends are computed using different standards for malignancy. For more information see malignant.html.,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+"[stage note] All Stages refers to any stage. Due to changes in stage coding, Combined Summary Stage with Expanded Regional Codes (2004+) is used for data from Surveillance, Epidemiology, and End Results (SEER) databases and Merged Summary Stage is used for data from National Program of Cancer Registries [ https://www.cdc.gov/cancer/npcr/index.htm ] databases. Due to the increased complexity with staging, other staging variables maybe used if necessary.",,,,,,,,,,,,,
+,,,,,,,,,,,,,
+"[rank note] Results presented with the CI*Rank statistics help show the usefulness of ranks. For example, ranks for relatively rare diseases or less populated areas may be essentially meaningless because of their large variability, but ranks for more common diseases in densely populated regions can be very useful. The rates used in CI*Rank are all age-adjusted to the 2000 US standard population using 19 age groups for SEER and NPCR areas. More information about methodology can be found on the CI*Rank website [ https://surveillance.cancer.gov/cirank/ ].",,,,,,,,,,,,,
+,,,,,,,,,,,,,
+"[rural urban note] Rural–urban county classifications are based on the 2023 USDA Rural–Urban Continuum Codes [ https://www.ers.usda.gov/data-products/rural-urban-continuum-codes/ ] (except for Connecticut Counties which use 2013 codes). State-level cancer rates for rural areas are calculated using cancer cases registered exclusively in rural counties, while state-level cancer rates for urban areas are calculated using cases registered exclusively in urban counties.",,,,,,,,,,,,,
+,,,,,,,,,,,,,
+"(1) Source: National Program of Cancer Registries [ https://www.cdc.gov/cancer/npcr/index.htm ] and Surveillance, Epidemiology, and End Results [ http://seer.cancer.gov ] SEER*Stat Database - United States Department of Health and Human Services, Centers for Disease Control and Prevention and National Cancer Institute. Based on the 2024 submission.",,,,,,,,,,,,,
+,,,,,,,,,,,,,
+(7) Source: SEER [ http://seer.cancer.gov ] November 2024 submission.,,,,,,,,,,,,,
+,,,,,,,,,,,,,
+Data for United States does not include Puerto Rico.,,,,,,,,,,,,,

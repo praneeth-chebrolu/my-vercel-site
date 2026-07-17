@@ -62,7 +62,39 @@ def centroid(geom):
 
 ROAD_FACTOR=1.27   # straight-line -> road distance multiplier
 AVG_MPH=52         # blended highway/rural speed for drive-time estimate
-IL_RATE=445.0      # statewide age-adjusted incidence per 100k (SEER/ISCR order of magnitude)
+
+# ---- REAL county incidence: State Cancer Profiles / ISCR export (2018-2022) ----
+# All Cancer Sites, all races, both sexes, all ages. Age-adjusted rate per 100k
+# and average annual case count, keyed by county FIPS.
+import csv, os
+INCIDENCE_CSV = 'incidence_scp_2018_2022.csv'
+if not os.path.exists(INCIDENCE_CSV):
+    INCIDENCE_CSV = os.path.join('data', 'incidence_scp_2018_2022.csv')
+
+def load_incidence(path):
+    out = {}
+    state_rate = 445.0
+    with open(path, newline='') as fh:
+        for parts in csv.reader(fh):
+            if len(parts) < 10:
+                continue
+            fips = parts[1].strip()
+            if fips == '17000':                      # statewide row
+                try: state_rate = float(parts[3])
+                except ValueError: pass
+                continue
+            if not (fips.startswith('17') and len(fips) == 5 and fips != '17000'):
+                continue
+            try:
+                rate = float(parts[3])
+                count = int(float(str(parts[9]).replace(',', '').strip()))
+            except (ValueError, IndexError):
+                continue
+            out[fips] = {'rate': rate, 'count': count,
+                         'rural_urban': parts[2].strip(), 'trend': parts[10].strip() if len(parts) > 10 else ''}
+    return out, state_rate
+
+INCIDENCE, IL_RATE = load_incidence(INCIDENCE_CSV)
 
 rows=[]
 for f in geo['features']:
@@ -87,11 +119,18 @@ for f in geo['features']:
                 cnt+=1; tr+=c['trials_active']
         return cnt,tr
     c30,t30=within(30); c60,t60=within(60); c90,t90=within(90)
-    est_cases=round(population*IL_RATE/100000)
+    inc=INCIDENCE.get(fips)
+    if inc:
+        annual_cases=inc['count']; rate=inc['rate']; rural_urban=inc['rural_urban']; trend=inc['trend']
+        is_real=True
+    else:                                           # fallback if a county is missing from the CSV
+        rate=IL_RATE; annual_cases=round(population*IL_RATE/100000)
+        rural_urban=""; trend=""; is_real=False
     rows.append({
         "fips":fips,"county":name,"population":population,"area_sqmi":area,
         "density":density,"lat":round(lat,4),"lng":round(lng,4),
-        "est_annual_cases":est_cases,"incidence_per100k":IL_RATE,
+        "annual_cases":annual_cases,"incidence_per100k":rate,"incidence_real":is_real,
+        "rural_urban":rural_urban,"trend":trend,
         "nearest_center":nearest_c['name'],"nearest_city":nearest_c['city'],
         "nearest_miles":round(road_mi,1),"drive_min":drive_min,
         "centers_30":c30,"centers_60":c60,"centers_90":c90,
@@ -100,12 +139,12 @@ for f in geo['features']:
 
 # ---- Access-to-Innovation Index ----
 # Higher index = greater UNMET need (high burden + poor trial access).
-# Normalize burden (est_cases) and access-gap (drive time, few nearby trials) to 0-100.
-maxcases=max(r['est_annual_cases'] for r in rows)
+# Normalize burden (real annual cases) and access-gap (drive time, few nearby trials) to 0-100.
+maxcases=max(r['annual_cases'] for r in rows)
 maxdrive=max(r['drive_min'] for r in rows)
 maxtr90=max(r['trials_90'] for r in rows) or 1
 for r in rows:
-    burden = r['est_annual_cases']/maxcases                 # 0..1
+    burden = r['annual_cases']/maxcases                     # 0..1
     gap_drive = r['drive_min']/maxdrive                      # 0..1 (farther = worse)
     gap_trials = 1 - (r['trials_90']/maxtr90)                # 0..1 (fewer trials = worse)
     access_gap = 0.55*gap_drive + 0.45*gap_trials
@@ -118,12 +157,16 @@ for r in rows:
 for i,r in enumerate(sorted(rows,key=lambda x:-x['index']),1):
     r['rank']=i
 
-json.dump({"generated_note":"Population/density/area and geography are REAL. Incidence is a statewide-rate estimate; trial counts are illustrative placeholders pending ClinicalTrials.gov + ISCR load.",
+real_n=sum(1 for r in rows if r['incidence_real'])
+json.dump({"generated_note":f"Population, density, geography, and cancer incidence are REAL: county age-adjusted incidence and annual case counts are from the Illinois State Cancer Registry / State Cancer Profiles (All Cancer Sites, 2018-2022). Trial counts remain illustrative placeholders pending a ClinicalTrials.gov load.",
+           "incidence_source":"Illinois State Cancer Registry / State Cancer Profiles (US Cancer Statistics), All Cancer Sites, 2018-2022, age-adjusted to 2000 US std population.",
+           "incidence_real_counties":real_n,
            "il_rate_per100k":IL_RATE,"road_factor":ROAD_FACTOR,"avg_mph":AVG_MPH,
            "counties":rows}, open('counties_out.json','w'))
 json.dump({"centers":CENTERS}, open('centers_out.json','w'), indent=2)
 
 top=sorted(rows,key=lambda x:-x['index'])[:8]
+print(f"Real incidence loaded for {real_n}/{len(rows)} counties. Statewide rate {IL_RATE}/100k.")
 print("Top unmet-need counties (index):")
-for r in top: print(f"  {r['rank']:>2} {r['county']:<12} idx={r['index']:>5} pop={r['population']:>8,} drive={r['drive_min']}min cases={r['est_annual_cases']}")
-print("Total est cases:", sum(r['est_annual_cases'] for r in rows))
+for r in top: print(f"  {r['rank']:>2} {r['county']:<12} idx={r['index']:>5} rate={r['incidence_per100k']:>5}/100k drive={r['drive_min']:>3}min cases={r['annual_cases']}")
+print("Total annual cases:", sum(r['annual_cases'] for r in rows))

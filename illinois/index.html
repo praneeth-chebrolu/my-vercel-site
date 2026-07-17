@@ -103,7 +103,8 @@
     <div class="controls">
       <span class="label">Map layer</span>
       <button class="chip active" data-metric="index">Access-to-Innovation Index</button>
-      <button class="chip" data-metric="est_annual_cases">Cancer burden</button>
+      <button class="chip" data-metric="annual_cases">Cancer burden</button>
+      <button class="chip" data-metric="incidence_per100k">Incidence rate</button>
       <button class="chip" data-metric="density">Population density</button>
       <button class="chip" data-metric="drive_min">Drive time to center</button>
       <button class="chip" data-metric="trials_90">Trials within 90 min</button>
@@ -136,8 +137,8 @@
         <th data-k="rank" class="num">#</th>
         <th data-k="county">County</th>
         <th data-k="population" class="num">Population</th>
-        <th data-k="density" class="num">Density</th>
-        <th data-k="est_annual_cases" class="num">Est. cases/yr</th>
+        <th data-k="incidence_per100k" class="num">Rate /100k</th>
+        <th data-k="annual_cases" class="num">Cases/yr</th>
         <th data-k="nearest_city">Nearest center</th>
         <th data-k="drive_min" class="num">Drive (min)</th>
         <th data-k="trials_90" class="num">Trials &le;90m</th>
@@ -153,10 +154,11 @@
   <div class="cols">
     <div>
       <h3>1. Cancer burden</h3>
-      <p>Estimated annual cases per county = county population &times; a statewide age-adjusted
-      incidence rate (<span id="rateNote">~445/100k</span>). This is a transparent estimate;
-      swap in true county rates from the <strong>Illinois State Cancer Registry (ISCR)</strong>
-      by editing <code>build_data.py</code>.</p>
+      <p>Real per-county annual case counts and age-adjusted incidence rates
+      (<span id="rateNote">state ~464/100k</span>) from the
+      <strong>Illinois State Cancer Registry / State Cancer Profiles</strong>
+      (All Cancer Sites, 2018&ndash;2022, age-adjusted to the 2000 U.S. standard
+      population). Load a different cancer type or year by re-running <code>build_data.py</code>.</p>
 
       <h3>2. Population &amp; density</h3>
       <p>Real county population, land area, and density (U.S. Census). Geometry is the
@@ -188,19 +190,22 @@
 
 <footer>
   <strong>Data provenance.</strong> Population, land area, density, and county geometry are real
-  (U.S. Census). Cancer incidence is a statewide-rate estimate, not true county rates. Trial
-  counts and drive times are modeled estimates for planning, not clinical or navigational advice.
+  (U.S. Census). Cancer incidence &mdash; per-county annual case counts and age-adjusted rates &mdash;
+  is real, from the Illinois State Cancer Registry / State Cancer Profiles (All Cancer Sites,
+  2018&ndash;2022). Cancer-center locations are real; per-center active-trial counts and drive
+  times are modeled estimates for planning, not clinical or navigational advice.
   Built as a prototype of a Clinical Intelligence Engine / Access-to-Innovation Index.
 </footer>
 
 <script src="vendor/leaflet.js"></script>
 <script>
 const METRICS = {
-  index:            {title:"Access-to-Innovation Index", fmt:v=>v.toFixed(1), scale:"warm", desc:"unmet need"},
-  est_annual_cases: {title:"Estimated annual cancer cases", fmt:v=>v.toLocaleString(), scale:"warm", desc:"cases/yr"},
-  density:          {title:"Population density (people / sq mi)", fmt:v=>v.toLocaleString(), scale:"blue", desc:"per sq mi"},
-  drive_min:        {title:"Drive time to nearest center (min)", fmt:v=>v+" min", scale:"warm", desc:"minutes"},
-  trials_90:        {title:"Active trials within 90 minutes", fmt:v=>v.toLocaleString(), scale:"green", desc:"trials"},
+  index:              {title:"Access-to-Innovation Index", fmt:v=>v.toFixed(1), scale:"warm", desc:"unmet need"},
+  annual_cases:       {title:"Annual cancer cases (ISCR 2018–2022)", fmt:v=>v.toLocaleString(), scale:"warm", desc:"cases/yr"},
+  incidence_per100k:  {title:"Age-adjusted incidence rate (per 100k)", fmt:v=>Math.round(v).toLocaleString(), scale:"warm", desc:"per 100k"},
+  density:            {title:"Population density (people / sq mi)", fmt:v=>v.toLocaleString(), scale:"blue", desc:"per sq mi"},
+  drive_min:          {title:"Drive time to nearest center (min)", fmt:v=>v+" min", scale:"warm", desc:"minutes"},
+  trials_90:          {title:"Active trials within 90 minutes", fmt:v=>v.toLocaleString(), scale:"green", desc:"trials"},
 };
 const RAMPS = {
   warm:  ["#fff5eb","#fed9a6","#fdae6b","#f16913","#d94801","#8c2d04"],
@@ -240,7 +245,8 @@ function showDetail(c){
     <div style="margin-bottom:10px;"><span class="idxbadge" style="background:${idxColor}">Index ${c.index.toFixed(1)}</span></div>
     <div class="stat"><span>Population</span><b>${c.population.toLocaleString()}</b></div>
     <div class="stat"><span>Density (/sq mi)</span><b>${c.density.toLocaleString()}</b></div>
-    <div class="stat"><span>Est. annual cancer cases</span><b>${c.est_annual_cases.toLocaleString()}</b></div>
+    <div class="stat"><span>Annual cancer cases</span><b>${c.annual_cases.toLocaleString()}</b></div>
+    <div class="stat"><span>Incidence rate /100k</span><b>${c.incidence_per100k.toLocaleString()} <span style="color:var(--muted);font-weight:400">(${c.trend||"n/a"})</span></b></div>
     <div class="stat"><span>Nearest center</span><b>${c.nearest_city}</b></div>
     <div class="stat"><span>Drive to nearest</span><b>${c.drive_min} min &middot; ${c.nearest_miles} mi</b></div>
     <div class="stat"><span>Centers &le; 60 min</span><b>${c.centers_60}</b></div>
@@ -280,8 +286,8 @@ function renderTable(){
       <td class="num">${c.rank}</td>
       <td>${c.county}</td>
       <td class="num">${c.population.toLocaleString()}</td>
-      <td class="num">${c.density.toLocaleString()}</td>
-      <td class="num">${c.est_annual_cases.toLocaleString()}</td>
+      <td class="num">${Math.round(c.incidence_per100k).toLocaleString()}</td>
+      <td class="num">${c.annual_cases.toLocaleString()}</td>
       <td>${c.nearest_city}</td>
       <td class="num">${c.drive_min}</td>
       <td class="num">${c.trials_90.toLocaleString()}</td>
