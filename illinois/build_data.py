@@ -63,7 +63,8 @@ def centroid(geom):
 ROAD_FACTOR=1.27   # straight-line -> road distance multiplier
 AVG_MPH=52         # blended highway/rural speed for drive-time estimate
 
-# ---- REAL county incidence: State Cancer Profiles / ISCR export (2018-2022) ----
+# ---- REAL county incidence: NCI & CDC State Cancer Profiles export (2018-2022) ----
+# Source: statecancerprofiles.cancer.gov, based on U.S. Cancer Statistics (NPCR + SEER).
 # All Cancer Sites, all races, both sexes, all ages. Age-adjusted rate per 100k
 # and average annual case count, keyed by county FIPS.
 import csv, os
@@ -158,8 +159,8 @@ for i,r in enumerate(sorted(rows,key=lambda x:-x['index']),1):
     r['rank']=i
 
 real_n=sum(1 for r in rows if r['incidence_real'])
-json.dump({"generated_note":f"Population, density, geography, and cancer incidence are REAL: county age-adjusted incidence and annual case counts are from the Illinois State Cancer Registry / State Cancer Profiles (All Cancer Sites, 2018-2022). Trial counts remain illustrative placeholders pending a ClinicalTrials.gov load.",
-           "incidence_source":"Illinois State Cancer Registry / State Cancer Profiles (US Cancer Statistics), All Cancer Sites, 2018-2022, age-adjusted to 2000 US std population.",
+json.dump({"generated_note":f"Population, density, geography, and cancer incidence are REAL: county age-adjusted incidence and annual case counts are from NCI & CDC State Cancer Profiles (All Cancer Sites, 2018-2022). Trial counts remain illustrative placeholders pending a ClinicalTrials.gov load.",
+           "incidence_source":"NCI & CDC — State Cancer Profiles (statecancerprofiles.cancer.gov), based on U.S. Cancer Statistics (NPCR + SEER). All Cancer Sites, 2018-2022, age-adjusted to the 2000 U.S. standard population.",
            "incidence_real_counties":real_n,
            "il_rate_per100k":IL_RATE,"road_factor":ROAD_FACTOR,"avg_mph":AVG_MPH,
            "counties":rows}, open('counties_out.json','w'))

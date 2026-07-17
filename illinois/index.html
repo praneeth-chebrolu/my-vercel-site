@@ -155,10 +155,11 @@
     <div>
       <h3>1. Cancer burden</h3>
       <p>Real per-county annual case counts and age-adjusted incidence rates
-      (<span id="rateNote">state ~464/100k</span>) from the
-      <strong>Illinois State Cancer Registry / State Cancer Profiles</strong>
-      (All Cancer Sites, 2018&ndash;2022, age-adjusted to the 2000 U.S. standard
-      population). Load a different cancer type or year by re-running <code>build_data.py</code>.</p>
+      (<span id="rateNote">state ~464/100k</span>) from
+      <strong>NCI &amp; CDC &mdash; State Cancer Profiles</strong>
+      (statecancerprofiles.cancer.gov), based on U.S. Cancer Statistics (NPCR + SEER),
+      All Cancer Sites, 2018&ndash;2022, age-adjusted to the 2000 U.S. standard
+      population. Load a different cancer type or year by re-running <code>build_data.py</code>.</p>
 
       <h3>2. Population &amp; density</h3>
       <p>Real county population, land area, and density (U.S. Census). Geometry is the
@@ -182,8 +183,9 @@
       It highlights counties where many people face cancer but the nearest research site is far.</p>
 
       <h3>Reproduce the data</h3>
-      <p>Run <code>python3 illinois/build_data.py</code> after dropping real ISCR and
-      ClinicalTrials.gov inputs in place. It regenerates <code>data/counties.json</code>.</p>
+      <p>Run <code>python3 illinois/build_data.py</code>. It reads the State Cancer Profiles
+      incidence CSV (and, when added, ClinicalTrials.gov inputs) and regenerates
+      <code>data/counties.json</code>.</p>
     </div>
   </div>
 </div>
@@ -191,8 +193,9 @@
 <footer>
   <strong>Data provenance.</strong> Population, land area, density, and county geometry are real
   (U.S. Census). Cancer incidence &mdash; per-county annual case counts and age-adjusted rates &mdash;
-  is real, from the Illinois State Cancer Registry / State Cancer Profiles (All Cancer Sites,
-  2018&ndash;2022). Cancer-center locations are real; per-center active-trial counts and drive
+  is real, from NCI &amp; CDC State Cancer Profiles (statecancerprofiles.cancer.gov), based on
+  U.S. Cancer Statistics (NPCR + SEER), All Cancer Sites, 2018&ndash;2022. Cancer-center
+  locations are real; per-center active-trial counts and drive
   times are modeled estimates for planning, not clinical or navigational advice.
   Built as a prototype of a Clinical Intelligence Engine / Access-to-Innovation Index.
 </footer>
@@ -201,7 +204,7 @@
 <script>
 const METRICS = {
   index:              {title:"Access-to-Innovation Index", fmt:v=>v.toFixed(1), scale:"warm", desc:"unmet need"},
-  annual_cases:       {title:"Annual cancer cases (ISCR 2018–2022)", fmt:v=>v.toLocaleString(), scale:"warm", desc:"cases/yr"},
+  annual_cases:       {title:"Annual cancer cases (State Cancer Profiles 2018–2022)", fmt:v=>v.toLocaleString(), scale:"warm", desc:"cases/yr"},
   incidence_per100k:  {title:"Age-adjusted incidence rate (per 100k)", fmt:v=>Math.round(v).toLocaleString(), scale:"warm", desc:"per 100k"},
   density:            {title:"Population density (people / sq mi)", fmt:v=>v.toLocaleString(), scale:"blue", desc:"per sq mi"},
   drive_min:          {title:"Drive time to nearest center (min)", fmt:v=>v+" min", scale:"warm", desc:"minutes"},
