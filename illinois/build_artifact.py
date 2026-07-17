@@ -236,11 +236,12 @@ gLayer=L.geoJSON(GEO,{style,onEachFeature:(f,l)=>{
         mouseout:()=>gLayer.resetStyle(l), click:()=>{if(c){detail(c);map.fitBounds(l.getBounds(),{maxZoom:9,padding:[30,30]});}}});
 }}).addTo(map);
 map.fitBounds(gLayer.getBounds(),{padding:[10,10]});
-// Spread near-coincident centers (e.g. the Chicago cluster) on a small circle so
-// each is visible/clickable. TRUE coordinates are used for all drive-time analytics
-// in build_data.py; only the on-map pin is nudged for legibility.
+// Spread near-coincident centers (e.g. the Chicago cluster) so each is visible and
+// clickable, while KEEPING each center's true compass direction from the cluster's
+// center (Northwestern stays north of University of Chicago, etc.). Only the on-map
+// pin is nudged; build_data.py uses true coordinates for all drive-time analytics.
 function declutter(items){
-  const pos=items.map(c=>[c.lat,c.lng]), used=items.map(()=>false), TH=0.15;
+  const pos=items.map(c=>[c.lat,c.lng]), used=items.map(()=>false), TH=0.15, R=0.085, MINGAP=0.9;
   for(let i=0;i<items.length;i++){
     if(used[i]) continue;
     const grp=[i];
@@ -248,9 +249,14 @@ function declutter(items){
       if(!used[j] && Math.hypot(items[i].lat-items[j].lat, items[i].lng-items[j].lng)<TH) grp.push(j);
     if(grp.length>1){
       const clat=grp.reduce((a,k)=>a+items[k].lat,0)/grp.length;
-      const clng=grp.reduce((a,k)=>a+items[k].lng,0)/grp.length, R=0.085;
-      grp.forEach((k,n)=>{const a=2*Math.PI*n/grp.length - Math.PI/2;
-        pos[k]=[clat+R*Math.sin(a), clng+R*Math.cos(a)];});
+      const clng=grp.reduce((a,k)=>a+items[k].lng,0)/grp.length;
+      // bearing of each center from the cluster centre (x=east/lng, y=north/lat)
+      const arr=grp.map(k=>({k,ang:Math.atan2(items[k].lat-clat, items[k].lng-clng)}));
+      arr.sort((a,b)=>a.ang-b.ang);
+      // keep bearing order but enforce a minimum angular gap so none overlap
+      for(let n=1;n<arr.length;n++)
+        if(arr[n].ang-arr[n-1].ang<MINGAP) arr[n].ang=arr[n-1].ang+MINGAP;
+      arr.forEach(({k,ang})=>{ pos[k]=[clat+R*Math.sin(ang), clng+R*Math.cos(ang)]; });
     }
     grp.forEach(k=>used[k]=true);
   }
