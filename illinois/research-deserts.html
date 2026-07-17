@@ -716,9 +716,24 @@ a{color:var(--accent-ink)}
 .stat .k{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.35;}
 .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:22px;margin-top:30px;align-items:start;}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;}
-.card-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:16px 18px 0;}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 0;}
 .card-h h2{font-size:15px;margin:0;letter-spacing:.01em;}
 .card-h .hint{font-size:12px;color:var(--muted);}
+.tabs{display:flex;gap:4px;}
+.tab{font-family:var(--sans);font-size:13px;font-weight:600;border:none;background:transparent;color:var(--muted);
+  padding:5px 10px;border-radius:8px;cursor:pointer;transition:all .12s;}
+.tab:hover{color:var(--ink);background:var(--ground);}
+.tab.active{color:var(--accent-ink);background:color-mix(in srgb,var(--accent) 12%,transparent);}
+/* trial-center rows */
+.ci{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px;border-radius:12px;cursor:pointer;}
+.ci+.ci{border-top:1px solid var(--line);}
+.ci:hover{background:var(--ground);}
+.ci .cn{font-weight:600;font-size:14px;line-height:1.3;}
+.ci .cc{font-size:12px;color:var(--muted);margin-top:2px;}
+.ci .ct{text-align:right;font-variant-numeric:tabular-nums;}
+.ci .ct .big{font-weight:700;font-size:15px;} .ci .ct .sm{font-size:11px;color:var(--muted);}
+.nci{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+  padding:1px 6px;border-radius:5px;background:var(--sev-severe);color:#fff;margin-left:6px;vertical-align:1px;}
 .controls{display:flex;flex-wrap:wrap;gap:7px;padding:14px 18px;}
 .chip{font-family:var(--sans);font-size:12.5px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);
   border-radius:999px;padding:6px 12px;cursor:pointer;transition:all .12s;}
@@ -799,8 +814,15 @@ a{color:var(--accent-ink)}
       <div class="detail" id="detail"></div>
     </section>
     <section class="card">
-      <div class="card-h"><h2>The deserts, ranked</h2><span class="hint">most unmet need first</span></div>
+      <div class="card-h">
+        <div class="tabs">
+          <button class="tab active" data-tab="deserts">Deserts</button>
+          <button class="tab" data-tab="centers">Trial centers</button>
+        </div>
+        <span class="hint" id="paneHint">most unmet need first</span>
+      </div>
       <div class="list" id="list"></div>
+      <div class="list" id="centersList" style="display:none"></div>
     </section>
   </div>
   <section class="method">
@@ -860,11 +882,14 @@ gLayer=L.geoJSON(GEO,{style,onEachFeature:(f,l)=>{
         mouseout:()=>gLayer.resetStyle(l), click:()=>{if(c){detail(c);map.fitBounds(l.getBounds(),{maxZoom:9,padding:[30,30]});}}});
 }}).addTo(map);
 map.fitBounds(gLayer.getBounds(),{padding:[10,10]});
-L.layerGroup(CENTERS.map(c=>{const nci=c.nci!=='None';
+const cMarkers=CENTERS.map(c=>{const nci=c.nci!=='None';
   return L.circleMarker([c.lat,c.lng],{radius:nci?7:5,color:'#1C1814',weight:1.4,
     fillColor:nci?'#8C2D12':'#1C1814',fillOpacity:.92})
-    .bindTooltip(`${c.name} — ${c.city}${nci?' (NCI '+c.nci+')':''}`);
-})).addTo(map);
+    .bindTooltip(`<b>${c.name}</b><br>${c.city}, IL${nci?' &middot; NCI '+c.nci:''}<br>~${c.trials_active} trials &middot; ${c.phase1} Phase I`);
+});
+L.layerGroup(cMarkers).addTo(map);
+function focusCenter(i){const c=CENTERS[i];map.setView([c.lat,c.lng],9);cMarkers[i].openTooltip();
+  cMarkers[i].setStyle({weight:3});setTimeout(()=>cMarkers[i].setStyle({weight:1.4}),1200);}
 function legend(){const m=METRICS[current],r=RAMPS[m.ramp],s=STOPS[current];let h='';
   for(let i=0;i<r.length;i++){const lo=s.min+(s.max-s.min)*i/r.length;
     h+=`<div class="row"><span class="sw" style="background:${r[i]}"></span>${m.fmt(Math.round(lo))}</div>`;}
@@ -900,7 +925,28 @@ function renderList(){
 function setMetric(m){current=m;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x.dataset.m===m));
   gLayer.setStyle(style);legend();}
 document.querySelectorAll('.chip').forEach(x=>x.onclick=()=>setMetric(x.dataset.m));
-legend();renderList();
+
+function renderCenters(){
+  const order=CENTERS.map((c,i)=>({c,i})).sort((a,b)=>b.c.trials_active-a.c.trials_active);
+  document.getElementById('centersList').innerHTML=order.map(({c,i})=>{
+    const nci=c.nci!=='None';
+    return `<div class="ci" data-ci="${i}">
+      <div><div class="cn">${c.name}${nci?`<span class="nci">NCI ${c.nci==='Comprehensive'?'Comp.':c.nci}</span>`:''}</div>
+        <div class="cc">${c.city}, IL</div></div>
+      <div class="ct"><div class="big">~${c.trials_active}</div><div class="sm">${c.phase1} Phase I</div></div>
+    </div>`;}).join('');
+  document.querySelectorAll('.ci').forEach(el=>el.onclick=()=>focusCenter(+el.dataset.ci));
+}
+function setTab(t){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
+  const deserts=t==='deserts';
+  document.getElementById('list').style.display=deserts?'':'none';
+  document.getElementById('centersList').style.display=deserts?'none':'';
+  document.getElementById('paneHint').textContent=deserts?'most unmet need first':'12 centers · trial counts are estimates';
+}
+document.querySelectorAll('.tab').forEach(x=>x.onclick=()=>setTab(x.dataset.tab));
+
+legend();renderList();renderCenters();
 detail([...DATA].sort((a,b)=>b.desert_score-a.desert_score)[0]);
 </script>
 
