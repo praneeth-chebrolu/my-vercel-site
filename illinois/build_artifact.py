@@ -228,18 +228,20 @@ gLayer=L.geoJSON(GEO,{style,onEachFeature:(f,l)=>{
         mouseout:()=>gLayer.resetStyle(l), click:()=>{if(c){detail(c);map.fitBounds(l.getBounds(),{maxZoom:9,padding:[30,30]});}}});
 }}).addTo(map);
 map.fitBounds(gLayer.getBounds(),{padding:[10,10]});
+map.createPane('centers'); map.getPane('centers').style.zIndex=650;
 const cMarkers=CENTERS.map(c=>{const nci=c.nci!=='None';
-  return L.circleMarker([c.lat,c.lng],{radius:nci?7:5,color:'#1C1814',weight:1.4,
-    fillColor:nci?'#8C2D12':'#1C1814',fillOpacity:.92})
+  return L.circleMarker([c.lat,c.lng],{pane:'centers',radius:nci?10:8,color:'#FFFFFF',weight:2.5,
+    fillColor:nci?'#7C2A12':'#0E6B6B',fillOpacity:1})
     .bindTooltip(`<b>${c.name}</b><br>${c.city}, IL${nci?' &middot; NCI '+c.nci:''}<br>~${c.trials_active} trials &middot; ${c.phase1} Phase I`);
 });
-L.layerGroup(cMarkers).addTo(map);
+const centersLayer=L.layerGroup(cMarkers).addTo(map);
 function focusCenter(i){const c=CENTERS[i];map.setView([c.lat,c.lng],9);cMarkers[i].openTooltip();
-  cMarkers[i].setStyle({weight:3});setTimeout(()=>cMarkers[i].setStyle({weight:1.4}),1200);}
+  cMarkers[i].setStyle({radius:14,weight:3.5});setTimeout(()=>cMarkers[i].setStyle({radius:CENTERS[i].nci!=='None'?10:8,weight:2.5}),1400);}
 function legend(){const m=METRICS[current],r=RAMPS[m.ramp],s=STOPS[current];let h='';
   for(let i=0;i<r.length;i++){const lo=s.min+(s.max-s.min)*i/r.length;
     h+=`<div class="row"><span class="sw" style="background:${r[i]}"></span>${m.fmt(Math.round(lo))}</div>`;}
-  h+=`<div class="row"><span class="sw" style="background:#1C1814;border-radius:50%;width:10px"></span>Trial center</div>`;
+  h+=`<div class="row"><span class="sw" style="background:#7C2A12;border:2px solid #fff;border-radius:50%;width:14px;height:14px"></span>NCI center</div>`;
+  h+=`<div class="row"><span class="sw" style="background:#0E6B6B;border:2px solid #fff;border-radius:50%;width:14px;height:14px"></span>Trial center</div>`;
   document.getElementById('legend').innerHTML=h;
   document.getElementById('mapTitle').textContent=m.t;
 }
