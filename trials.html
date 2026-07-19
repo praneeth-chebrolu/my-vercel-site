@@ -6,74 +6,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
-    body{
-      font-family: Arial, sans-serif;
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 0 16px;
-      line-height: 1.6;
-      color: #1f2937;
-    }
-    header{
-      display:flex; align-items:baseline; justify-content:space-between;
-      gap:16px; margin-bottom:18px; flex-wrap: wrap;
-    }
+    body{ font-family: Arial, sans-serif; max-width: 1100px; margin: 40px auto; padding: 0 16px; line-height: 1.6; color: #1f2937; }
+    header{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap: wrap; }
     nav a{ margin-left: 14px; text-decoration:none; color:#1f2937; white-space: nowrap; }
     nav a:hover{ text-decoration:underline; }
-
     .card{ border:1px solid #e5e7eb; border-radius:14px; padding:18px; background:#fff; }
     .muted{ color:#6b7280; font-size:14px; }
     a{ color:#2563eb; }
 
-    .filters{
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap:12px; margin-top:12px;
-    }
-    input, select{
-      width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; background:#fff;
-      font: inherit;
-    }
-    .grid{ display:grid; grid-template-columns: 1fr; gap:14px; margin-top:14px; }
+    .filters{ display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; margin-top:12px; }
+    input, select{ width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; background:#fff; font: inherit; }
+    label.f{ font-size:12px; color:#6b7280; display:block; margin-bottom:4px; }
+    .zipRow{ display:flex; gap:8px; align-items:center; }
+    .zipRow input{ max-width:160px; }
+    .locNote{ margin-top:10px; font-size:13px; }
+
+    .section{ border-top:1px solid #e5e7eb; margin-top:14px; }
+    .section > summary{ cursor:pointer; list-style:none; font-weight:700; font-size:16px; padding:12px 0; display:flex; align-items:center; gap:10px; }
+    .section > summary::-webkit-details-marker{ display:none; }
+    .chev{ transition: transform .15s; color:#9ca3af; }
+    details[open] > summary .chev{ transform: rotate(90deg); }
+    .cpill{ font-size:12px; font-weight:600; background:#eef2ff; color:#3730a3; border-radius:999px; padding:2px 9px; }
+    .country{ margin-left:6px; }
+
+    .grid{ display:grid; grid-template-columns: 1fr; gap:14px; margin:6px 0 14px; }
     @media (min-width: 700px){ .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (min-width: 1000px){ .grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
-    .trial{
-      border:1px solid #e5e7eb; border-radius:14px; padding:14px; background:#fff;
-      display:flex; flex-direction:column; gap:10px; min-height: 210px;
-    }
+    .trial{ border:1px solid #e5e7eb; border-radius:14px; padding:14px; background:#fff; display:flex; flex-direction:column; gap:10px; min-height: 200px; }
     .badgeRow{ display:flex; gap:8px; flex-wrap:wrap; }
-    .badge{
-      font-size:12px; border:1px solid #d1d5db; border-radius:999px; padding:4px 10px;
-      background:#f9fafb; white-space: nowrap;
-    }
+    .badge{ font-size:12px; border:1px solid #d1d5db; border-radius:999px; padding:4px 10px; background:#f9fafb; white-space: nowrap; }
     .badge.status-recruiting{ background:#ecfdf5; border-color:#10b981; color:#065f46; }
     .badge.status-soon{ background:#eff6ff; border-color:#3b82f6; color:#1e40af; }
     .badge.status-other{ background:#f3f4f6; border-color:#9ca3af; color:#374151; }
-
-    button{
-      padding:10px 12px; border-radius:10px; border:1px solid #d1d5db; background:#f9fafb;
-      cursor:pointer; font-weight:600; text-align:left; font: inherit;
-    }
+    .dist{ font-size:13px; color:#065f46; font-weight:600; }
+    .loc{ font-size:13px; color:#6b7280; }
+    button{ padding:10px 12px; border-radius:10px; border:1px solid #d1d5db; background:#f9fafb; cursor:pointer; font-weight:600; text-align:left; font: inherit; }
     button:hover{ background:#f3f4f6; }
     .actions{ margin-top:auto; display:flex; gap:10px; flex-wrap:wrap; align-items: center; }
-    .loc{ font-size:13px; color:#6b7280; }
 
     @media (max-width: 900px){ .filters{ grid-template-columns: 1fr 1fr; } }
     @media (max-width: 560px){ .filters{ grid-template-columns: 1fr; } }
 
-    .modalBackdrop{
-      position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none;
-      align-items: center; justify-content: center; padding: 12px; z-index: 9999;
-    }
-    .modal{
-      width: 100%; max-width: 820px; background: #fff; border-radius: 16px; border: 1px solid #e5e7eb;
-      max-height: calc(100vh - 24px); overflow: hidden; display:flex; flex-direction: column;
-    }
-    .modalHeader{
-      display:flex; align-items: center; justify-content: space-between; gap: 10px;
-      padding: 14px 16px; border-bottom: 1px solid #e5e7eb; background: #fff;
-    }
+    .modalBackdrop{ position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; padding: 12px; z-index: 9999; }
+    .modal{ width: 100%; max-width: 820px; background: #fff; border-radius: 16px; border: 1px solid #e5e7eb; max-height: calc(100vh - 24px); overflow: hidden; display:flex; flex-direction: column; }
+    .modalHeader{ display:flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid #e5e7eb; background: #fff; }
     .modalHeader h3{ margin:0; font-size: 16px; line-height: 1.3; }
     .closeBtn{ width:auto; text-align:center; white-space: nowrap; }
     .modalBody{ padding: 14px 16px; overflow: auto; -webkit-overflow-scrolling: touch; }
@@ -93,42 +70,52 @@
   </header>
 
   <section class="card">
-    <h2 style="margin:0;">Open clinical trials</h2>
+    <h2 style="margin:0;">Find open trials near you</h2>
     <p class="muted" style="margin:6px 0 0 0;">
-      Live from <a href="https://clinicaltrials.gov" target="_blank" rel="noreferrer">ClinicalTrials.gov</a> &mdash;
-      choose a disease group to see trials currently open for enrollment. Click a trial for a plain-language overview.
+      Live from <a href="https://clinicaltrials.gov" target="_blank" rel="noreferrer">ClinicalTrials.gov</a>.
+      Enter your ZIP code and choose a disease group — trials are grouped by how far the nearest study site is from you.
     </p>
 
     <div class="filters">
-      <input id="q" placeholder="Search within results (keyword, NCT ID)" />
-
-      <select id="cancer">
-        <option value="">All cancer types</option>
-        <option>Bladder cancer</option>
-        <option>Brain cancer</option>
-        <option>Breast cancer</option>
-        <option>Childhood cancer</option>
-        <option>Colon &amp; rectal cancer</option>
-        <option>Gastrointestinal cancer</option>
-        <option>Gynecologic cancer</option>
-        <option>Head &amp; neck cancer</option>
-        <option>Kidney cancer</option>
-        <option>Lung cancer</option>
-        <option>Prostate cancer</option>
-        <option>Skin cancer</option>
-        <option>Testicular cancer</option>
-      </select>
-
-      <select id="status">
-        <option value="RECRUITING">Recruiting (open)</option>
-        <option value="NOT_YET_RECRUITING">Not yet recruiting</option>
-        <option value="">Any status</option>
-      </select>
-
-      <input id="locn" placeholder="Location (e.g., Illinois) — optional" />
+      <div>
+        <label class="f" for="zip">Your ZIP code</label>
+        <div class="zipRow"><input id="zip" inputmode="numeric" maxlength="5" placeholder="e.g., 60601" /></div>
+      </div>
+      <div>
+        <label class="f" for="cancer">Cancer type</label>
+        <select id="cancer">
+          <option value="">All cancer types</option>
+          <option>Bladder cancer</option>
+          <option>Brain cancer</option>
+          <option>Breast cancer</option>
+          <option>Childhood cancer</option>
+          <option>Colon &amp; rectal cancer</option>
+          <option>Gastrointestinal cancer</option>
+          <option>Gynecologic cancer</option>
+          <option>Head &amp; neck cancer</option>
+          <option>Kidney cancer</option>
+          <option>Lung cancer</option>
+          <option>Prostate cancer</option>
+          <option>Skin cancer</option>
+          <option>Testicular cancer</option>
+        </select>
+      </div>
+      <div>
+        <label class="f" for="status">Status</label>
+        <select id="status">
+          <option value="RECRUITING">Recruiting (open)</option>
+          <option value="NOT_YET_RECRUITING">Not yet recruiting</option>
+          <option value="">Any status</option>
+        </select>
+      </div>
+      <div>
+        <label class="f" for="q">Search within results</label>
+        <input id="q" placeholder="keyword, NCT ID" />
+      </div>
     </div>
 
-    <div id="results" class="grid"></div>
+    <div id="locNote" class="locNote muted"></div>
+    <div id="results"></div>
     <p id="count" class="muted"></p>
   </section>
 
@@ -147,329 +134,305 @@
 
   <script>
     const API = "https://clinicaltrials.gov/api/v2/studies";
-
-    // Map each disease-group label to a ClinicalTrials.gov condition query (Essie syntax; OR broadens).
     const CONDITION_QUERY = {
-      "Bladder cancer":       "bladder cancer OR urothelial carcinoma",
-      "Brain cancer":         "brain tumor OR glioblastoma OR glioma OR astrocytoma",
-      "Breast cancer":        "breast cancer",
-      "Childhood cancer":     "childhood cancer OR pediatric cancer",
+      "Bladder cancer":"bladder cancer OR urothelial carcinoma",
+      "Brain cancer":"brain tumor OR glioblastoma OR glioma OR astrocytoma",
+      "Breast cancer":"breast cancer",
+      "Childhood cancer":"childhood cancer OR pediatric cancer",
       "Colon & rectal cancer":"colorectal cancer",
       "Gastrointestinal cancer":"gastrointestinal cancer OR colorectal cancer OR pancreatic cancer OR gastric cancer OR esophageal cancer OR liver cancer",
-      "Gynecologic cancer":   "ovarian cancer OR cervical cancer OR endometrial cancer OR uterine cancer",
-      "Head & neck cancer":   "head and neck cancer",
-      "Kidney cancer":        "kidney cancer OR renal cell carcinoma",
-      "Lung cancer":          "lung cancer OR NSCLC OR SCLC",
-      "Prostate cancer":      "prostate cancer",
-      "Skin cancer":          "skin cancer OR melanoma",
-      "Testicular cancer":    "testicular cancer"
+      "Gynecologic cancer":"ovarian cancer OR cervical cancer OR endometrial cancer OR uterine cancer",
+      "Head & neck cancer":"head and neck cancer",
+      "Kidney cancer":"kidney cancer OR renal cell carcinoma",
+      "Lung cancer":"lung cancer OR NSCLC OR SCLC",
+      "Prostate cancer":"prostate cancer",
+      "Skin cancer":"skin cancer OR melanoma",
+      "Testicular cancer":"testicular cancer"
     };
-    const PAGE_SIZE = 60;
+    const NEAR_PAGE = 200, BROAD_PAGE = 120;
 
+    const zipEl = document.getElementById("zip");
     const qEl = document.getElementById("q");
     const cancerEl = document.getElementById("cancer");
     const statusEl = document.getElementById("status");
-    const locnEl = document.getElementById("locn");
     const resultsEl = document.getElementById("results");
     const countEl = document.getElementById("count");
+    const locNoteEl = document.getElementById("locNote");
     const backdrop = document.getElementById("backdrop");
     const closeBtn = document.getElementById("close");
     const mTitle = document.getElementById("mTitle");
     const mBody = document.getElementById("mBody");
     const mLink = document.getElementById("mLink");
 
-    let TRIALS = [];
-    let TOTAL = 0;
+    let USER = null;         // {lat,lng,place,zip}
+    let TRIALS = [];         // models with .study, .bucket, .dist, .country
     let queryToken = 0;
 
     // ---------- helpers ----------
-    function cleanText(s){ return (s || "").replace(/\s+/g, " ").trim(); }
-    function firstNonEmpty(...vals){ for (const v of vals) if (typeof v === "string" && v.trim()) return v.trim(); return ""; }
-    function escapeHtml(s){
-      return String(s || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
-    }
+    const cleanText = s => (s||"").replace(/\s+/g," ").trim();
+    const firstNonEmpty = (...v) => { for (const x of v) if (typeof x==="string" && x.trim()) return x.trim(); return ""; };
+    function escapeHtml(s){ return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
     function prettyStatus(raw){
-      const map = {
-        RECRUITING:"Recruiting", NOT_YET_RECRUITING:"Not yet recruiting",
-        ENROLLING_BY_INVITATION:"Enrolling by invitation", ACTIVE_NOT_RECRUITING:"Active, not recruiting",
-        COMPLETED:"Completed", SUSPENDED:"Suspended", TERMINATED:"Terminated", WITHDRAWN:"Withdrawn"
-      };
-      return map[raw] || cleanText((raw||"").replaceAll("_"," ").toLowerCase());
+      const m={RECRUITING:"Recruiting",NOT_YET_RECRUITING:"Not yet recruiting",ENROLLING_BY_INVITATION:"Enrolling by invitation",ACTIVE_NOT_RECRUITING:"Active, not recruiting",COMPLETED:"Completed",SUSPENDED:"Suspended",TERMINATED:"Terminated",WITHDRAWN:"Withdrawn"};
+      return m[raw] || cleanText((raw||"").replaceAll("_"," ").toLowerCase());
     }
-    function statusClass(raw){
-      if (raw === "RECRUITING") return "status-recruiting";
-      if (raw === "NOT_YET_RECRUITING" || raw === "ENROLLING_BY_INVITATION") return "status-soon";
-      return "status-other";
+    function statusClass(raw){ return raw==="RECRUITING"?"status-recruiting":(raw==="NOT_YET_RECRUITING"||raw==="ENROLLING_BY_INVITATION")?"status-soon":"status-other"; }
+    function getPhaseText(d){ const p=(Array.isArray(d?.phases)?d.phases:[]).filter(x=>x&&x!=="NA").map(x=>x.replace("PHASE","Phase ").replace("_"," ")); return p.length?p.join(", "):"Phase not listed"; }
+    function getSponsor(s){ return s?.leadSponsor?.name ? cleanText(s.leadSponsor.name) : "Sponsor not listed"; }
+    function getOverview(d){ return firstNonEmpty(d?.briefSummary,d?.detailedDescription,"").replace(/\r/g," ").replace(/\n+/g," ").replace(/\s+/g," ").trim(); }
+    function shortOverview(text,{phase,diseaseFocus}){
+      const parts=[]; if(phase&&phase!=="Phase not listed")parts.push(`This is a ${phase} clinical trial.`); if(diseaseFocus)parts.push(`It focuses on ${diseaseFocus}.`);
+      const prefix=parts.length?parts.join(" ")+" ":""; if(!text)return prefix||"Study overview is not listed on ClinicalTrials.gov.";
+      const s=text.split(/(?<=[.?!])\s+/).filter(Boolean).slice(0,3).join(" "); return (prefix+(s.length>650?s.slice(0,650).trim()+"…":s)).trim();
     }
-    function getPhaseText(designMod){
-      const phases = Array.isArray(designMod?.phases) ? designMod.phases : [];
-      const p = phases.filter(x => x && x !== "NA").map(x => x.replace("PHASE","Phase ").replace("_"," "));
-      return p.length ? p.join(", ") : "Phase not listed";
+    function parseElig(raw){
+      const text=(raw||"").replace(/\r/g,""); if(!text.trim())return{inclusion:[],exclusion:[]};
+      const l=text.toLowerCase(), i=l.indexOf("inclusion criteria"), e=l.indexOf("exclusion criteria");
+      let inc="",exc=""; if(i!==-1&&e!==-1){ if(i<e){inc=text.slice(i,e);exc=text.slice(e);}else{exc=text.slice(e,i);inc=text.slice(i);} } else if(i!==-1)inc=text.slice(i); else if(e!==-1)exc=text.slice(e);
+      const bul=t=>{const c=t.replace(/inclusion criteria[:\s]*/i,"").replace(/exclusion criteria[:\s]*/i,"").trim(); return c?c.split(/\n+/).map(x=>x.trim()).filter(Boolean).map(x=>x.replace(/^[-–•\s]*/,"").trim()).slice(0,8):[];};
+      return{inclusion:bul(inc),exclusion:bul(exc)};
     }
-    function getSponsorText(sponsorMod){
-      const lead = sponsorMod?.leadSponsor?.name;
-      return lead ? cleanText(lead) : "Sponsor not listed";
+    function whoCanJoin(focus,el){
+      const who=[]; if(el?.minimumAge||el?.maximumAge){const a=[];if(el.minimumAge)a.push(`at least ${el.minimumAge}`);if(el.maximumAge)a.push(`up to ${el.maximumAge}`);who.push(`Age: People who are ${a.join(" and ")}.`);}
+      if(el?.sex&&el.sex!=="ALL")who.push(`Sex: only ${el.sex.toLowerCase()} participants.`); if(focus)who.push(`Condition: People diagnosed with ${focus}.`);
+      const p=parseElig(el?.eligibilityCriteria||""); if(p.inclusion.length)return[...who,...p.inclusion].slice(0,8); who.push("Other eligibility rules apply; the study team will confirm eligibility."); return who.slice(0,8);
     }
-    function listNames(arr, key="name", max=4){
-      if (!Array.isArray(arr)) return [];
-      return arr.map(x => (typeof x === "string" ? x : x?.[key])).filter(Boolean).map(cleanText).slice(0, max);
-    }
-    function getInterventionSummary(interventionsMod){
-      return listNames(interventionsMod?.interventions, "name", 4).join(", ");
-    }
-    function getOverview(descMod){
-      const raw = firstNonEmpty(descMod?.briefSummary, descMod?.detailedDescription, "");
-      return raw.replace(/\r/g," ").replace(/\n+/g," ").replace(/\s+/g," ").trim();
-    }
-    function shortOverview(text, { phase, diseaseFocus, interventionsSummary }){
-      const parts = [];
-      if (phase && phase !== "Phase not listed") parts.push(`This is a ${phase} clinical trial.`);
-      if (diseaseFocus) parts.push(`It focuses on ${diseaseFocus}.`);
-      if (interventionsSummary) parts.push(`Treatment may include ${interventionsSummary}.`);
-      const prefix = parts.length ? parts.join(" ") + " " : "";
-      if (!text) return prefix || "Study overview is not listed on ClinicalTrials.gov.";
-      const sentences = text.split(/(?<=[.?!])\s+/).filter(Boolean).slice(0, 3).join(" ");
-      const trimmed = sentences.length > 650 ? sentences.slice(0, 650).trim() + "…" : sentences;
-      return (prefix + trimmed).trim();
-    }
-    function parseEligibility(raw){
-      const text = (raw || "").replace(/\r/g, "");
-      if (!text.trim()) return { inclusion: [], exclusion: [] };
-      const lower = text.toLowerCase();
-      const incIdx = lower.indexOf("inclusion criteria");
-      const excIdx = lower.indexOf("exclusion criteria");
-      let incText = "", excText = "";
-      if (incIdx !== -1 && excIdx !== -1){
-        if (incIdx < excIdx){ incText = text.slice(incIdx, excIdx); excText = text.slice(excIdx); }
-        else { excText = text.slice(excIdx, incIdx); incText = text.slice(incIdx); }
-      } else if (incIdx !== -1) incText = text.slice(incIdx);
-      else if (excIdx !== -1) excText = text.slice(excIdx);
-      function toBullets(sectionText){
-        const cleaned = sectionText.replace(/inclusion criteria[:\s]*/i,"").replace(/exclusion criteria[:\s]*/i,"").trim();
-        if (!cleaned) return [];
-        return cleaned.split(/\n+/).map(l => l.trim()).filter(Boolean).map(l => l.replace(/^[-–•\s]*/,"").trim()).slice(0, 8);
-      }
-      return { inclusion: toBullets(incText), exclusion: toBullets(excText) };
-    }
-    function whoCanJoin(diseaseFocus, elig){
-      const who = [];
-      const minAge = elig?.minimumAge, maxAge = elig?.maximumAge, sex = elig?.sex;
-      if (minAge || maxAge){
-        const a = [];
-        if (minAge) a.push(`at least ${minAge}`);
-        if (maxAge) a.push(`up to ${maxAge}`);
-        who.push(`Age: People who are ${a.join(" and ")}.`);
-      }
-      if (sex && sex !== "ALL") who.push(`Sex: This study is only for ${sex.toLowerCase()} participants.`);
-      if (diseaseFocus) who.push(`Condition: People diagnosed with ${diseaseFocus}.`);
-      const parsed = parseEligibility(elig?.eligibilityCriteria || "");
-      if (parsed.inclusion.length) return [...who, ...parsed.inclusion].slice(0, 8);
-      who.push("Other eligibility rules apply. The study team will confirm eligibility.");
-      return who.slice(0, 8);
-    }
-    function whoCannotJoin(elig){
-      const parsed = parseEligibility(elig?.eligibilityCriteria || "");
-      if (parsed.exclusion.length) return parsed.exclusion.slice(0, 8);
-      return ["People who do not meet the study’s eligibility requirements.",
-              "The study team will confirm eligibility after review."];
-    }
-    function summarizeLocations(locations){
-      if (!Array.isArray(locations) || !locations.length) return { line:"", all:[] };
-      const rec = locations.filter(l => /RECRUITING/i.test(l.status || ""));
-      const use = rec.length ? rec : locations;
-      const fmt = l => [l.facility, l.city, l.state].filter(Boolean).join(", ");
-      const top = use.slice(0, 3).map(fmt);
-      const extra = use.length > 3 ? ` +${use.length - 3} more site(s)` : "";
-      return { line: (top[0] || "") + (use.length > 1 ? ` +${use.length - 1} more` : ""),
-               all: top, extra, count: use.length };
+    function whoCannotJoin(el){ const p=parseElig(el?.eligibilityCriteria||""); return p.exclusion.length?p.exclusion.slice(0,8):["People who do not meet the study’s eligibility requirements.","The study team will confirm eligibility after review."]; }
+
+    function haversineMi(a,b,c,d){ const R=3958.8,r=x=>x*Math.PI/180; const dLat=r(c-a),dLon=r(d-b); const h=Math.sin(dLat/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dLon/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+    const isUS = c => { const s=(c||"").toLowerCase(); return s==="united states"||s==="usa"||s==="us"; };
+
+    async function geocodeZip(zip){
+      const res = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(zip)}`);
+      if(!res.ok) throw new Error("ZIP not found");
+      const d = await res.json(); const pl = d.places && d.places[0];
+      if(!pl) throw new Error("ZIP not found");
+      return { lat:+pl.latitude, lng:+pl.longitude, place:`${pl["place name"]}, ${pl["state abbreviation"]}`, zip };
     }
 
     function toModel(study){
-      const p = study.protocolSection || {};
-      const idMod = p.identificationModule || {};
-      const statusMod = p.statusModule || {};
-      const designMod = p.designModule || {};
-      const condMod = p.conditionsModule || {};
-      const descMod = p.descriptionModule || {};
-      const sponsorMod = p.sponsorCollaboratorsModule || {};
-      const interventionsMod = p.armsInterventionsModule || {};
-      const eligMod = p.eligibilityModule || {};
-      const contactsMod = p.contactsLocationsModule || {};
-
-      const id = idMod.nctId || "";
-      const title = firstNonEmpty(idMod.briefTitle, idMod.officialTitle, "Title not listed");
-      const phase = getPhaseText(designMod);
-      const rawStatus = statusMod.overallStatus || "";
-      const conditions = Array.isArray(condMod.conditions) ? condMod.conditions : [];
-      const cancer = conditions[0] || "Cancer";
-      const interventionsSummary = getInterventionSummary(interventionsMod);
-      const overviewText = shortOverview(getOverview(descMod), { phase, diseaseFocus: cancer, interventionsSummary });
-      const central = Array.isArray(contactsMod.centralContacts) ? contactsMod.centralContacts[0] : null;
-      const loc = summarizeLocations(contactsMod.locations);
-
+      const p = study.protocolSection||{};
+      const id = p.identificationModule?.nctId||"";
+      const locs = (p.contactsLocationsModule?.locations||[]).map(L=>({
+        facility:L.facility||"", city:L.city||"", state:L.state||"", country:L.country||"",
+        status:L.status||"", lat:L.geoPoint?.lat ?? null, lon:L.geoPoint?.lon ?? null
+      }));
       return {
-        id,
-        ctgovLink: `https://clinicaltrials.gov/study/${id}`,
-        title, phase, rawStatus, statusText: prettyStatus(rawStatus),
-        cancer, conditions, sponsor: getSponsorText(sponsorMod),
-        overviewText,
-        whoCanJoin: whoCanJoin(cancer, eligMod),
-        whoCannotJoin: whoCannotJoin(eligMod),
-        contactName: central?.name || "", contactPhone: central?.phone || "", contactEmail: central?.email || "",
-        locLine: loc.line, locAll: loc.all, locExtra: loc.extra || "", locCount: loc.count || 0,
-        note: "Eligibility shown here is high-level and not complete. Final eligibility is determined by the study team in coordination with your cancer care team."
+        study, id, ctgovLink:`https://clinicaltrials.gov/study/${id}`,
+        title: firstNonEmpty(p.identificationModule?.briefTitle, p.identificationModule?.officialTitle, "Title not listed"),
+        phase: getPhaseText(p.designModule),
+        rawStatus: p.statusModule?.overallStatus||"", statusText: prettyStatus(p.statusModule?.overallStatus||""),
+        cancer: (p.conditionsModule?.conditions||[])[0] || "Cancer",
+        sponsor: getSponsor(p.sponsorCollaboratorsModule),
+        locs, bucket:null, dist:null, nearest:null, country:null
       };
     }
 
-    // ---------- query ClinicalTrials.gov ----------
-    function buildUrl(cond, statusVal, locn){
+    // classify each trial into a distance bucket relative to USER
+    function classify(t){
+      t.dist=null; t.nearest=null; t.country=null; t.bucket="us";
+      if(USER){
+        const usGeo = t.locs.filter(l=>isUS(l.country) && l.lat!=null);
+        if(usGeo.length){
+          let best=null,bd=Infinity;
+          for(const l of usGeo){ const d=haversineMi(USER.lat,USER.lng,l.lat,l.lon); if(d<bd){bd=d;best=l;} }
+          t.dist=bd; t.nearest=best; t.country="United States";
+          t.bucket = bd<=50?"d50":bd<=100?"d100":bd<=200?"d200":"us";
+          return t;
+        }
+      }
+      // any US site (no geo / no ZIP) -> US bucket
+      const anyUS = t.locs.find(l=>isUS(l.country));
+      if(anyUS && (!USER)){ t.country="United States"; t.nearest=anyUS; t.bucket="us"; return t; }
+      if(anyUS){ t.country="United States"; t.nearest=anyUS; t.bucket="us"; return t; }
+      // otherwise non-US -> world, grouped by nearest (or first) country
+      const nonUS = t.locs.filter(l=>l.country && !isUS(l.country));
+      if(nonUS.length){
+        let pick=nonUS[0];
+        if(USER){ let bd=Infinity; for(const l of nonUS){ if(l.lat!=null){ const d=haversineMi(USER.lat,USER.lng,l.lat,l.lon); if(d<bd){bd=d;pick=l;t.dist=d;} } } }
+        t.country=pick.country; t.nearest=pick; t.bucket="world"; return t;
+      }
+      t.country=null; t.bucket="us"; return t; // location unknown
+    }
+
+    // ---------- query ----------
+    function buildUrl(cond, statusVal, geo, pageSize){
       const p = new URLSearchParams();
       p.set("query.cond", cond);
-      if (statusVal) p.set("filter.overallStatus", statusVal);
-      if (locn) p.set("query.locn", locn);
-      p.set("pageSize", String(PAGE_SIZE));
+      if(statusVal) p.set("filter.overallStatus", statusVal);
+      if(geo) p.set("filter.geo", geo);
+      p.set("pageSize", String(pageSize));
       p.set("countTotal", "true");
       return `${API}?${p.toString()}`;
     }
-    function ctgovSearchLink(cond, statusVal, locn){
-      const p = new URLSearchParams();
-      p.set("cond", cond);
-      const agg = [];
-      if (statusVal === "RECRUITING") agg.push("status:rec");
-      if (statusVal === "NOT_YET_RECRUITING") agg.push("status:not");
-      if (agg.length) p.set("aggFilters", agg.join(","));
-      if (locn) p.set("locStr", locn);
+    function ctgovSearchLink(cond, statusVal, zip){
+      const p = new URLSearchParams(); p.set("cond", cond);
+      const agg=[]; if(statusVal==="RECRUITING")agg.push("status:rec"); if(statusVal==="NOT_YET_RECRUITING")agg.push("status:not");
+      if(agg.length)p.set("aggFilters",agg.join(",")); if(zip)p.set("locStr",zip);
       return `https://clinicaltrials.gov/search?${p.toString()}`;
+    }
+    async function fetchStudies(url){
+      const res = await fetch(url,{headers:{Accept:"application/json"}});
+      if(!res.ok) throw new Error(`ClinicalTrials.gov returned ${res.status}`);
+      return await res.json();
     }
 
     async function load(){
       const token = ++queryToken;
       const label = cancerEl.value;
-      const cond = CONDITION_QUERY[label] || (label ? label : "cancer");
+      const cond = CONDITION_QUERY[label] || (label || "cancer");
       const statusVal = statusEl.value;
-      const locn = cleanText(locnEl.value);
 
-      resultsEl.innerHTML = `<div class="muted">Loading open trials from ClinicalTrials.gov…</div>`;
+      resultsEl.innerHTML = `<div class="muted" style="margin-top:12px;">Loading open trials from ClinicalTrials.gov…</div>`;
       countEl.textContent = "";
 
-      try {
-        const res = await fetch(buildUrl(cond, statusVal, locn), { headers: { "Accept": "application/json" } });
-        if (!res.ok) throw new Error(`ClinicalTrials.gov returned ${res.status}`);
-        const data = await res.json();
-        if (token !== queryToken) return; // a newer query superseded this one
-        TRIALS = (data.studies || []).map(toModel).filter(t => t.id);
-        TOTAL = data.totalCount || TRIALS.length;
-        render();
-      } catch (e) {
-        if (token !== queryToken) return;
-        const link = ctgovSearchLink(cond, statusVal, locn);
-        resultsEl.innerHTML =
-          `<div class="muted">Couldn’t load trials directly right now (${escapeHtml(e.message || "network error")}).</div>
-           <div style="margin-top:8px;"><a href="${link}" target="_blank" rel="noreferrer">View these open trials on ClinicalTrials.gov →</a></div>`;
-        countEl.textContent = "";
+      try{
+        const byId = new Map();
+        // near query (geo) when we have the user's location
+        if(USER){
+          const near = await fetchStudies(buildUrl(cond, statusVal, `distance(${USER.lat},${USER.lng},200mi)`, NEAR_PAGE));
+          (near.studies||[]).forEach(s=>{ const m=toModel(s); if(m.id) byId.set(m.id,m); });
+        }
+        // broad query for the US-elsewhere + world buckets (and the whole list when no ZIP)
+        const broad = await fetchStudies(buildUrl(cond, statusVal, null, BROAD_PAGE));
+        let broadTotal = broad.totalCount || 0;
+        (broad.studies||[]).forEach(s=>{ const m=toModel(s); if(m.id && !byId.has(m.id)) byId.set(m.id,m); });
+
+        if(token !== queryToken) return;
+        TRIALS = [...byId.values()].map(classify);
+        render(broadTotal, cond, statusVal);
+      }catch(e){
+        if(token !== queryToken) return;
+        const link = ctgovSearchLink(cond, statusVal, USER?.zip||"");
+        resultsEl.innerHTML = `<div class="muted">Couldn’t load trials right now (${escapeHtml(e.message||"network error")}).</div>
+          <div style="margin-top:8px;"><a href="${link}" target="_blank" rel="noreferrer">View these open trials on ClinicalTrials.gov →</a></div>`;
+        countEl.textContent="";
       }
     }
 
     function keywordMatch(t){
-      const q = cleanText(qEl.value).toLowerCase();
-      if (!q) return true;
-      return [t.id, t.title, t.cancer, t.phase, t.statusText, t.sponsor, t.overviewText, t.locLine]
-        .join(" ").toLowerCase().includes(q);
+      const q = cleanText(qEl.value).toLowerCase(); if(!q) return true;
+      return [t.id,t.title,t.cancer,t.phase,t.statusText,t.sponsor,(t.nearest? [t.nearest.facility,t.nearest.city,t.nearest.state].join(" "):"")].join(" ").toLowerCase().includes(q);
     }
 
-    function render(){
-      const filtered = TRIALS.filter(keywordMatch);
-      resultsEl.innerHTML = filtered.map(t => `
-        <div class="trial">
-          <div class="badgeRow">
-            <span class="badge">${escapeHtml(t.cancer)}</span>
-            <span class="badge">${escapeHtml(t.phase)}</span>
-            <span class="badge ${statusClass(t.rawStatus)}">${escapeHtml(t.statusText)}</span>
-          </div>
-          <div>
-            <div style="font-weight:700; font-size:16px;">${escapeHtml(t.title)}</div>
-            <div class="muted">
-              <a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${escapeHtml(t.id)}</a>
-              ${t.sponsor ? `• ${escapeHtml(t.sponsor)}` : ""}
-            </div>
-            ${t.locLine ? `<div class="loc">📍 ${escapeHtml(t.locLine)}</div>` : ""}
-          </div>
-          <div class="actions">
-            <button type="button" onclick="openModal('${escapeHtml(t.id)}')">View details</button>
-            <a href="intake.html?nct=${encodeURIComponent(t.id)}">I’m interested</a>
-          </div>
+    function cardHtml(t){
+      const dist = (t.dist!=null) ? `<div class="dist">≈ ${Math.round(t.dist)} mi away</div>` : "";
+      const near = t.nearest ? `<div class="loc">📍 ${escapeHtml([t.nearest.facility,t.nearest.city,t.nearest.state||t.nearest.country].filter(Boolean).join(", "))}</div>` : "";
+      return `<div class="trial">
+        <div class="badgeRow">
+          <span class="badge">${escapeHtml(t.cancer)}</span>
+          <span class="badge">${escapeHtml(t.phase)}</span>
+          <span class="badge ${statusClass(t.rawStatus)}">${escapeHtml(t.statusText)}</span>
         </div>
-      `).join("") || `<div class="muted">No trials matched. Try a different disease group or clear the search.</div>`;
+        <div>
+          <div style="font-weight:700; font-size:16px;">${escapeHtml(t.title)}</div>
+          <div class="muted"><a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${escapeHtml(t.id)}</a>${t.sponsor?` • ${escapeHtml(t.sponsor)}`:""}</div>
+          ${dist}${near}
+        </div>
+        <div class="actions">
+          <button type="button" onclick="openModal('${escapeHtml(t.id)}')">View details</button>
+          <a href="intake.html?nct=${encodeURIComponent(t.id)}">I’m interested</a>
+        </div>
+      </div>`;
+    }
+
+    function sectionHtml(title, items, open){
+      if(!items.length) return "";
+      const cards = items.sort((a,b)=>(a.dist??1e9)-(b.dist??1e9)).map(cardHtml).join("");
+      return `<details class="section" ${open?"open":""}>
+        <summary><span class="chev">▶</span>${escapeHtml(title)} <span class="cpill">${items.length}</span></summary>
+        <div class="grid">${cards}</div>
+      </details>`;
+    }
+
+    function render(broadTotal, cond, statusVal){
+      const items = TRIALS.filter(keywordMatch);
+
+      if(!USER){
+        locNoteEl.innerHTML = `Enter your <strong>ZIP code</strong> above to group these trials by distance from you.`;
+        resultsEl.innerHTML = sectionHtml("All open trials", items, true) || `<div class="muted" style="margin-top:12px;">No trials matched.</div>`;
+      } else {
+        locNoteEl.innerHTML = `Showing trials by distance from <strong>${escapeHtml(USER.place)} ${escapeHtml(USER.zip)}</strong>. <a href="#" id="clearZip">Change</a>`;
+        const b = { d50:[], d100:[], d200:[], us:[], world:[] };
+        items.forEach(t => b[t.bucket]?.push(t));
+        // world grouped by country
+        const worldByCountry = {};
+        b.world.forEach(t => { (worldByCountry[t.country||"Other"] = worldByCountry[t.country||"Other"] || []).push(t); });
+        const worldCountries = Object.keys(worldByCountry).sort((a,b2)=>worldByCountry[b2].length-worldByCountry[a].length);
+
+        let html = "";
+        html += sectionHtml("Within 50 miles", b.d50, true);
+        html += sectionHtml("50–100 miles", b.d100, true);
+        html += sectionHtml("100–200 miles", b.d200, false);
+        html += sectionHtml("Elsewhere in the United States", b.us, false);
+        if(b.world.length){
+          const inner = worldCountries.map(c => sectionHtml(c, worldByCountry[c], false)).join("");
+          html += `<details class="section"><summary><span class="chev">▶</span>Rest of the world <span class="cpill">${b.world.length}</span></summary><div style="padding-left:12px;">${inner}</div></details>`;
+        }
+        resultsEl.innerHTML = html || `<div class="muted" style="margin-top:12px;">No open trials matched for this area. Try a wider status or another disease group.</div>`;
+        const clr = document.getElementById("clearZip");
+        if(clr) clr.onclick = (e)=>{ e.preventDefault(); zipEl.value=""; USER=null; load(); };
+      }
 
       const label = cancerEl.value || "all cancers";
-      const shown = filtered.length;
-      const more = TOTAL > TRIALS.length ? ` of ${TOTAL.toLocaleString()} open on ClinicalTrials.gov` : "";
-      const link = ctgovSearchLink(CONDITION_QUERY[cancerEl.value] || (cancerEl.value || "cancer"), statusEl.value, cleanText(locnEl.value));
-      countEl.innerHTML = `Showing ${shown} ${escapeHtml(label)} trial(s)${more}. ` +
-        `<a href="${link}" target="_blank" rel="noreferrer">View all on ClinicalTrials.gov →</a>`;
+      const link = ctgovSearchLink(cond, statusVal, USER?.zip||"");
+      const totalNote = broadTotal ? ` ClinicalTrials.gov lists ${broadTotal.toLocaleString()} open ${escapeHtml(label)} trial(s) in total.` : "";
+      countEl.innerHTML = `Loaded ${items.length} ${escapeHtml(label)} trial(s).${totalNote} <a href="${link}" target="_blank" rel="noreferrer">View all on ClinicalTrials.gov →</a>`;
     }
 
-    function bulletsToHtml(arr){
-      if (!arr || !arr.length) return "<div class='muted'>Not listed.</div>";
-      return `<ul>${arr.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>`;
-    }
+    function bulletsToHtml(arr){ return (!arr||!arr.length)?"<div class='muted'>Not listed.</div>":`<ul>${arr.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>`; }
 
     window.openModal = function(id){
-      const t = TRIALS.find(x => x.id === id);
-      if (!t) return;
+      const t = TRIALS.find(x=>x.id===id); if(!t) return;
+      const p = t.study.protocolSection||{};
+      const overview = shortOverview(getOverview(p.descriptionModule), { phase:t.phase, diseaseFocus:t.cancer });
+      const can = whoCanJoin(t.cancer, p.eligibilityModule||{});
+      const cannot = whoCannotJoin(p.eligibilityModule||{});
+      const sites = (t.locs.filter(l=>/RECRUITING/i.test(l.status||"")).length?t.locs.filter(l=>/RECRUITING/i.test(l.status||"")):t.locs)
+        .slice(0,5).map(l=>[l.facility,l.city,l.state||l.country].filter(Boolean).join(", "));
       mTitle.textContent = `${t.title} (${t.id})`;
-      const contactBits = [t.contactName, t.contactPhone, t.contactEmail].filter(Boolean).map(escapeHtml).join(" · ");
       mBody.innerHTML = `
         <div><strong>Cancer:</strong> ${escapeHtml(t.cancer)}</div>
         <div><strong>Study phase:</strong> ${escapeHtml(t.phase)}</div>
         <div><strong>Status:</strong> <span class="badge ${statusClass(t.rawStatus)}">${escapeHtml(t.statusText)}</span></div>
         <div><strong>Sponsor:</strong> ${escapeHtml(t.sponsor)}</div>
-        <div style="margin-top:10px;"><strong>ClinicalTrials.gov ID:</strong>
-          <a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${escapeHtml(t.id)}</a></div>
-
-        <div style="margin-top:14px;"><strong>Study overview</strong></div>
-        <div style="margin-top:6px;">${escapeHtml(t.overviewText)}</div>
-
-        <div style="margin-top:14px;"><strong>Who can join</strong></div>
-        ${bulletsToHtml(t.whoCanJoin)}
-        <div style="margin-top:10px;"><strong>Who cannot join</strong></div>
-        ${bulletsToHtml(t.whoCannotJoin)}
-        <div style="margin-top:10px;" class="muted"><strong>Note:</strong> ${escapeHtml(t.note)}</div>
-
-        ${t.locAll.length ? `<div style="margin-top:14px;"><strong>Where (recruiting sites)</strong></div>
-          ${bulletsToHtml(t.locAll)}${t.locExtra ? `<div class="muted">${escapeHtml(t.locExtra)}</div>` : ""}` : ""}
-
+        ${t.dist!=null?`<div><strong>Nearest site:</strong> ≈ ${Math.round(t.dist)} mi — ${escapeHtml([t.nearest.facility,t.nearest.city,t.nearest.state].filter(Boolean).join(", "))}</div>`:""}
+        <div style="margin-top:10px;"><strong>ClinicalTrials.gov ID:</strong> <a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${escapeHtml(t.id)}</a></div>
+        <div style="margin-top:14px;"><strong>Study overview</strong></div><div style="margin-top:6px;">${escapeHtml(overview)}</div>
+        <div style="margin-top:14px;"><strong>Who can join</strong></div>${bulletsToHtml(can)}
+        <div style="margin-top:10px;"><strong>Who cannot join</strong></div>${bulletsToHtml(cannot)}
+        ${sites.length?`<div style="margin-top:14px;"><strong>Recruiting sites</strong></div>${bulletsToHtml(sites)}`:""}
         <div style="margin-top:14px;"><strong>How to join</strong></div>
-        <div>Ask your oncologist for a referral, or use the “I’m interested” button.${contactBits ? ` Study contact: ${contactBits}.` : ""}</div>
-      `;
-      mLink.href = t.ctgovLink;
-      backdrop.style.display = "flex";
+        <div>Ask your oncologist for a referral, or use the “I’m interested” button.</div>`;
+      mLink.href = t.ctgovLink; backdrop.style.display = "flex";
     };
-
-    function closeModal(){ backdrop.style.display = "none"; }
+    function closeModal(){ backdrop.style.display="none"; }
     closeBtn.addEventListener("click", closeModal);
-    backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeModal(); });
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && backdrop.style.display === "flex") closeModal(); });
+    backdrop.addEventListener("click", e=>{ if(e.target===backdrop) closeModal(); });
+    document.addEventListener("keydown", e=>{ if(e.key==="Escape"&&backdrop.style.display==="flex") closeModal(); });
 
-    // keyword filters client-side; the others re-query ClinicalTrials.gov
-    qEl.addEventListener("input", render);
+    // ---------- events ----------
+    qEl.addEventListener("input", ()=>{ if(TRIALS.length) render(0, CONDITION_QUERY[cancerEl.value]||(cancerEl.value||"cancer"), statusEl.value); });
     cancerEl.addEventListener("change", load);
     statusEl.addEventListener("change", load);
-    let locnTimer;
-    locnEl.addEventListener("input", () => { clearTimeout(locnTimer); locnTimer = setTimeout(load, 500); });
+
+    let zipTimer;
+    async function onZip(){
+      const zip = cleanText(zipEl.value);
+      if(!/^\d{5}$/.test(zip)){ if(USER){ USER=null; load(); } return; }
+      locNoteEl.textContent = "Looking up your ZIP…";
+      try{ USER = await geocodeZip(zip); }
+      catch(_){ USER=null; locNoteEl.innerHTML = `<span style="color:#b91c1c">Couldn’t find ZIP ${escapeHtml(zip)}. Check and try again.</span>`; return; }
+      load();
+    }
+    zipEl.addEventListener("input", ()=>{ clearTimeout(zipTimer); zipTimer=setTimeout(onZip, 500); });
 
     (function init(){
       const params = new URLSearchParams(window.location.search);
-      const cancerFromUrl = params.get("cancer");
-      if (cancerFromUrl) {
-        // match against option labels case-insensitively
-        const opt = [...cancerEl.options].find(o => o.value.toLowerCase() === cancerFromUrl.toLowerCase());
-        if (opt) cancerEl.value = opt.value;
-      }
-      const locFromUrl = params.get("locn");
-      if (locFromUrl) locnEl.value = locFromUrl;
-      load();
+      const c = params.get("cancer");
+      if(c){ const opt=[...cancerEl.options].find(o=>o.value.toLowerCase()===c.toLowerCase()); if(opt) cancerEl.value=opt.value; }
+      const z = params.get("zip"); if(z && /^\d{5}$/.test(z)) zipEl.value = z;
+      if(zipEl.value){ onZip(); } else { load(); }
     })();
   </script>
 </body>
