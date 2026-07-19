@@ -1,13 +1,13 @@
 # my-vercel-site
 
-Static site for **OSF Cancer Clinical Trials**, deployed on Vercel.
+Static site for **Cancer Clinical Trials**, deployed on Vercel.
 
 ## Pages
 - `index.html` — choose a cancer type
-- `trials.html` — searchable trial list (reads the OSF trials CSV)
+- `trials.html` — open trials by disease group, live from **ClinicalTrials.gov** (v2 API, client-side)
 - `intake.html` — patient/referral intake
 - `departments.html` — clinical trials landing
-- **`illinois/`** — Illinois Access-to-Innovation Index (see below)
+- **`illinois/`** — Illinois cancer research deserts + Access-to-Innovation Index (see below)
 
 ## Illinois Access-to-Innovation Index (`/illinois/`)
 
