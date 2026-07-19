@@ -768,6 +768,19 @@ a{color:var(--accent-ink)}
 .detail .dsub{font-size:12px;color:var(--muted);margin:3px 0 12px;}
 .drow{display:flex;justify-content:space-between;gap:16px;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line);}
 .drow:last-child{border-bottom:none;} .drow b{font-variant-numeric:tabular-nums;}
+.connect{margin-top:36px;border:1px solid var(--line);border-radius:20px;overflow:hidden;
+  background:color-mix(in srgb,var(--accent) 7%,var(--panel));}
+.connect-in{padding:38px clamp(22px,4vw,48px);}
+.eyebrow2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:0 0 12px;}
+.connect .ch{font-family:var(--serif);font-weight:600;font-size:clamp(28px,4.4vw,44px);line-height:1.02;margin:0;letter-spacing:-.01em;text-wrap:balance;}
+.connect .csub{font-size:clamp(15px,1.9vw,18px);color:var(--muted);max-width:64ch;margin:14px 0 0;line-height:1.5;}
+.cfeat{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:30px 0 28px;}
+.cfeat .cnum{font-family:var(--serif);font-size:13px;color:var(--accent);font-variant-numeric:tabular-nums;}
+.cfeat h3{font-size:15px;margin:6px 0 5px;}
+.cfeat p{font-size:13.5px;line-height:1.55;color:var(--muted);margin:0;}
+.cbtn{display:inline-block;background:var(--accent);color:#fff;font-weight:600;font-size:14.5px;
+  text-decoration:none;padding:11px 20px;border-radius:10px;transition:filter .12s;}
+.cbtn:hover{filter:brightness(1.08);}
 .method{margin-top:34px;padding-top:26px;border-top:1px solid var(--line);}
 .method h2{font-family:var(--serif);font-size:22px;margin:0 0 6px;}
 .mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:14px;}
@@ -832,6 +845,21 @@ a{color:var(--accent-ink)}
       <div class="list" id="centersList" style="display:none"></div>
     </section>
   </div>
+  <section class="connect">
+    <div class="connect-in">
+      <p class="eyebrow2">Sapion Connect</p>
+      <h2 class="ch">Connect cancer patients to trials</h2>
+      <p class="csub">Surfacing open clinical trials is hard. Sapion Connect helps patients find the
+        right trial for their diagnosis &mdash; and connects them to the health system that runs it.</p>
+      <div class="cfeat">
+        <div><span class="cnum">01</span><h3>Surface</h3><p>Pull open oncology trials across every Illinois site into one place, so no relevant option is missed.</p></div>
+        <div><span class="cnum">02</span><h3>Match</h3><p>Screen against eligibility and diagnosis so each patient sees the trials that actually fit &mdash; not a wall of listings.</p></div>
+        <div><span class="cnum">03</span><h3>Connect</h3><p>Route the patient to the health system running the trial, turning a research desert into a warm handoff.</p></div>
+      </div>
+      <a class="cbtn" href="../intake.html">Refer a patient &rarr;</a>
+    </div>
+  </section>
+
   <section class="method">
     <h2>How a &ldquo;desert&rdquo; is measured</h2>
     <div class="mgrid">
