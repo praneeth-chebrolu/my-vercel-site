@@ -4,10 +4,24 @@ Static site for **Cancer Clinical Trials**, deployed on Vercel.
 
 ## Pages
 - `index.html` — choose a cancer type
-- `trials.html` — open trials by disease group, live from **ClinicalTrials.gov** (v2 API, client-side)
+- `trials.html` — open trials grouped by distance from the user (postal code / city, worldwide), live from **ClinicalTrials.gov** (v2 API, client-side), with an optional **precision-match** patient profile (biomarkers, stage, prior lines, ECOG, age, sex)
 - `intake.html` — patient/referral intake
 - `departments.html` — clinical trials landing
 - **`illinois/`** — Illinois cancer research deserts + Access-to-Innovation Index (see below)
+
+## Precision matching (trial finder)
+
+The trials page ranks trials against a patient profile in two tiers:
+
+- **Tier B (rule-based, always on):** parses each trial's written ClinicalTrials.gov eligibility for biomarker inclusion/exclusion, sex, age, ECOG, stage, and line-of-therapy cues → Strong / Possible / Likely-ineligible with a "why" breakdown.
+- **Tier A (NCI structured, optional):** upgrades trials using *structured* biomarker eligibility (gene/variant) from the **NCI Clinical Trials Search API**, shown as a **★ NCI structured** badge.
+
+### Enabling Tier A
+1. Get a free key at <https://clinicaltrialsapi.cancer.gov> → **Get API Key**.
+2. In the Vercel project: **Settings → Environment Variables → add `NCI_API_KEY`**, then redeploy.
+3. `api/nci-trials.js` is a serverless proxy that holds the key server-side; the front-end calls `/api/nci-trials`. With no key set it returns `{configured:false}` and the page falls back to Tier B (no breakage).
+
+All matching is preliminary decision support — final eligibility is confirmed by the study team.
 
 ## Illinois Access-to-Innovation Index (`/illinois/`)
 
