@@ -57,6 +57,8 @@
     .m-strong{ background:#dcfce7; color:#166534; border:1px solid #22c55e; }
     .m-possible{ background:#fef9c3; color:#854d0e; border:1px solid #eab308; }
     .m-inelig{ background:#fee2e2; color:#991b1b; border:1px solid #ef4444; }
+    .m-nci{ background:#ede9fe; color:#5b21b6; border:1px solid #8b5cf6; }
+    .nci-note{ font-size:12px; color:#6b21a8; margin-top:6px; }
     .why{ font-size:12.5px; margin-top:4px; }
     .why summary{ cursor:pointer; color:#4f46e5; list-style:none; }
     .why summary::-webkit-details-marker{ display:none; }
@@ -287,6 +289,34 @@
     let queryToken = 0;
     let lastArgs = { broadTotal:0, cond:"cancer", statusVal:"RECRUITING" };
 
+    // Tier A: structured biomarker eligibility from the NCI CTS API (via /api/nci-trials proxy).
+    let NCI_STRUCT = new Map();   // nctId -> [{gene, variant, crit}]
+    let NCI_STATE = "idle";       // idle | ok | unconfigured | error
+    async function refreshNci(){
+      const p = getProfile();
+      if(!p.biomarkers.length){ NCI_STRUCT = new Map(); NCI_STATE="idle"; return; }
+      try{
+        const params = new URLSearchParams();
+        params.set("biomarkers", p.biomarkers.join(","));
+        if(cancerEl.value) params.set("diseases", cancerEl.value);
+        const r = await fetch(`/api/nci-trials?${params.toString()}`);
+        const d = await r.json().catch(()=>({}));
+        if(d && d.configured === false){ NCI_STATE="unconfigured"; NCI_STRUCT=new Map(); return; }
+        const trials = d.trials || d.data || [];
+        const map = new Map();
+        trials.forEach(tr=>{
+          const id = tr.nct_id || tr.nctId; if(!id) return;
+          const bms = tr.biomarkers || tr.biomarker_eligibility || [];
+          map.set(id, (Array.isArray(bms)?bms:[]).map(b=>({
+            gene: (b.name || b.gene || b.hugo_gene_symbol || "").toString(),
+            variant: (b.variant || b.assay_type_description || "").toString(),
+            crit: (b.eligibility_criterion || b.assay_purpose || b.inclusion_indicator || "inclusion").toString()
+          })));
+        });
+        NCI_STRUCT = map; NCI_STATE = "ok";
+      }catch(_){ NCI_STATE="error"; NCI_STRUCT=new Map(); }
+    }
+
     function getProfile(){
       const marks = [...bmkWrap.querySelectorAll("input:checked")].map(i=>i.value);
       const other = cleanText(bmkOtherEl.value);
@@ -316,7 +346,20 @@
     function computeMatch(t, p){
       const el = t.study.protocolSection?.eligibilityModule || {};
       const {inc, exc, all} = eligSections(el.eligibilityCriteria);
-      const reasons = []; let score = 0; let hardFail = false;
+      const reasons = []; let score = 0; let hardFail = false; let nci = false;
+
+      // Tier A: NCI structured biomarker eligibility (authoritative when present)
+      const struct = NCI_STRUCT.get(t.id);
+      if(struct && p.biomarkers.length){
+        p.biomarkers.forEach(id=>{
+          const g = id.split(/[ /]/)[0].toUpperCase();
+          const hit = struct.find(s => { const sg=(s.gene||"").toUpperCase(); return sg && (sg.includes(g) || g.includes(sg)); });
+          if(hit){
+            if(/exclu/i.test(hit.crit)){ reasons.push({k:"bad",txt:`NCI structured: ${hit.gene} is an exclusion`}); hardFail=true; }
+            else { reasons.push({k:"ok",txt:`NCI structured eligibility: ${hit.gene}${hit.variant?" "+hit.variant:""} required`}); score+=5; nci=true; }
+          }
+        });
+      }
 
       // sex
       if(p.sex && el.sex && el.sex!=="ALL"){
@@ -370,7 +413,7 @@
       else if(score > 0) level = "possible";
       else level = "possible";
       if(hardFail) score = -100 + score;
-      return { level, score, reasons };
+      return { level, score, reasons, nci };
     }
 
     // ---------- helpers ----------
@@ -504,6 +547,8 @@
 
         if(token !== queryToken) return;
         TRIALS = [...byId.values()].map(classify);
+        await refreshNci();
+        if(token !== queryToken) return;
         render(broadTotal, cond, statusVal);
       }catch(e){
         if(token !== queryToken) return;
@@ -523,9 +568,10 @@
     function matchHtml(t){
       const m = t._match; if(!m) return "";
       const [cls,label] = MATCH_LABEL[m.level];
+      const nciBadge = m.nci ? `<span class="mbadge m-nci" title="Structured biomarker eligibility from the NCI Clinical Trials Search API">★ NCI structured</span>` : "";
       const why = m.reasons.length ? `<details class="why"><summary>Why this ${m.level==="inelig"?"may not fit":"matches"}</summary>
         <ul>${m.reasons.map(r=>`<li class="r-${r.k==="ok"?"ok":r.k==="bad"?"bad":"warn"}">${escapeHtml(r.txt)}</li>`).join("")}</ul></details>` : "";
-      return `<div class="mrow"><span class="mbadge ${cls}">${label}</span></div>${why}`;
+      return `<div class="mrow"><span class="mbadge ${cls}">${label}</span>${nciBadge}</div>${why}`;
     }
     function cardHtml(t){
       const dist = (t.dist!=null) ? `<div class="dist">≈ ${Math.round(t.dist)} mi away</div>` : "";
@@ -602,7 +648,9 @@
       if(active){
         const strong = items.filter(t=>t._match?.level==="strong").length;
         const inelig = items.filter(t=>t._match?.level==="inelig").length;
-        matchNote = ` Precision match: ${strong} strong, ${inelig} likely ineligible — sorted best-first within each area.`;
+        const nciN = items.filter(t=>t._match?.nci).length;
+        matchNote = ` Precision match: ${strong} strong${nciN?`, ${nciN} NCI-structured`:""}, ${inelig} likely ineligible — sorted best-first within each area.`;
+        if(p.biomarkers.length && NCI_STATE==="unconfigured") matchNote += ` (Set an NCI_API_KEY to enable structured biomarker matching.)`;
       }
       countEl.innerHTML = `Loaded ${items.length} ${escapeHtml(label)} trial(s).${totalNote}${matchNote} <a href="${link}" target="_blank" rel="noreferrer">View all on ClinicalTrials.gov →</a>`;
     }
@@ -646,8 +694,12 @@
 
     // precision-profile inputs re-rank client-side (no re-query needed)
     [stageEl, linesEl, ecogEl, psexEl, hideEl].forEach(el => el.addEventListener("change", rerender));
-    [pageEl, bmkOtherEl].forEach(el => el.addEventListener("input", rerender));
-    bmkWrap.addEventListener("change", rerender);
+    pageEl.addEventListener("input", rerender);
+    // biomarker changes also refresh the NCI structured lookup
+    async function onBiomarkerChange(){ await refreshNci(); rerender(); }
+    bmkWrap.addEventListener("change", onBiomarkerChange);
+    let bmkTimer;
+    bmkOtherEl.addEventListener("input", ()=>{ clearTimeout(bmkTimer); bmkTimer=setTimeout(onBiomarkerChange, 500); });
 
     let locTimer;
     async function onLoc(){
