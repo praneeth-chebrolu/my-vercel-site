@@ -14,11 +14,9 @@
     .muted{ color:#6b7280; font-size:14px; }
     a{ color:#2563eb; }
 
-    .filters{ display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; margin-top:12px; }
+    .filters{ display:grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap:12px; margin-top:12px; }
     input, select{ width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; background:#fff; font: inherit; }
     label.f{ font-size:12px; color:#6b7280; display:block; margin-bottom:4px; }
-    .zipRow{ display:flex; gap:8px; align-items:center; }
-    .zipRow input{ max-width:160px; }
     .locNote{ margin-top:10px; font-size:13px; }
 
     .section{ border-top:1px solid #e5e7eb; margin-top:14px; }
@@ -27,7 +25,6 @@
     .chev{ transition: transform .15s; color:#9ca3af; }
     details[open] > summary .chev{ transform: rotate(90deg); }
     .cpill{ font-size:12px; font-weight:600; background:#eef2ff; color:#3730a3; border-radius:999px; padding:2px 9px; }
-    .country{ margin-left:6px; }
 
     .grid{ display:grid; grid-template-columns: 1fr; gap:14px; margin:6px 0 14px; }
     @media (min-width: 700px){ .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -44,9 +41,6 @@
     button{ padding:10px 12px; border-radius:10px; border:1px solid #d1d5db; background:#f9fafb; cursor:pointer; font-weight:600; text-align:left; font: inherit; }
     button:hover{ background:#f3f4f6; }
     .actions{ margin-top:auto; display:flex; gap:10px; flex-wrap:wrap; align-items: center; }
-
-    @media (max-width: 900px){ .filters{ grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 560px){ .filters{ grid-template-columns: 1fr; } }
 
     .modalBackdrop{ position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; padding: 12px; z-index: 9999; }
     .modal{ width: 100%; max-width: 820px; background: #fff; border-radius: 16px; border: 1px solid #e5e7eb; max-height: calc(100vh - 24px); overflow: hidden; display:flex; flex-direction: column; }
@@ -73,13 +67,17 @@
     <h2 style="margin:0;">Find open trials near you</h2>
     <p class="muted" style="margin:6px 0 0 0;">
       Live from <a href="https://clinicaltrials.gov" target="_blank" rel="noreferrer">ClinicalTrials.gov</a>.
-      Enter your ZIP code and choose a disease group — trials are grouped by how far the nearest study site is from you.
+      Pick your country and enter a postal code (or city) — trials are grouped by how far the nearest study site is from you.
     </p>
 
     <div class="filters">
       <div>
-        <label class="f" for="zip">Your ZIP code</label>
-        <div class="zipRow"><input id="zip" inputmode="numeric" maxlength="5" placeholder="e.g., 60601" /></div>
+        <label class="f" for="country">Country</label>
+        <select id="country"></select>
+      </div>
+      <div>
+        <label class="f" for="loc">Postal code or city</label>
+        <input id="loc" placeholder="e.g., 60601 or Chicago" />
       </div>
       <div>
         <label class="f" for="cancer">Cancer type</label>
@@ -149,9 +147,19 @@
       "Skin cancer":"skin cancer OR melanoma",
       "Testicular cancer":"testicular cancer"
     };
+    // Countries with zippopotam.us postal support; anything else still works via the city fallback.
+    const COUNTRIES = [
+      ["us","United States"],["ca","Canada"],["gb","United Kingdom"],["ie","Ireland"],["au","Australia"],
+      ["nz","New Zealand"],["in","India"],["de","Germany"],["fr","France"],["es","Spain"],["it","Italy"],
+      ["nl","Netherlands"],["be","Belgium"],["ch","Switzerland"],["at","Austria"],["se","Sweden"],
+      ["no","Norway"],["dk","Denmark"],["fi","Finland"],["pt","Portugal"],["pl","Poland"],["br","Brazil"],
+      ["mx","Mexico"],["ar","Argentina"],["jp","Japan"],["kr","South Korea"],["za","South Africa"]
+    ];
+    const CC_NAME = Object.fromEntries(COUNTRIES);
     const NEAR_PAGE = 200, BROAD_PAGE = 120;
 
-    const zipEl = document.getElementById("zip");
+    const countryEl = document.getElementById("country");
+    const locEl = document.getElementById("loc");
     const qEl = document.getElementById("q");
     const cancerEl = document.getElementById("cancer");
     const statusEl = document.getElementById("status");
@@ -164,8 +172,11 @@
     const mBody = document.getElementById("mBody");
     const mLink = document.getElementById("mLink");
 
-    let USER = null;         // {lat,lng,place,zip}
-    let TRIALS = [];         // models with .study, .bucket, .dist, .country
+    COUNTRIES.forEach(([cc,name]) => { const o=document.createElement("option"); o.value=cc; o.textContent=name; countryEl.appendChild(o); });
+    countryEl.value = "us";
+
+    let USER = null;         // {lat,lng,place,label,country,cc}
+    let TRIALS = [];
     let queryToken = 0;
 
     // ---------- helpers ----------
@@ -200,14 +211,24 @@
     function whoCannotJoin(el){ const p=parseElig(el?.eligibilityCriteria||""); return p.exclusion.length?p.exclusion.slice(0,8):["People who do not meet the study’s eligibility requirements.","The study team will confirm eligibility after review."]; }
 
     function haversineMi(a,b,c,d){ const R=3958.8,r=x=>x*Math.PI/180; const dLat=r(c-a),dLon=r(d-b); const h=Math.sin(dLat/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dLon/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
-    const isUS = c => { const s=(c||"").toLowerCase(); return s==="united states"||s==="usa"||s==="us"; };
+    function normCountry(s){ const t=(s||"").toLowerCase().trim(); if(t==="usa"||t==="us"||t==="u.s."||t==="u.s.a.")return "united states"; if(t==="uk"||t==="u.k.")return "united kingdom"; return t; }
+    function sameCountry(siteCountry){ return USER && normCountry(siteCountry)===normCountry(USER.country); }
 
-    async function geocodeZip(zip){
-      const res = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(zip)}`);
-      if(!res.ok) throw new Error("ZIP not found");
-      const d = await res.json(); const pl = d.places && d.places[0];
-      if(!pl) throw new Error("ZIP not found");
-      return { lat:+pl.latitude, lng:+pl.longitude, place:`${pl["place name"]}, ${pl["state abbreviation"]}`, zip };
+    // Geocode: try zippopotam postal for the chosen country, then fall back to a city name search (Open-Meteo).
+    async function geocodeLoc(cc, text){
+      text = cleanText(text);
+      try{
+        const r = await fetch(`https://api.zippopotam.us/${cc}/${encodeURIComponent(text)}`);
+        if(r.ok){ const d = await r.json(); const pl = d.places && d.places[0];
+          if(pl) return { lat:+pl.latitude, lng:+pl.longitude,
+            place:`${pl["place name"]}${pl["state abbreviation"]?", "+pl["state abbreviation"]:""}`,
+            label:text, country: d.country || CC_NAME[cc] || "", cc }; }
+      }catch(_){}
+      const r2 = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(text)}&count=1&language=en&countryCode=${cc.toUpperCase()}`);
+      if(r2.ok){ const d = await r2.json(); const g = d.results && d.results[0];
+        if(g) return { lat:g.latitude, lng:g.longitude,
+          place:`${g.name}${g.admin1?", "+g.admin1:""}`, label:text, country: g.country || CC_NAME[cc] || "", cc }; }
+      throw new Error("Location not found");
     }
 
     function toModel(study){
@@ -228,31 +249,22 @@
       };
     }
 
-    // classify each trial into a distance bucket relative to USER
+    // Bucket each trial by distance from USER (any country); beyond 200mi split home-country vs. rest of world.
     function classify(t){
-      t.dist=null; t.nearest=null; t.country=null; t.bucket="us";
-      if(USER){
-        const usGeo = t.locs.filter(l=>isUS(l.country) && l.lat!=null);
-        if(usGeo.length){
-          let best=null,bd=Infinity;
-          for(const l of usGeo){ const d=haversineMi(USER.lat,USER.lng,l.lat,l.lon); if(d<bd){bd=d;best=l;} }
-          t.dist=bd; t.nearest=best; t.country="United States";
-          t.bucket = bd<=50?"d50":bd<=100?"d100":bd<=200?"d200":"us";
-          return t;
-        }
+      t.dist=null; t.nearest=null; t.country=null; t.bucket="home";
+      const geoSites = t.locs.filter(l=>l.lat!=null);
+      if(USER && geoSites.length){
+        let best=null, bd=Infinity;
+        for(const l of geoSites){ const d=haversineMi(USER.lat,USER.lng,l.lat,l.lon); if(d<bd){bd=d;best=l;} }
+        t.dist=bd; t.nearest=best; t.country=best.country||"";
+        t.bucket = bd<=50?"d50" : bd<=100?"d100" : bd<=200?"d200" : (sameCountry(best.country)?"home":"world");
+        return t;
       }
-      // any US site (no geo / no ZIP) -> US bucket
-      const anyUS = t.locs.find(l=>isUS(l.country));
-      if(anyUS && (!USER)){ t.country="United States"; t.nearest=anyUS; t.bucket="us"; return t; }
-      if(anyUS){ t.country="United States"; t.nearest=anyUS; t.bucket="us"; return t; }
-      // otherwise non-US -> world, grouped by nearest (or first) country
-      const nonUS = t.locs.filter(l=>l.country && !isUS(l.country));
-      if(nonUS.length){
-        let pick=nonUS[0];
-        if(USER){ let bd=Infinity; for(const l of nonUS){ if(l.lat!=null){ const d=haversineMi(USER.lat,USER.lng,l.lat,l.lon); if(d<bd){bd=d;pick=l;t.dist=d;} } } }
-        t.country=pick.country; t.nearest=pick; t.bucket="world"; return t;
-      }
-      t.country=null; t.bucket="us"; return t; // location unknown
+      const any = t.locs[0] || null;
+      t.nearest = any; t.country = any?.country || "";
+      if(!USER){ t.bucket="all"; return t; }
+      t.bucket = (any && sameCountry(any.country)) ? "home" : (any ? "world" : "home");
+      return t;
     }
 
     // ---------- query ----------
@@ -265,10 +277,10 @@
       p.set("countTotal", "true");
       return `${API}?${p.toString()}`;
     }
-    function ctgovSearchLink(cond, statusVal, zip){
+    function ctgovSearchLink(cond, statusVal){
       const p = new URLSearchParams(); p.set("cond", cond);
       const agg=[]; if(statusVal==="RECRUITING")agg.push("status:rec"); if(statusVal==="NOT_YET_RECRUITING")agg.push("status:not");
-      if(agg.length)p.set("aggFilters",agg.join(",")); if(zip)p.set("locStr",zip);
+      if(agg.length)p.set("aggFilters",agg.join(",")); if(USER?.label)p.set("locStr", USER.label);
       return `https://clinicaltrials.gov/search?${p.toString()}`;
     }
     async function fetchStudies(url){
@@ -288,14 +300,12 @@
 
       try{
         const byId = new Map();
-        // near query (geo) when we have the user's location
         if(USER){
           const near = await fetchStudies(buildUrl(cond, statusVal, `distance(${USER.lat},${USER.lng},200mi)`, NEAR_PAGE));
           (near.studies||[]).forEach(s=>{ const m=toModel(s); if(m.id) byId.set(m.id,m); });
         }
-        // broad query for the US-elsewhere + world buckets (and the whole list when no ZIP)
         const broad = await fetchStudies(buildUrl(cond, statusVal, null, BROAD_PAGE));
-        let broadTotal = broad.totalCount || 0;
+        const broadTotal = broad.totalCount || 0;
         (broad.studies||[]).forEach(s=>{ const m=toModel(s); if(m.id && !byId.has(m.id)) byId.set(m.id,m); });
 
         if(token !== queryToken) return;
@@ -303,7 +313,7 @@
         render(broadTotal, cond, statusVal);
       }catch(e){
         if(token !== queryToken) return;
-        const link = ctgovSearchLink(cond, statusVal, USER?.zip||"");
+        const link = ctgovSearchLink(cond, statusVal);
         resultsEl.innerHTML = `<div class="muted">Couldn’t load trials right now (${escapeHtml(e.message||"network error")}).</div>
           <div style="margin-top:8px;"><a href="${link}" target="_blank" rel="noreferrer">View these open trials on ClinicalTrials.gov →</a></div>`;
         countEl.textContent="";
@@ -312,7 +322,7 @@
 
     function keywordMatch(t){
       const q = cleanText(qEl.value).toLowerCase(); if(!q) return true;
-      return [t.id,t.title,t.cancer,t.phase,t.statusText,t.sponsor,(t.nearest? [t.nearest.facility,t.nearest.city,t.nearest.state].join(" "):"")].join(" ").toLowerCase().includes(q);
+      return [t.id,t.title,t.cancer,t.phase,t.statusText,t.sponsor,(t.nearest?[t.nearest.facility,t.nearest.city,t.nearest.state,t.nearest.country].join(" "):"")].join(" ").toLowerCase().includes(q);
     }
 
     function cardHtml(t){
@@ -335,7 +345,6 @@
         </div>
       </div>`;
     }
-
     function sectionHtml(title, items, open){
       if(!items.length) return "";
       const cards = items.sort((a,b)=>(a.dist??1e9)-(b.dist??1e9)).map(cardHtml).join("");
@@ -349,13 +358,13 @@
       const items = TRIALS.filter(keywordMatch);
 
       if(!USER){
-        locNoteEl.innerHTML = `Enter your <strong>ZIP code</strong> above to group these trials by distance from you.`;
+        locNoteEl.innerHTML = `Enter your <strong>postal code or city</strong> above to group these trials by distance from you.`;
         resultsEl.innerHTML = sectionHtml("All open trials", items, true) || `<div class="muted" style="margin-top:12px;">No trials matched.</div>`;
       } else {
-        locNoteEl.innerHTML = `Showing trials by distance from <strong>${escapeHtml(USER.place)} ${escapeHtml(USER.zip)}</strong>. <a href="#" id="clearZip">Change</a>`;
-        const b = { d50:[], d100:[], d200:[], us:[], world:[] };
-        items.forEach(t => b[t.bucket]?.push(t));
-        // world grouped by country
+        const homeCountry = USER.country || CC_NAME[USER.cc] || "your country";
+        locNoteEl.innerHTML = `Showing trials by distance from <strong>${escapeHtml(USER.place)}</strong> (${escapeHtml(homeCountry)}). <a href="#" id="clearLoc">Change</a>`;
+        const b = { d50:[], d100:[], d200:[], home:[], world:[] };
+        items.forEach(t => (b[t.bucket]||b.home).push(t));
         const worldByCountry = {};
         b.world.forEach(t => { (worldByCountry[t.country||"Other"] = worldByCountry[t.country||"Other"] || []).push(t); });
         const worldCountries = Object.keys(worldByCountry).sort((a,b2)=>worldByCountry[b2].length-worldByCountry[a].length);
@@ -364,18 +373,18 @@
         html += sectionHtml("Within 50 miles", b.d50, true);
         html += sectionHtml("50–100 miles", b.d100, true);
         html += sectionHtml("100–200 miles", b.d200, false);
-        html += sectionHtml("Elsewhere in the United States", b.us, false);
+        html += sectionHtml(`Elsewhere in ${homeCountry}`, b.home, false);
         if(b.world.length){
           const inner = worldCountries.map(c => sectionHtml(c, worldByCountry[c], false)).join("");
           html += `<details class="section"><summary><span class="chev">▶</span>Rest of the world <span class="cpill">${b.world.length}</span></summary><div style="padding-left:12px;">${inner}</div></details>`;
         }
         resultsEl.innerHTML = html || `<div class="muted" style="margin-top:12px;">No open trials matched for this area. Try a wider status or another disease group.</div>`;
-        const clr = document.getElementById("clearZip");
-        if(clr) clr.onclick = (e)=>{ e.preventDefault(); zipEl.value=""; USER=null; load(); };
+        const clr = document.getElementById("clearLoc");
+        if(clr) clr.onclick = (e)=>{ e.preventDefault(); locEl.value=""; USER=null; load(); };
       }
 
       const label = cancerEl.value || "all cancers";
-      const link = ctgovSearchLink(cond, statusVal, USER?.zip||"");
+      const link = ctgovSearchLink(cond, statusVal);
       const totalNote = broadTotal ? ` ClinicalTrials.gov lists ${broadTotal.toLocaleString()} open ${escapeHtml(label)} trial(s) in total.` : "";
       countEl.innerHTML = `Loaded ${items.length} ${escapeHtml(label)} trial(s).${totalNote} <a href="${link}" target="_blank" rel="noreferrer">View all on ClinicalTrials.gov →</a>`;
     }
@@ -396,7 +405,7 @@
         <div><strong>Study phase:</strong> ${escapeHtml(t.phase)}</div>
         <div><strong>Status:</strong> <span class="badge ${statusClass(t.rawStatus)}">${escapeHtml(t.statusText)}</span></div>
         <div><strong>Sponsor:</strong> ${escapeHtml(t.sponsor)}</div>
-        ${t.dist!=null?`<div><strong>Nearest site:</strong> ≈ ${Math.round(t.dist)} mi — ${escapeHtml([t.nearest.facility,t.nearest.city,t.nearest.state].filter(Boolean).join(", "))}</div>`:""}
+        ${t.dist!=null?`<div><strong>Nearest site:</strong> ≈ ${Math.round(t.dist)} mi — ${escapeHtml([t.nearest.facility,t.nearest.city,t.nearest.state||t.nearest.country].filter(Boolean).join(", "))}</div>`:""}
         <div style="margin-top:10px;"><strong>ClinicalTrials.gov ID:</strong> <a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${escapeHtml(t.id)}</a></div>
         <div style="margin-top:14px;"><strong>Study overview</strong></div><div style="margin-top:6px;">${escapeHtml(overview)}</div>
         <div style="margin-top:14px;"><strong>Who can join</strong></div>${bulletsToHtml(can)}
@@ -416,23 +425,26 @@
     cancerEl.addEventListener("change", load);
     statusEl.addEventListener("change", load);
 
-    let zipTimer;
-    async function onZip(){
-      const zip = cleanText(zipEl.value);
-      if(!/^\d{5}$/.test(zip)){ if(USER){ USER=null; load(); } return; }
-      locNoteEl.textContent = "Looking up your ZIP…";
-      try{ USER = await geocodeZip(zip); }
-      catch(_){ USER=null; locNoteEl.innerHTML = `<span style="color:#b91c1c">Couldn’t find ZIP ${escapeHtml(zip)}. Check and try again.</span>`; return; }
+    let locTimer;
+    async function onLoc(){
+      const text = cleanText(locEl.value);
+      if(!text){ if(USER){ USER=null; load(); } return; }
+      const cc = countryEl.value;
+      locNoteEl.textContent = "Looking up your location…";
+      try{ USER = await geocodeLoc(cc, text); }
+      catch(_){ USER=null; locNoteEl.innerHTML = `<span style="color:#b91c1c">Couldn’t find “${escapeHtml(text)}” in ${escapeHtml(CC_NAME[cc]||cc)}. Try a postal code or a city name.</span>`; return; }
       load();
     }
-    zipEl.addEventListener("input", ()=>{ clearTimeout(zipTimer); zipTimer=setTimeout(onZip, 500); });
+    locEl.addEventListener("input", ()=>{ clearTimeout(locTimer); locTimer=setTimeout(onLoc, 500); });
+    countryEl.addEventListener("change", ()=>{ if(cleanText(locEl.value)) onLoc(); });
 
     (function init(){
       const params = new URLSearchParams(window.location.search);
       const c = params.get("cancer");
       if(c){ const opt=[...cancerEl.options].find(o=>o.value.toLowerCase()===c.toLowerCase()); if(opt) cancerEl.value=opt.value; }
-      const z = params.get("zip"); if(z && /^\d{5}$/.test(z)) zipEl.value = z;
-      if(zipEl.value){ onZip(); } else { load(); }
+      const ctry = params.get("country"); if(ctry && CC_NAME[ctry.toLowerCase()]) countryEl.value = ctry.toLowerCase();
+      const loc = params.get("loc") || params.get("zip"); if(loc) locEl.value = loc;
+      if(cleanText(locEl.value)){ onLoc(); } else { load(); }
     })();
   </script>
 </body>
