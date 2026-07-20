@@ -59,6 +59,14 @@
     .m-inelig{ background:#fee2e2; color:#991b1b; border:1px solid #ef4444; }
     .m-nci{ background:#ede9fe; color:#5b21b6; border:1px solid #8b5cf6; }
     .nci-note{ font-size:12px; color:#6b21a8; margin-top:6px; }
+    /* Tier C — AI eligibility */
+    .aibtn{ font-size:12.5px; padding:6px 10px; border-radius:8px; border:1px solid #8b5cf6; background:#f5f3ff; color:#5b21b6; cursor:pointer; font-weight:600; }
+    .aibtn:hover{ background:#ede9fe; }
+    .ai-elig{ background:#dcfce7; color:#166534; border:1px solid #22c55e; }
+    .ai-pos{ background:#fef9c3; color:#854d0e; border:1px solid #eab308; }
+    .ai-inelig{ background:#fee2e2; color:#991b1b; border:1px solid #ef4444; }
+    .aidisc{ font-size:11px; color:#6b7280; margin-top:4px; }
+    .conf{ font-size:12px; color:#6b7280; }
     .why{ font-size:12.5px; margin-top:4px; }
     .why summary{ cursor:pointer; color:#4f46e5; list-style:none; }
     .why summary::-webkit-details-marker{ display:none; }
@@ -573,6 +581,44 @@
         <ul>${m.reasons.map(r=>`<li class="r-${r.k==="ok"?"ok":r.k==="bad"?"bad":"warn"}">${escapeHtml(r.txt)}</li>`).join("")}</ul></details>` : "";
       return `<div class="mrow"><span class="mbadge ${cls}">${label}</span>${nciBadge}</div>${why}`;
     }
+
+    // ---- Tier C: Claude eligibility reasoning ----
+    const AI_CACHE = new Map();
+    function profileKey(){ return JSON.stringify(getProfile()); }
+    const AI_LABEL = { eligible:["ai-elig","Likely eligible"], possible:["ai-pos","Possibly eligible"], ineligible:["ai-inelig","Likely ineligible"] };
+    function aiResultHtml(d){
+      const [cls,label] = AI_LABEL[d.verdict] || AI_LABEL.possible;
+      const lists = (arr,k)=> (arr&&arr.length)?`<ul>${arr.map(x=>`<li class="r-${k}">${escapeHtml(x)}</li>`).join("")}</ul>`:"";
+      return `<div class="mrow"><span class="mbadge ${cls}">🤖 ${label}</span><span class="conf">confidence: ${escapeHtml(d.confidence||"low")}</span></div>
+        <details class="why" open><summary>Claude's reasoning</summary>
+          <div style="margin:4px 0;">${escapeHtml(d.summary||"")}</div>
+          ${lists(d.matched,"ok")}${lists(d.concerns,"warn")}
+          <div class="aidisc">AI assessment from the trial's written criteria — the study team makes the final eligibility decision.</div>
+        </details>`;
+    }
+    function aiSectionHtml(t){
+      if(!profileActive(getProfile())) return "";
+      const cached = AI_CACHE.get(t.id+"|"+profileKey());
+      const inner = cached ? aiResultHtml(cached)
+        : `<button class="aibtn" onclick="aiCheck('${escapeHtml(t.id)}')">🤖 AI eligibility check</button>`;
+      return `<div id="ai-${escapeHtml(t.id)}" style="margin-top:2px;">${inner}</div>`;
+    }
+    window.aiCheck = async function(id){
+      const t = TRIALS.find(x=>x.id===id); if(!t) return;
+      const el = document.getElementById("ai-"+id);
+      if(el) el.innerHTML = `<span class="muted">Checking eligibility with Claude…</span>`;
+      try{
+        const p = getProfile();
+        const body = { profile:p, trial:{ nctId:id, title:t.title, cancer:t.cancer,
+          eligibilityCriteria: t.study.protocolSection?.eligibilityModule?.eligibilityCriteria || "" } };
+        const r = await fetch("/api/match", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify(body) });
+        const d = await r.json().catch(()=>({}));
+        if(d && d.configured === false){ if(el) el.innerHTML = `<span class="muted">AI eligibility check needs an ANTHROPIC_API_KEY on the site (see README).</span>`; return; }
+        if(!d || !d.verdict){ throw new Error((d && d.error) || "no result"); }
+        AI_CACHE.set(id+"|"+profileKey(), d);
+        if(el) el.innerHTML = aiResultHtml(d);
+      }catch(e){ if(el) el.innerHTML = `<span style="color:#b91c1c">AI check failed: ${escapeHtml(e.message||"error")}</span>`; }
+    };
     function cardHtml(t){
       const dist = (t.dist!=null) ? `<div class="dist">≈ ${Math.round(t.dist)} mi away</div>` : "";
       const near = t.nearest ? `<div class="loc">📍 ${escapeHtml([t.nearest.facility,t.nearest.city,t.nearest.state||t.nearest.country].filter(Boolean).join(", "))}</div>` : "";
@@ -588,6 +634,7 @@
           <div class="muted"><a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${escapeHtml(t.id)}</a>${t.sponsor?` • ${escapeHtml(t.sponsor)}`:""}</div>
           ${dist}${near}
         </div>
+        ${aiSectionHtml(t)}
         <div class="actions">
           <button type="button" onclick="openModal('${escapeHtml(t.id)}')">View details</button>
           <a href="intake.html?nct=${encodeURIComponent(t.id)}">I’m interested</a>

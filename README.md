@@ -15,11 +15,17 @@ The trials page ranks trials against a patient profile in two tiers:
 
 - **Tier B (rule-based, always on):** parses each trial's written ClinicalTrials.gov eligibility for biomarker inclusion/exclusion, sex, age, ECOG, stage, and line-of-therapy cues → Strong / Possible / Likely-ineligible with a "why" breakdown.
 - **Tier A (NCI structured, optional):** upgrades trials using *structured* biomarker eligibility (gene/variant) from the **NCI Clinical Trials Search API**, shown as a **★ NCI structured** badge.
+- **Tier C (Claude reasoning, optional):** a per-trial **🤖 AI eligibility check** button sends the trial's full written eligibility + the patient profile to **Claude** (`claude-opus-4-8`, structured output) for a reasoned *Likely eligible / Possibly eligible / Likely ineligible* verdict with a "why" breakdown — catching nuances (e.g. exclusion criteria) that keyword matching misses.
 
 ### Enabling Tier A
 1. Get a free key at <https://clinicaltrialsapi.cancer.gov> → **Get API Key**.
 2. In the Vercel project: **Settings → Environment Variables → add `NCI_API_KEY`**, then redeploy.
 3. `api/nci-trials.js` is a serverless proxy that holds the key server-side; the front-end calls `/api/nci-trials`. With no key set it returns `{configured:false}` and the page falls back to Tier B (no breakage).
+
+### Enabling Tier C
+1. Get an Anthropic API key at <https://console.anthropic.com>.
+2. In the Vercel project: **Settings → Environment Variables → add `ANTHROPIC_API_KEY`**, then redeploy.
+3. `api/match.js` is a serverless proxy that holds the key server-side and calls the Anthropic Messages API. With no key set it returns `{configured:false}` and the button shows a hint instead of failing.
 
 All matching is preliminary decision support — final eligibility is confirmed by the study team.
 
