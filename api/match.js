@@ -29,6 +29,16 @@ const SYSTEM = [
   "matched: short bullet phrases for criteria the patient appears to satisfy. concerns: criteria that conflict or need confirmation. summary: one or two plain-language sentences. Always end reasoning implicitly with the understanding that the study team makes the final call.",
 ].join(" ");
 
+// Adversarial verification pass. Runs only after an initial 'eligible' verdict to
+// catch missed disqualifiers — deliberately skeptical, biased toward downgrading.
+const VERIFY_SYSTEM = [
+  "You are an adversarial eligibility AUDITOR for cancer clinical trials, providing DECISION SUPPORT — never a medical determination.",
+  "A prior automated pass judged this patient likely ELIGIBLE. Your job is to try to REFUTE that by finding any STATED exclusion criterion the patient would trip, or any STATED inclusion criterion the profile does not clearly satisfy.",
+  "Judge ONLY against the trial's written eligibility criteria and the patient profile provided. Do not invent criteria that aren't stated, and do not use outside knowledge of the trial.",
+  "Return verdict 'eligible' ONLY if, after actively looking for disqualifiers, you find none. If you find a clear conflict, return 'ineligible'. If a relevant criterion exists but the profile lacks the detail to confirm it either way, return 'possible' (do not guess it away).",
+  "concerns: the specific stated criteria that create doubt or conflict. matched: inclusion criteria that clearly hold up. summary: one or two plain-language sentences on whether eligibility survives scrutiny.",
+].join(" ");
+
 function profileText(p) {
   const parts = [];
   if (p.biomarkers && p.biomarkers.length) parts.push("Biomarkers/alterations: " + p.biomarkers.join(", "));
@@ -56,6 +66,8 @@ module.exports = async (req, res) => {
   try { if (typeof body === "string") body = JSON.parse(body); } catch (_) { body = null; }
   const profile = (body && body.profile) || {};
   const trial = (body && body.trial) || {};
+  const verify = body && body.verify === true;
+  const prior = (body && body.prior) || null;
   const criteria = (trial.eligibilityCriteria || "").toString().slice(0, 12000);
   if (!criteria.trim()) {
     res.status(200).send(JSON.stringify({
@@ -66,10 +78,14 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const userMsg =
+  let userMsg =
     "PATIENT PROFILE\n" + profileText(profile) +
     "\n\nTRIAL: " + (trial.title || trial.nctId || "") +
     " (condition: " + (trial.cancer || "cancer") + ")\n\nELIGIBILITY CRITERIA (verbatim from ClinicalTrials.gov):\n" + criteria;
+  if (verify && prior && prior.summary) {
+    userMsg += "\n\nPRIOR ASSESSMENT TO AUDIT (judged likely eligible): " + String(prior.summary).slice(0, 800);
+  }
+  const systemPrompt = verify ? VERIFY_SYSTEM : SYSTEM;
 
   try {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
@@ -83,7 +99,7 @@ module.exports = async (req, res) => {
         model: MODEL,
         max_tokens: 1024,
         output_config: { format: { type: "json_schema", schema: SCHEMA }, effort: "low" },
-        system: SYSTEM,
+        system: systemPrompt,
         messages: [{ role: "user", content: userMsg }],
       }),
     });

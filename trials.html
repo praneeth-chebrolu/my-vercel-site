@@ -206,6 +206,7 @@
     </details>
 
     <div id="locNote" class="locNote muted"></div>
+    <div id="aiBar" class="locNote"></div>
     <div id="results"></div>
     <p id="count" class="muted"></p>
   </section>
@@ -586,15 +587,19 @@
       return `<div class="mrow"><span class="mbadge ${cls}">${label}</span>${nciBadge}</div>${why}`;
     }
 
-    // ---- Tier C: Claude eligibility reasoning ----
+    // ---- Tier C: Claude eligibility reasoning (assess → adversarial verify) ----
     const AI_CACHE = new Map();
+    let AI_UNCONFIGURED = false;   // remembered so a batch doesn't spam the proxy
     function profileKey(){ return JSON.stringify(getProfile()); }
     const AI_LABEL = { eligible:["ai-elig","Likely eligible"], possible:["ai-pos","Possibly eligible"], ineligible:["ai-inelig","Likely ineligible"] };
     function aiResultHtml(d){
       const [cls,label] = AI_LABEL[d.verdict] || AI_LABEL.possible;
       const lists = (arr,k)=> (arr&&arr.length)?`<ul>${arr.map(x=>`<li class="r-${k}">${escapeHtml(x)}</li>`).join("")}</ul>`:"";
-      return `<div class="mrow"><span class="mbadge ${cls}">🤖 ${label}</span><span class="conf">confidence: ${escapeHtml(d.confidence||"low")}</span></div>
+      const verified = d.verified ? `<span class="conf" title="Re-checked by a second, adversarial eligibility pass">✓ double-checked</span>` : "";
+      const downgrade = d.downgraded ? `<div class="aidisc" style="color:#854d0e;">This first looked eligible, but a second adversarial check surfaced the concern(s) below.</div>` : "";
+      return `<div class="mrow"><span class="mbadge ${cls}">🤖 ${label}</span><span class="conf">confidence: ${escapeHtml(d.confidence||"low")}</span>${verified}</div>
         <details class="why" open><summary>Claude's reasoning</summary>
+          ${downgrade}
           <div style="margin:4px 0;">${escapeHtml(d.summary||"")}</div>
           ${lists(d.matched,"ok")}${lists(d.concerns,"warn")}
           <div class="aidisc">AI assessment from the trial's written criteria — the study team makes the final eligibility decision.</div>
@@ -607,22 +612,76 @@
         : `<button class="aibtn" onclick="aiCheck('${escapeHtml(t.id)}')">🤖 AI eligibility check</button>`;
       return `<div id="ai-${escapeHtml(t.id)}" style="margin-top:2px;">${inner}</div>`;
     }
+    function trialCriteria(t){ return t.study.protocolSection?.eligibilityModule?.eligibilityCriteria || ""; }
+    function mergeUnique(a,b){ const s=new Set(a||[]); (b||[]).forEach(x=>s.add(x)); return [...s]; }
+    async function callMatch(payload){
+      const r = await fetch("/api/match", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify(payload) });
+      return await r.json().catch(()=>({}));
+    }
+
+    // One trial: assess, and if it looks eligible, run an adversarial verify pass that
+    // can only hold or downgrade the verdict. Result is cached per (trial, profile).
     window.aiCheck = async function(id){
       const t = TRIALS.find(x=>x.id===id); if(!t) return;
       const el = document.getElementById("ai-"+id);
+      const cacheKey = id+"|"+profileKey();
+      if(AI_CACHE.has(cacheKey)){ if(el) el.innerHTML = aiResultHtml(AI_CACHE.get(cacheKey)); return; }
+      if(AI_UNCONFIGURED){ if(el) el.innerHTML = aiHint(); return; }
       if(el) el.innerHTML = `<span class="muted">Checking eligibility with Claude…</span>`;
       try{
         const p = getProfile();
-        const body = { profile:p, trial:{ nctId:id, title:t.title, cancer:t.cancer,
-          eligibilityCriteria: t.study.protocolSection?.eligibilityModule?.eligibilityCriteria || "" } };
-        const r = await fetch("/api/match", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify(body) });
-        const d = await r.json().catch(()=>({}));
-        if(d && d.configured === false){ if(el) el.innerHTML = `<span class="muted">AI eligibility check needs an ANTHROPIC_API_KEY on the site (see README).</span>`; return; }
+        const trial = { nctId:id, title:t.title, cancer:t.cancer, eligibilityCriteria: trialCriteria(t) };
+        let d = await callMatch({ profile:p, trial });
+        if(d && d.configured === false){ AI_UNCONFIGURED = true; if(el) el.innerHTML = aiHint(); return; }
         if(!d || !d.verdict){ throw new Error((d && d.error) || "no result"); }
-        AI_CACHE.set(id+"|"+profileKey(), d);
+        if(d.verdict === "eligible"){
+          if(el) el.innerHTML = `<span class="muted">Double-checking eligibility…</span>`;
+          try{
+            const v = await callMatch({ profile:p, trial, verify:true, prior:{ summary:d.summary } });
+            if(v && v.verdict === "eligible"){ d = Object.assign({}, d, { verified:true, matched: mergeUnique(d.matched, v.matched) }); }
+            else if(v && v.verdict){ d = Object.assign({}, v, { verified:true, downgraded:true }); }
+          }catch(_){ /* keep the initial assessment if the verify pass fails */ }
+        }
+        AI_CACHE.set(cacheKey, d);
         if(el) el.innerHTML = aiResultHtml(d);
       }catch(e){ if(el) el.innerHTML = `<span style="color:#b91c1c">AI check failed: ${escapeHtml(e.message||"error")}</span>`; }
     };
+    function aiHint(){ return `<span class="muted">AI eligibility check needs an ANTHROPIC_API_KEY on the site (see README).</span>`; }
+
+    // Bounded fan-out: run aiCheck over the best-ranked eligible trials, small concurrency.
+    let aiBatchRunning = false;
+    async function pool(items, limit, fn){
+      const q = items.slice();
+      const runners = Array.from({length: Math.min(limit, q.length)}, async () => {
+        while(q.length){ await fn(q.shift()); }
+      });
+      await Promise.all(runners);
+    }
+    window.aiCheckTop = async function(n){
+      if(aiBatchRunning) return;
+      n = n || 8;
+      const p = getProfile();
+      if(!profileActive(p)) return;
+      const shortlist = TRIALS
+        .filter(keywordMatch)
+        .filter(t => t._match && t._match.level !== "inelig")
+        .filter(t => trialCriteria(t).trim())
+        .sort((a,b)=>(b._match?.score??0)-(a._match?.score??0))
+        .slice(0, n);
+      if(!shortlist.length) return;
+      aiBatchRunning = true;
+      let done = 0; aiBar(`<span class="muted">Checking 0/${shortlist.length} top matches with Claude…</span>`);
+      await pool(shortlist, 4, async (t)=>{
+        if(!AI_CACHE.has(t.id+"|"+profileKey())) await aiCheck(t.id);
+        done++;
+        aiBar(AI_UNCONFIGURED ? aiHint() : `<span class="muted">Checking ${done}/${shortlist.length} top matches with Claude…</span>`);
+      });
+      aiBatchRunning = false;
+      aiBar(AI_UNCONFIGURED ? aiHint()
+        : `<span class="muted">✓ Double-checked your top ${shortlist.length} matches. </span>${aiBarBtn("Re-run",8)}`);
+    };
+    function aiBar(html){ const b=document.getElementById("aiBar"); if(b) b.innerHTML = html; }
+    function aiBarBtn(label,n){ return `<button class="aibtn" onclick="aiCheckTop(${n||8})">🤖 ${escapeHtml(label)}</button>`; }
     function cardHtml(t){
       const dist = (t.dist!=null) ? `<div class="dist">≈ ${Math.round(t.dist)} mi away</div>` : "";
       const near = t.nearest ? `<div class="loc">📍 ${escapeHtml([t.nearest.facility,t.nearest.city,t.nearest.state||t.nearest.country].filter(Boolean).join(", "))}</div>` : "";
@@ -662,6 +721,11 @@
       const p = getProfile();
       const active = profileActive(p);
       TRIALS.forEach(t => { t._match = active ? computeMatch(t, p) : null; });
+      if(!aiBatchRunning){
+        aiBar(active
+          ? `${aiBarBtn("AI-check my top matches",8)} <span class="muted">Runs Claude eligibility + an adversarial double-check on your best-ranked trials.</span>`
+          : "");
+      }
       const hideInelig = active && hideEl.checked;
       let items = TRIALS.filter(keywordMatch);
       if(hideInelig) items = items.filter(t => t._match?.level !== "inelig");
