@@ -433,6 +433,7 @@
       return m[raw] || cleanText((raw||"").replaceAll("_"," ").toLowerCase());
     }
     function statusClass(raw){ return raw==="RECRUITING"?"status-recruiting":(raw==="NOT_YET_RECRUITING"||raw==="ENROLLING_BY_INVITATION")?"status-soon":"status-other"; }
+    function isRecruiting(s){ return /^(RECRUITING|ENROLLING_BY_INVITATION)$/i.test((s||"").trim()); }
     function getPhaseText(d){ const p=(Array.isArray(d?.phases)?d.phases:[]).filter(x=>x&&x!=="NA").map(x=>x.replace("PHASE","Phase ").replace("_"," ")); return p.length?p.join(", "):"Phase not listed"; }
     function getSponsor(s){ return s?.leadSponsor?.name ? cleanText(s.leadSponsor.name) : "Sponsor not listed"; }
     function getOverview(d){ return firstNonEmpty(d?.briefSummary,d?.detailedDescription,"").replace(/\r/g," ").replace(/\n+/g," ").replace(/\s+/g," ").trim(); }
@@ -480,11 +481,14 @@
       const p = study.protocolSection||{};
       const id = p.identificationModule?.nctId||"";
       const locs = (p.contactsLocationsModule?.locations||[]).map(L=>({
-        facility:L.facility||"", city:L.city||"", state:L.state||"", country:L.country||"",
-        status:L.status||"", lat:L.geoPoint?.lat ?? null, lon:L.geoPoint?.lon ?? null
+        facility:L.facility||"", city:L.city||"", state:L.state||"", zip:L.zip||"", country:L.country||"",
+        status:L.status||"", lat:L.geoPoint?.lat ?? null, lon:L.geoPoint?.lon ?? null,
+        contacts:(L.contacts||[]).map(c=>({name:c.name||"", phone:c.phone||"", email:c.email||"", role:c.role||""}))
       }));
+      const centralContacts = (p.contactsLocationsModule?.centralContacts||[])
+        .map(c=>({name:c.name||"", phone:c.phone||"", email:c.email||"", role:c.role||""}));
       return {
-        study, id, ctgovLink:`https://clinicaltrials.gov/study/${id}`,
+        study, id, centralContacts, ctgovLink:`https://clinicaltrials.gov/study/${id}`,
         title: firstNonEmpty(p.identificationModule?.briefTitle, p.identificationModule?.officialTitle, "Title not listed"),
         phase: getPhaseText(p.designModule),
         rawStatus: p.statusModule?.overallStatus||"", statusText: prettyStatus(p.statusModule?.overallStatus||""),
@@ -637,7 +641,7 @@
         ${aiSectionHtml(t)}
         <div class="actions">
           <button type="button" onclick="openModal('${escapeHtml(t.id)}')">View details</button>
-          <a href="intake.html?nct=${encodeURIComponent(t.id)}">I’m interested</a>
+          <button type="button" onclick="openInterest('${escapeHtml(t.id)}')">I’m interested</button>
         </div>
       </div>`;
     }
@@ -704,13 +708,80 @@
 
     function bulletsToHtml(arr){ return (!arr||!arr.length)?"<div class='muted'>Not listed.</div>":`<ul>${arr.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>`; }
 
+    // ---- "I'm interested" → nearest study site ----
+    // Pick the closest recruiting site to the user (fall back to closest overall, then first listed).
+    function nearestSite(t){
+      const geo = t.locs.filter(l=>l.lat!=null);
+      if(USER && geo.length){
+        const rec = geo.filter(l=>isRecruiting(l.status));
+        const pool = rec.length ? rec : geo;
+        let best=null, bd=Infinity;
+        for(const l of pool){ const d=haversineMi(USER.lat,USER.lng,l.lat,l.lon); if(d<bd){bd=d;best=l;} }
+        return { site:best, dist:bd };
+      }
+      const rec = t.locs.filter(l=>isRecruiting(l.status));
+      return { site: rec[0] || t.locs[0] || null, dist:null };
+    }
+    function cleanRole(r){ return cleanText((r||"").replace(/_/g," ").toLowerCase()); }
+    function directionsLink(s){
+      if(s.lat!=null && s.lon!=null) return `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`;
+      const q=[s.facility,s.city,s.state,s.zip,s.country].filter(Boolean).join(", ");
+      return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}`;
+    }
+    function contactsHtml(list){
+      if(!list||!list.length) return "";
+      return list.map(c=>{
+        const rows=[];
+        if(c.name) rows.push(`<div><strong>${escapeHtml(c.name)}</strong>${c.role?` <span class="muted">(${escapeHtml(cleanRole(c.role))})</span>`:""}</div>`);
+        else if(c.role) rows.push(`<div class="muted">${escapeHtml(cleanRole(c.role))}</div>`);
+        if(c.phone) rows.push(`<div>📞 <a href="tel:${escapeHtml(c.phone.replace(/[^+\d]/g,""))}">${escapeHtml(c.phone)}</a></div>`);
+        if(c.email) rows.push(`<div>✉️ <a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a></div>`);
+        return rows.length ? `<div style="margin-bottom:8px;">${rows.join("")}</div>` : "";
+      }).join("");
+    }
+    window.openInterest = function(id){
+      const t = TRIALS.find(x=>x.id===id); if(!t) return;
+      const { site, dist } = nearestSite(t);
+      mTitle.textContent = "Contact the nearest study site";
+      if(!site){
+        mBody.innerHTML = `<div style="font-weight:700;">${escapeHtml(t.title)}</div>
+          <div class="muted"><a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${escapeHtml(t.id)}</a></div>
+          <div style="margin-top:12px;">No specific site location is listed for this trial on ClinicalTrials.gov yet. Open the study record for central contact details, or ask your oncologist for a referral.</div>`;
+        mLink.href = t.ctgovLink; mLink.target="_blank"; mLink.textContent = "Open on ClinicalTrials.gov";
+        backdrop.style.display="flex"; return;
+      }
+      const addr = [site.city, site.state, site.zip, site.country].filter(Boolean).join(", ");
+      const statusBadge = site.status ? `<span class="badge ${statusClass(site.status)}">${escapeHtml(prettyStatus(site.status))}</span>` : "";
+      const distText = dist!=null ? `<span class="dist">≈ ${Math.round(dist)} mi away</span>` : "";
+      const contacts = (site.contacts&&site.contacts.length) ? site.contacts : t.centralContacts;
+      const cHtml = contactsHtml(contacts);
+      const contactBlock = cHtml || `<div class="muted">No direct site contact is published on ClinicalTrials.gov. Ask your oncologist for a referral, or open the study record for the central study contact.</div>`;
+      mBody.innerHTML = `
+        <div style="font-weight:700;">${escapeHtml(t.title)}</div>
+        <div class="muted"><a href="${t.ctgovLink}" target="_blank" rel="noreferrer">${escapeHtml(t.id)}</a>${t.sponsor?` • ${escapeHtml(t.sponsor)}`:""}</div>
+        <div style="margin-top:14px; padding:12px 14px; border:1px solid #e5e7eb; border-radius:12px; background:#f9fafb;">
+          <div style="font-weight:700; font-size:15px;">📍 ${escapeHtml(site.facility||"Study site")}</div>
+          ${addr?`<div style="margin-top:2px;">${escapeHtml(addr)}</div>`:""}
+          <div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">${statusBadge}${distText}</div>
+          <div style="margin-top:10px;"><a href="${directionsLink(site)}" target="_blank" rel="noreferrer">Get directions →</a></div>
+        </div>
+        <div style="margin-top:16px;"><strong>Who to contact</strong></div>
+        <div style="margin-top:6px;">${contactBlock}</div>
+        <div style="margin-top:16px;"><strong>Next steps</strong></div>
+        <div style="margin-top:4px;">Contact the site above (mention the trial ID ${escapeHtml(t.id)}), and bring your diagnosis with recent pathology and imaging. The study team confirms final eligibility. You can also send a referral request below.</div>`;
+      mLink.href = `intake.html?trial=${encodeURIComponent(t.id)}${site.facility?`&site=${encodeURIComponent(site.facility)}`:""}`;
+      mLink.target = "_self"; mLink.textContent = "Request a referral →";
+      backdrop.style.display="flex";
+    };
+
     window.openModal = function(id){
       const t = TRIALS.find(x=>x.id===id); if(!t) return;
       const p = t.study.protocolSection||{};
       const overview = shortOverview(getOverview(p.descriptionModule), { phase:t.phase, diseaseFocus:t.cancer });
       const can = whoCanJoin(t.cancer, p.eligibilityModule||{});
       const cannot = whoCannotJoin(p.eligibilityModule||{});
-      const sites = (t.locs.filter(l=>/RECRUITING/i.test(l.status||"")).length?t.locs.filter(l=>/RECRUITING/i.test(l.status||"")):t.locs)
+      const recSites = t.locs.filter(l=>isRecruiting(l.status));
+      const sites = (recSites.length?recSites:t.locs)
         .slice(0,5).map(l=>[l.facility,l.city,l.state||l.country].filter(Boolean).join(", "));
       mTitle.textContent = `${t.title} (${t.id})`;
       mBody.innerHTML = `
@@ -726,7 +797,8 @@
         ${sites.length?`<div style="margin-top:14px;"><strong>Recruiting sites</strong></div>${bulletsToHtml(sites)}`:""}
         <div style="margin-top:14px;"><strong>How to join</strong></div>
         <div>Ask your oncologist for a referral, or use the “I’m interested” button.</div>`;
-      mLink.href = t.ctgovLink; backdrop.style.display = "flex";
+      mLink.href = t.ctgovLink; mLink.target = "_blank"; mLink.textContent = "Open on ClinicalTrials.gov";
+      backdrop.style.display = "flex";
     };
     function closeModal(){ backdrop.style.display="none"; }
     closeBtn.addEventListener("click", closeModal);
