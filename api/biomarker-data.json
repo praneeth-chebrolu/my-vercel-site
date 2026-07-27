@@ -1,0 +1,115 @@
+{
+  "_meta": {
+    "source": "Curated from FDA-recognized and NCCN/CAP-guideline biomarkers for each tumor type (indicative, prototype). IMPACT/ACCESS coverage is indicative of MSK-IMPACT (DNA panel) and MSK-ACCESS (cfDNA) reporting. Refresh from CIViC/OncoKB as needed.",
+    "tiers": { "A": "FDA-approved / standard-of-care biomarker", "B": "guideline or emerging / investigational" }
+  },
+  "Lung cancer": [
+    { "gene": "EGFR", "aliases": ["ERBB1"], "tier": "A", "alterations": ["Exon 19 deletion", "L858R", "T790M", "Exon 20 insertion"], "onImpact": true, "onAccess": true },
+    { "gene": "ALK", "tier": "A", "alterations": ["Fusion / rearrangement"], "onImpact": true, "onAccess": true },
+    { "gene": "ROS1", "tier": "A", "alterations": ["Fusion"], "onImpact": true, "onAccess": true },
+    { "gene": "BRAF", "tier": "A", "alterations": ["V600E"], "onImpact": true, "onAccess": true },
+    { "gene": "KRAS", "tier": "A", "alterations": ["G12C"], "onImpact": true, "onAccess": true },
+    { "gene": "MET", "aliases": ["c-MET"], "tier": "A", "alterations": ["Exon 14 skipping", "Amplification"], "onImpact": true, "onAccess": true },
+    { "gene": "RET", "tier": "A", "alterations": ["Fusion"], "onImpact": true, "onAccess": true },
+    { "gene": "ERBB2", "aliases": ["HER2", "neu"], "tier": "A", "alterations": ["Exon 20 insertion", "Amplification"], "onImpact": true, "onAccess": true },
+    { "gene": "PD-L1", "aliases": ["CD274", "PDL1"], "tier": "A", "alterations": ["IHC expression"], "onImpact": false, "onAccess": false }
+  ],
+  "Breast cancer": [
+    { "gene": "ERBB2", "aliases": ["HER2", "neu"], "tier": "A", "alterations": ["Amplification / overexpression"], "onImpact": true, "onAccess": true },
+    { "gene": "ESR1", "aliases": ["ER", "estrogen receptor"], "tier": "A", "alterations": ["Expression", "Ligand-binding mutation"], "onImpact": true, "onAccess": true },
+    { "gene": "PGR", "aliases": ["PR", "progesterone receptor"], "tier": "A", "alterations": ["Expression"], "onImpact": false, "onAccess": false },
+    { "gene": "PIK3CA", "tier": "A", "alterations": ["H1047R", "E545K", "E542K"], "onImpact": true, "onAccess": true },
+    { "gene": "BRCA1", "tier": "A", "alterations": ["Germline / somatic pathogenic"], "onImpact": true, "onAccess": true },
+    { "gene": "BRCA2", "tier": "A", "alterations": ["Germline / somatic pathogenic"], "onImpact": true, "onAccess": true },
+    { "gene": "AKT1", "tier": "B", "alterations": ["E17K"], "onImpact": true, "onAccess": true },
+    { "gene": "PTEN", "tier": "B", "alterations": ["Loss"], "onImpact": true, "onAccess": false },
+    { "gene": "PD-L1", "aliases": ["CD274", "PDL1"], "tier": "A", "alterations": ["IHC expression (TNBC)"], "onImpact": false, "onAccess": false }
+  ],
+  "Colon & rectal cancer": [
+    { "gene": "KRAS", "tier": "A", "alterations": ["Codon 12/13", "G12C"], "onImpact": true, "onAccess": true },
+    { "gene": "NRAS", "tier": "A", "alterations": ["Codon 12/13/61"], "onImpact": true, "onAccess": true },
+    { "gene": "BRAF", "tier": "A", "alterations": ["V600E"], "onImpact": true, "onAccess": true },
+    { "gene": "ERBB2", "aliases": ["HER2", "neu"], "tier": "A", "alterations": ["Amplification"], "onImpact": true, "onAccess": true },
+    { "gene": "PIK3CA", "tier": "B", "alterations": ["Hotspot mutation"], "onImpact": true, "onAccess": true }
+  ],
+  "Gastrointestinal cancer": [
+    { "gene": "ERBB2", "aliases": ["HER2", "neu"], "tier": "A", "alterations": ["Amplification (gastric/GEJ)"], "onImpact": true, "onAccess": true },
+    { "gene": "KIT", "aliases": ["c-KIT", "CD117"], "tier": "A", "alterations": ["Exon 11/9 (GIST)"], "onImpact": true, "onAccess": true },
+    { "gene": "PDGFRA", "tier": "A", "alterations": ["D842V (GIST)"], "onImpact": true, "onAccess": true },
+    { "gene": "KRAS", "tier": "A", "alterations": ["G12x (pancreatic/CRC)"], "onImpact": true, "onAccess": true },
+    { "gene": "BRAF", "tier": "A", "alterations": ["V600E"], "onImpact": true, "onAccess": true },
+    { "gene": "FGFR2", "tier": "A", "alterations": ["Fusion (cholangiocarcinoma)"], "onImpact": true, "onAccess": true },
+    { "gene": "IDH1", "tier": "A", "alterations": ["R132 (cholangiocarcinoma)"], "onImpact": true, "onAccess": true },
+    { "gene": "PD-L1", "aliases": ["CD274", "PDL1"], "tier": "A", "alterations": ["IHC / CPS"], "onImpact": false, "onAccess": false }
+  ],
+  "Gynecologic cancer": [
+    { "gene": "BRCA1", "tier": "A", "alterations": ["Germline / somatic pathogenic"], "onImpact": true, "onAccess": true },
+    { "gene": "BRCA2", "tier": "A", "alterations": ["Germline / somatic pathogenic"], "onImpact": true, "onAccess": true },
+    { "gene": "PIK3CA", "tier": "B", "alterations": ["Hotspot mutation"], "onImpact": true, "onAccess": true },
+    { "gene": "ERBB2", "aliases": ["HER2", "neu"], "tier": "A", "alterations": ["Amplification (endometrial/USC)"], "onImpact": true, "onAccess": true },
+    { "gene": "PTEN", "tier": "B", "alterations": ["Loss (endometrial)"], "onImpact": true, "onAccess": false },
+    { "gene": "FOLR1", "aliases": ["FRalpha", "folate receptor alpha"], "tier": "A", "alterations": ["Expression (ovarian)"], "onImpact": false, "onAccess": false },
+    { "gene": "PD-L1", "aliases": ["CD274", "PDL1"], "tier": "A", "alterations": ["IHC (cervical)"], "onImpact": false, "onAccess": false }
+  ],
+  "Head & neck cancer": [
+    { "gene": "PD-L1", "aliases": ["CD274", "PDL1"], "tier": "A", "alterations": ["IHC / CPS"], "onImpact": false, "onAccess": false },
+    { "gene": "HRAS", "tier": "B", "alterations": ["Hotspot mutation"], "onImpact": true, "onAccess": true },
+    { "gene": "PIK3CA", "tier": "B", "alterations": ["Hotspot / amplification"], "onImpact": true, "onAccess": true },
+    { "gene": "EGFR", "aliases": ["ERBB1"], "tier": "B", "alterations": ["Amplification / expression"], "onImpact": true, "onAccess": true },
+    { "gene": "CDKN2A", "tier": "B", "alterations": ["Loss"], "onImpact": true, "onAccess": false }
+  ],
+  "Kidney cancer": [
+    { "gene": "VHL", "tier": "A", "alterations": ["Loss / mutation (ccRCC)"], "onImpact": true, "onAccess": false },
+    { "gene": "MET", "aliases": ["c-MET"], "tier": "A", "alterations": ["Mutation / amplification (papillary)"], "onImpact": true, "onAccess": true },
+    { "gene": "FH", "tier": "B", "alterations": ["Germline (HLRCC)"], "onImpact": true, "onAccess": false },
+    { "gene": "TSC1", "tier": "B", "alterations": ["Loss"], "onImpact": true, "onAccess": false },
+    { "gene": "TSC2", "tier": "B", "alterations": ["Loss"], "onImpact": true, "onAccess": false },
+    { "gene": "PBRM1", "tier": "B", "alterations": ["Loss"], "onImpact": true, "onAccess": false }
+  ],
+  "Prostate cancer": [
+    { "gene": "BRCA2", "tier": "A", "alterations": ["Germline / somatic pathogenic"], "onImpact": true, "onAccess": true },
+    { "gene": "BRCA1", "tier": "A", "alterations": ["Germline / somatic pathogenic"], "onImpact": true, "onAccess": true },
+    { "gene": "ATM", "tier": "A", "alterations": ["Loss-of-function"], "onImpact": true, "onAccess": true },
+    { "gene": "CHEK2", "tier": "B", "alterations": ["Loss-of-function"], "onImpact": true, "onAccess": true },
+    { "gene": "PALB2", "tier": "B", "alterations": ["Loss-of-function"], "onImpact": true, "onAccess": true },
+    { "gene": "AR", "tier": "B", "alterations": ["Amplification / L702H / AR-V7"], "onImpact": true, "onAccess": true },
+    { "gene": "PTEN", "tier": "B", "alterations": ["Loss"], "onImpact": true, "onAccess": false }
+  ],
+  "Skin cancer": [
+    { "gene": "BRAF", "tier": "A", "alterations": ["V600E", "V600K"], "onImpact": true, "onAccess": true },
+    { "gene": "NRAS", "tier": "A", "alterations": ["Q61x"], "onImpact": true, "onAccess": true },
+    { "gene": "KIT", "aliases": ["c-KIT", "CD117"], "tier": "A", "alterations": ["Exon 11/13 (acral/mucosal)"], "onImpact": true, "onAccess": true },
+    { "gene": "NF1", "tier": "B", "alterations": ["Loss-of-function"], "onImpact": true, "onAccess": false },
+    { "gene": "GNAQ", "tier": "B", "alterations": ["Q209 (uveal)"], "onImpact": true, "onAccess": false },
+    { "gene": "GNA11", "tier": "B", "alterations": ["Q209 (uveal)"], "onImpact": true, "onAccess": false },
+    { "gene": "PD-L1", "aliases": ["CD274", "PDL1"], "tier": "A", "alterations": ["IHC expression"], "onImpact": false, "onAccess": false }
+  ],
+  "Bladder cancer": [
+    { "gene": "FGFR3", "tier": "A", "alterations": ["Mutation / fusion"], "onImpact": true, "onAccess": true },
+    { "gene": "FGFR2", "tier": "A", "alterations": ["Fusion"], "onImpact": true, "onAccess": true },
+    { "gene": "ERBB2", "aliases": ["HER2", "neu"], "tier": "B", "alterations": ["Amplification / mutation"], "onImpact": true, "onAccess": true },
+    { "gene": "PIK3CA", "tier": "B", "alterations": ["Hotspot mutation"], "onImpact": true, "onAccess": true },
+    { "gene": "PD-L1", "aliases": ["CD274", "PDL1"], "tier": "A", "alterations": ["IHC expression"], "onImpact": false, "onAccess": false }
+  ],
+  "Brain cancer": [
+    { "gene": "IDH1", "tier": "A", "alterations": ["R132H"], "onImpact": true, "onAccess": false },
+    { "gene": "IDH2", "tier": "A", "alterations": ["R172"], "onImpact": true, "onAccess": false },
+    { "gene": "MGMT", "tier": "A", "alterations": ["Promoter methylation"], "onImpact": false, "onAccess": false },
+    { "gene": "1p/19q", "aliases": ["1p19q codeletion"], "tier": "A", "alterations": ["Co-deletion (oligodendroglioma)"], "onImpact": false, "onAccess": false },
+    { "gene": "BRAF", "tier": "A", "alterations": ["V600E", "KIAA1549 fusion"], "onImpact": true, "onAccess": false },
+    { "gene": "EGFR", "aliases": ["ERBB1"], "tier": "B", "alterations": ["Amplification", "vIII"], "onImpact": true, "onAccess": false },
+    { "gene": "H3F3A", "aliases": ["H3K27M", "H3-3A"], "tier": "A", "alterations": ["K27M (diffuse midline glioma)"], "onImpact": true, "onAccess": false },
+    { "gene": "ATRX", "tier": "B", "alterations": ["Loss"], "onImpact": true, "onAccess": false }
+  ],
+  "Testicular cancer": [
+    { "gene": "KIT", "aliases": ["c-KIT", "CD117"], "tier": "B", "alterations": ["Exon 17 (seminoma)"], "onImpact": true, "onAccess": true },
+    { "gene": "KRAS", "tier": "B", "alterations": ["Mutation / amplification"], "onImpact": true, "onAccess": true }
+  ],
+  "Childhood cancer": [
+    { "gene": "ALK", "tier": "A", "alterations": ["Mutation / amplification (neuroblastoma)", "Fusion (ALCL)"], "onImpact": true, "onAccess": true },
+    { "gene": "MYCN", "tier": "A", "alterations": ["Amplification (neuroblastoma)"], "onImpact": true, "onAccess": false },
+    { "gene": "BRAF", "tier": "A", "alterations": ["V600E", "KIAA1549 fusion"], "onImpact": true, "onAccess": true },
+    { "gene": "H3F3A", "aliases": ["H3K27M", "H3-3A"], "tier": "A", "alterations": ["K27M (DIPG)"], "onImpact": true, "onAccess": false },
+    { "gene": "FGFR1", "tier": "B", "alterations": ["Fusion / mutation"], "onImpact": true, "onAccess": true }
+  ]
+}

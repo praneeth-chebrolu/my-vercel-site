@@ -13,7 +13,7 @@ Static site for **Cancer Clinical Trials**, deployed on Vercel.
 
 The trials page ranks trials against a patient profile in two tiers:
 
-Biomarkers are entered through a **tumor-specific dropdown** (works with no paid key): pick a cancer type and the dropdown lists *that tumor's* markers from **CIViC** (civicdb.org — Clinical Interpretation of Variants in Cancer, released **CC0 / public domain**), each labeled with its clinical **evidence level (A–E)**, example alterations, and whether it's covered by **MSK-IMPACT** (`I`) or **MSK-ACCESS** (`A`). Selecting a marker adds a removable chip (multiple markers supported); a free-text field covers anything not listed. See "Cancer-specific biomarkers" below.
+Biomarkers are entered through a **tumor-specific dropdown** (works with no paid key, no external calls): pick a cancer type and the dropdown lists *that tumor's* markers, each labeled with a **tier** (A = FDA/standard-of-care, B = guideline/emerging), example alterations, and whether it's covered by **MSK-IMPACT** (`I`) or **MSK-ACCESS** (`A`). Selecting a marker adds a removable chip (multiple markers supported); a free-text field covers anything not listed. See "Cancer-specific biomarkers" below.
 
 - **Tier B (rule-based, always on):** parses each trial's written ClinicalTrials.gov eligibility for biomarker inclusion/exclusion, sex, age, ECOG, stage, and line-of-therapy cues → Strong / Possible / Likely-ineligible with a "why" breakdown.
 - **Tier A (NCI structured, optional):** upgrades trials using *structured* biomarker eligibility (gene/variant) from the **NCI Clinical Trials Search API**, shown as a **★ NCI structured** badge.
@@ -34,15 +34,13 @@ Biomarkers are entered through a **tumor-specific dropdown** (works with no paid
 
 ### Cancer-specific biomarkers (`api/biomarkers.js`)
 
-**Open by default — no key required.** `api/biomarkers.js` is a serverless proxy that, for the selected cancer, returns that tumor's genes with a clinical **evidence level (A–E)**, aggregated **alterations/variants** and **therapies**:
+**Deterministic, no key, no external calls.** `api/biomarkers.js` reads a bundled, curated per-tumor dataset (`api/biomarker-data.json`) and, for the selected cancer, returns that tumor's markers with a **tier** (A = FDA/standard-of-care, B = guideline/emerging), example **alterations**, and **MSK-IMPACT / MSK-ACCESS** coverage flags. Because it's local data, every cancer returns instantly with no timeout or egress dependency (an earlier live-API version fell back to a generic list whenever the upstream fetch failed).
 
-- **Primary source — CIViC** (<https://civicdb.org>), released **CC0 / public domain** → free for any use, including commercial. The proxy reads CIViC's nightly clinical-evidence release, filters to the cancer (plus tumor-agnostic markers like NTRK fusions / MSI-H), and aggregates by gene keeping the strongest evidence level.
-- **Assay coverage** — **MSK-IMPACT505** and **MSK-ACCESS** panel membership from cBioPortal's public gene-panel API (free, no key), shown as `I` / `A` badges.
-- A small alias map keeps HUGO symbols matching how trials phrase them (e.g. `ERBB2`↔`HER2`, `CD274`↔`PD-L1`).
+- **Dataset** — `api/biomarker-data.json`, seeded from **FDA-recognized** and **NCCN/CAP-guideline** biomarkers per tumor type. Tumor-agnostic FDA approvals (**NTRK** fusions, **MSI-H/dMMR**, **TMB-High**) are appended to every tumor automatically.
+- Aliases keep symbols matching how trials phrase them (e.g. `ERBB2`↔`HER2`, `CD274`↔`PD-L1`).
+- To broaden or refresh it, edit `biomarker-data.json` (or regenerate it from an open source like **CIViC**, CC0, or a licensed **OncoKB** feed) — the endpoint's response shape is unchanged.
 
-**Optional upgrade — MSK OncoKB.** If you later obtain an OncoKB license, set `ONCOKB_TOKEN` in the Vercel env and the proxy transparently switches to OncoKB (same response shape). OncoKB is free for **research/academic** use but requires a **paid license for commercial/clinical** use (<https://www.oncokb.org/terms>) — so it's strictly opt-in. No token → CIViC.
-
-> **Attribution:** CIViC is CC0. MSK-IMPACT/MSK-ACCESS gene panels come from cBioPortal (cite the cBioPortal/MSK publications). All matching is preliminary decision support — final eligibility is confirmed by the study team.
+> **Note:** IMPACT/ACCESS coverage flags and tiers are **indicative** for a prototype, not a substitute for a certified report. All matching is preliminary decision support — final eligibility is confirmed by the study team.
 
 All matching is preliminary decision support — final eligibility is confirmed by the study team.
 
