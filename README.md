@@ -13,7 +13,7 @@ Static site for **Cancer Clinical Trials**, deployed on Vercel.
 
 The trials page ranks trials against a patient profile in two tiers:
 
-The **biomarker checklist itself is cancer-specific and works with no paid key**: when you pick a cancer type, the page pulls that tumor's biomarkers/alterations from **CIViC** (civicdb.org — Clinical Interpretation of Variants in Cancer, released **CC0 / public domain**), tags each with its clinical **evidence level (A–E)** and whether it's covered by **MSK-IMPACT** (`I`) or **MSK-ACCESS** (`A`). See "Cancer-specific biomarkers" below.
+Biomarkers are entered through a **tumor-specific dropdown** (works with no paid key): pick a cancer type and the dropdown lists *that tumor's* markers from **CIViC** (civicdb.org — Clinical Interpretation of Variants in Cancer, released **CC0 / public domain**), each labeled with its clinical **evidence level (A–E)**, example alterations, and whether it's covered by **MSK-IMPACT** (`I`) or **MSK-ACCESS** (`A`). Selecting a marker adds a removable chip (multiple markers supported); a free-text field covers anything not listed. See "Cancer-specific biomarkers" below.
 
 - **Tier B (rule-based, always on):** parses each trial's written ClinicalTrials.gov eligibility for biomarker inclusion/exclusion, sex, age, ECOG, stage, and line-of-therapy cues → Strong / Possible / Likely-ineligible with a "why" breakdown.
 - **Tier A (NCI structured, optional):** upgrades trials using *structured* biomarker eligibility (gene/variant) from the **NCI Clinical Trials Search API**, shown as a **★ NCI structured** badge.
