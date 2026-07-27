@@ -49,6 +49,11 @@
     .bmk label{ font-size:13px; border:1px solid #d1d5db; border-radius:999px; padding:4px 10px; cursor:pointer; background:#fff; user-select:none; }
     .bmk input{ width:auto; margin-right:5px; vertical-align:-1px; }
     .bmk label:has(input:checked){ background:#eef2ff; border-color:#6366f1; color:#3730a3; }
+    .bmk .lvl{ font-size:10px; font-weight:800; border-radius:5px; padding:1px 4px; margin-left:5px; vertical-align:1px; color:#fff; background:#6b7280; }
+    .bmk .lvl1{ background:#15803d; } .bmk .lvl2{ background:#2563eb; }
+    .bmk .lvl3A,.bmk .lvl3B{ background:#a16207; } .bmk .lvl4{ background:#6b7280; }
+    .bmk .lvlR1,.bmk .lvlR2{ background:#b91c1c; }
+    .bmk .pan{ font-size:10px; font-weight:800; border-radius:5px; padding:1px 4px; margin-left:4px; vertical-align:1px; color:#3730a3; background:#e0e7ff; border:1px solid #c7d2fe; }
     .disc{ font-size:12px; color:#6b7280; margin-top:10px; }
 
     /* match badges + why */
@@ -156,6 +161,7 @@
         <div>
           <label class="f">Biomarkers / molecular alterations</label>
           <div class="bmk" id="bmk"></div>
+          <div id="bmkSrc" class="muted" style="font-size:12px; margin-top:6px;"></div>
           <input id="bmkOther" style="margin-top:8px;" placeholder="Other biomarker (e.g., FGFR2, IDH1)" />
         </div>
         <div class="pgrid" style="margin-top:12px;">
@@ -270,7 +276,9 @@
     countryEl.value = "us";
 
     // ---- precision-match profile ----
-    const BIOMARKERS = [
+    // Fallback: common pan-cancer markers used until a cancer type is picked (or if
+    // the OncoKB-backed /api/biomarkers proxy isn't configured).
+    const STATIC_BIOMARKERS = [
       {id:"EGFR", rx:/\begfr\b/},
       {id:"ALK", rx:/\balk\b/},
       {id:"ROS1", rx:/\bros[\s-]?1\b/},
@@ -284,9 +292,66 @@
       {id:"MSI-H/dMMR", rx:/msi[\s-]?h|microsatellite instab|dmmr|mismatch[\s-]?repair/},
       {id:"BRCA", rx:/\bbrca/}
     ];
+    let BIOMARKERS = STATIC_BIOMARKERS.slice();
+    let BMK_SOURCE = "";
     const bmkWrap = document.getElementById("bmk");
-    BIOMARKERS.forEach(b=>{ const l=document.createElement("label");
-      l.innerHTML = `<input type="checkbox" value="${b.id}">${b.id}`; bmkWrap.appendChild(l); });
+    const bmkSrcEl = document.getElementById("bmkSrc");
+
+    // Build a matching regex from a gene symbol + its aliases.
+    function makeRx(gene, aliases){
+      const esc = s => String(s).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+      const parts = [gene, ...(aliases||[])].filter(Boolean).map(esc);
+      try { return new RegExp("\\b("+parts.join("|")+")\\b","i"); }
+      catch(_){ return new RegExp("\\b"+esc(gene)+"\\b","i"); }
+    }
+    function bmkBadges(b){
+      let h = "";
+      if(b.level) h += `<span class="lvl lvl${escapeHtml(String(b.level))}" title="OncoKB evidence level ${escapeHtml(String(b.level))}">L${escapeHtml(String(b.level))}</span>`;
+      if(b.onImpact) h += `<span class="pan" title="Tested by MSK-IMPACT">I</span>`;
+      if(b.onAccess) h += `<span class="pan" title="Tested by MSK-ACCESS (liquid biopsy)">A</span>`;
+      return h;
+    }
+    function renderBiomarkers(){
+      const checked = new Set([...bmkWrap.querySelectorAll("input:checked")].map(i=>i.value));
+      bmkWrap.innerHTML = "";
+      BIOMARKERS.forEach(b=>{
+        const l = document.createElement("label");
+        const title = b.alterations && b.alterations.length ? ` title="Alterations: ${escapeHtml(b.alterations.join(", "))}"` : "";
+        l.innerHTML = `<input type="checkbox" value="${escapeHtml(b.id)}"${checked.has(b.id)?" checked":""}><span${title}>${escapeHtml(b.id)}</span>${bmkBadges(b)}`;
+        bmkWrap.appendChild(l);
+      });
+      if(bmkSrcEl) bmkSrcEl.textContent = BMK_SOURCE;
+    }
+
+    // Pull cancer-specific biomarkers from MSK OncoKB (+ IMPACT/ACCESS coverage) for the
+    // selected cancer type; fall back to the common markers when unavailable.
+    async function loadBiomarkers(){
+      const cancer = cancerEl.value;
+      if(!cancer){ BIOMARKERS = STATIC_BIOMARKERS.slice(); BMK_SOURCE = "Common markers — pick a cancer type for MSK OncoKB–specific biomarkers."; renderBiomarkers(); return; }
+      try{
+        const r = await fetch(`/api/biomarkers?cancer=${encodeURIComponent(cancer)}`);
+        const d = await r.json().catch(()=>({}));
+        if(d && d.configured && Array.isArray(d.genes) && d.genes.length){
+          BIOMARKERS = d.genes.map(g=>({
+            id: g.gene, rx: makeRx(g.gene, g.aliases),
+            level: g.level, onImpact: g.onImpact, onAccess: g.onAccess, alterations: g.alterations
+          }));
+          const panels = [d.impactAvailable?"MSK-IMPACT":null, d.accessAvailable?"MSK-ACCESS":null].filter(Boolean).join(" + ");
+          BMK_SOURCE = `${d.genes.length} actionable genes for ${cancer} — MSK OncoKB${panels?` · coverage: ${panels}`:""}. L = OncoKB evidence level; I/A = on IMPACT/ACCESS.`;
+        } else if(d && d.configured === false){
+          BIOMARKERS = STATIC_BIOMARKERS.slice();
+          BMK_SOURCE = "Common markers — set ONCOKB_TOKEN on the site for cancer-specific MSK OncoKB biomarkers.";
+        } else {
+          BIOMARKERS = STATIC_BIOMARKERS.slice();
+          BMK_SOURCE = "Common markers (no cancer-specific list available for this type).";
+        }
+      }catch(_){
+        BIOMARKERS = STATIC_BIOMARKERS.slice();
+        BMK_SOURCE = "Common markers (couldn't reach the biomarker service).";
+      }
+      renderBiomarkers();
+    }
+    renderBiomarkers();
 
     const stageEl=document.getElementById("stage"), linesEl=document.getElementById("lines"),
           ecogEl=document.getElementById("ecog"), pageEl=document.getElementById("page"),
@@ -872,7 +937,7 @@
     // ---------- events ----------
     function rerender(){ if(TRIALS.length) render(lastArgs.broadTotal, lastArgs.cond, lastArgs.statusVal); }
     qEl.addEventListener("input", rerender);
-    cancerEl.addEventListener("change", load);
+    cancerEl.addEventListener("change", async ()=>{ await loadBiomarkers(); load(); });
     statusEl.addEventListener("change", load);
 
     // precision-profile inputs re-rank client-side (no re-query needed)
@@ -897,12 +962,13 @@
     locEl.addEventListener("input", ()=>{ clearTimeout(locTimer); locTimer=setTimeout(onLoc, 500); });
     countryEl.addEventListener("change", ()=>{ if(cleanText(locEl.value)) onLoc(); });
 
-    (function init(){
+    (async function init(){
       const params = new URLSearchParams(window.location.search);
       const c = params.get("cancer");
       if(c){ const opt=[...cancerEl.options].find(o=>o.value.toLowerCase()===c.toLowerCase()); if(opt) cancerEl.value=opt.value; }
       const ctry = params.get("country"); if(ctry && CC_NAME[ctry.toLowerCase()]) countryEl.value = ctry.toLowerCase();
       const loc = params.get("loc") || params.get("zip"); if(loc) locEl.value = loc;
+      await loadBiomarkers();
       if(cleanText(locEl.value)){ onLoc(); } else { load(); }
     })();
   </script>
