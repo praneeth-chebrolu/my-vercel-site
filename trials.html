@@ -50,9 +50,9 @@
     .bmk input{ width:auto; margin-right:5px; vertical-align:-1px; }
     .bmk label:has(input:checked){ background:#eef2ff; border-color:#6366f1; color:#3730a3; }
     .bmk .lvl{ font-size:10px; font-weight:800; border-radius:5px; padding:1px 4px; margin-left:5px; vertical-align:1px; color:#fff; background:#6b7280; }
-    .bmk .lvl1{ background:#15803d; } .bmk .lvl2{ background:#2563eb; }
-    .bmk .lvl3A,.bmk .lvl3B{ background:#a16207; } .bmk .lvl4{ background:#6b7280; }
-    .bmk .lvlR1,.bmk .lvlR2{ background:#b91c1c; }
+    .bmk .lvl1,.bmk .lvlA{ background:#15803d; } .bmk .lvl2,.bmk .lvlB{ background:#2563eb; }
+    .bmk .lvl3A,.bmk .lvl3B,.bmk .lvlC{ background:#a16207; } .bmk .lvl4,.bmk .lvlD{ background:#6b7280; }
+    .bmk .lvlE{ background:#9ca3af; } .bmk .lvlR1,.bmk .lvlR2{ background:#b91c1c; }
     .bmk .pan{ font-size:10px; font-weight:800; border-radius:5px; padding:1px 4px; margin-left:4px; vertical-align:1px; color:#3730a3; background:#e0e7ff; border:1px solid #c7d2fe; }
     .disc{ font-size:12px; color:#6b7280; margin-top:10px; }
 
@@ -306,7 +306,7 @@
     }
     function bmkBadges(b){
       let h = "";
-      if(b.level) h += `<span class="lvl lvl${escapeHtml(String(b.level))}" title="OncoKB evidence level ${escapeHtml(String(b.level))}">L${escapeHtml(String(b.level))}</span>`;
+      if(b.level){ const lv=escapeHtml(String(b.level)); h += `<span class="lvl lvl${lv}" title="Clinical evidence level ${lv}${b.therapies&&b.therapies.length?" — e.g. "+escapeHtml(b.therapies.slice(0,3).join(", ")):""}">${lv}</span>`; }
       if(b.onImpact) h += `<span class="pan" title="Tested by MSK-IMPACT">I</span>`;
       if(b.onAccess) h += `<span class="pan" title="Tested by MSK-ACCESS (liquid biopsy)">A</span>`;
       return h;
@@ -327,20 +327,16 @@
     // selected cancer type; fall back to the common markers when unavailable.
     async function loadBiomarkers(){
       const cancer = cancerEl.value;
-      if(!cancer){ BIOMARKERS = STATIC_BIOMARKERS.slice(); BMK_SOURCE = "Common markers — pick a cancer type for MSK OncoKB–specific biomarkers."; renderBiomarkers(); return; }
+      if(!cancer){ BIOMARKERS = STATIC_BIOMARKERS.slice(); BMK_SOURCE = "Common markers — pick a cancer type for biomarkers specific to it."; renderBiomarkers(); return; }
       try{
         const r = await fetch(`/api/biomarkers?cancer=${encodeURIComponent(cancer)}`);
         const d = await r.json().catch(()=>({}));
         if(d && d.configured && Array.isArray(d.genes) && d.genes.length){
           BIOMARKERS = d.genes.map(g=>({
             id: g.gene, rx: makeRx(g.gene, g.aliases),
-            level: g.level, onImpact: g.onImpact, onAccess: g.onAccess, alterations: g.alterations
+            level: g.level, onImpact: g.onImpact, onAccess: g.onAccess, alterations: g.alterations, therapies: g.therapies
           }));
-          const panels = [d.impactAvailable?"MSK-IMPACT":null, d.accessAvailable?"MSK-ACCESS":null].filter(Boolean).join(" + ");
-          BMK_SOURCE = `${d.genes.length} actionable genes for ${cancer} — MSK OncoKB${panels?` · coverage: ${panels}`:""}. L = OncoKB evidence level; I/A = on IMPACT/ACCESS.`;
-        } else if(d && d.configured === false){
-          BIOMARKERS = STATIC_BIOMARKERS.slice();
-          BMK_SOURCE = "Common markers — set ONCOKB_TOKEN on the site for cancer-specific MSK OncoKB biomarkers.";
+          BMK_SOURCE = `${d.genes.length} genes for ${cancer} — ${d.source || "clinical evidence knowledgebase"}. Level = evidence strength; I = MSK-IMPACT, A = MSK-ACCESS.`;
         } else {
           BIOMARKERS = STATIC_BIOMARKERS.slice();
           BMK_SOURCE = "Common markers (no cancer-specific list available for this type).";

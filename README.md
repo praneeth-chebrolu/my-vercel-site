@@ -13,7 +13,7 @@ Static site for **Cancer Clinical Trials**, deployed on Vercel.
 
 The trials page ranks trials against a patient profile in two tiers:
 
-The **biomarker checklist itself is cancer-specific**: when you pick a cancer type, the page pulls that tumor's actionable genes/alterations from **MSK OncoKB**, tags each with its OncoKB evidence level (**L1–L4/R**) and whether it's covered by **MSK-IMPACT** (`I`) or **MSK-ACCESS** (`A`). See "Enabling cancer-specific biomarkers" below; without a token it falls back to a short list of common pan-cancer markers.
+The **biomarker checklist itself is cancer-specific and works with no paid key**: when you pick a cancer type, the page pulls that tumor's biomarkers/alterations from **CIViC** (civicdb.org — Clinical Interpretation of Variants in Cancer, released **CC0 / public domain**), tags each with its clinical **evidence level (A–E)** and whether it's covered by **MSK-IMPACT** (`I`) or **MSK-ACCESS** (`A`). See "Cancer-specific biomarkers" below.
 
 - **Tier B (rule-based, always on):** parses each trial's written ClinicalTrials.gov eligibility for biomarker inclusion/exclusion, sex, age, ECOG, stage, and line-of-therapy cues → Strong / Possible / Likely-ineligible with a "why" breakdown.
 - **Tier A (NCI structured, optional):** upgrades trials using *structured* biomarker eligibility (gene/variant) from the **NCI Clinical Trials Search API**, shown as a **★ NCI structured** badge.
@@ -32,12 +32,17 @@ The **biomarker checklist itself is cancer-specific**: when you pick a cancer ty
 2. In the Vercel project: **Settings → Environment Variables → add `ANTHROPIC_API_KEY`**, then redeploy.
 3. `api/match.js` is a serverless proxy that holds the key server-side and calls the Anthropic Messages API. It serves both the initial assessment and the adversarial verify pass (`verify:true` switches to an auditor system prompt). With no key set it returns `{configured:false}` and the button shows a hint instead of failing.
 
-### Enabling cancer-specific biomarkers (MSK OncoKB + IMPACT/ACCESS)
-1. Register for an OncoKB API token at <https://www.oncokb.org/account/register>.
-2. In the Vercel project: **Settings → Environment Variables → add `ONCOKB_TOKEN`**, then redeploy.
-3. `api/biomarkers.js` is a serverless proxy that holds the token server-side. Per selected cancer it returns that tumor's actionable genes from OncoKB's `allActionableVariants` (best evidence level, aggregated alterations, aliases), merged with **MSK-IMPACT** membership (OncoKB's `mSKImpact` flag) and **MSK-IMPACT505 / MSK-ACCESS** panel coverage from cBioPortal's public gene-panel API. Tumor-agnostic markers (NTRK fusions, MSI-H, TMB-H) are always included. With no token it returns `{configured:false}` and the UI keeps the common-marker fallback.
+### Cancer-specific biomarkers (`api/biomarkers.js`)
 
-> **Licensing:** OncoKB content is free for **research/academic** use, but **commercial or clinical** use requires a license agreement with Memorial Sloan Kettering (see <https://www.oncokb.org/terms>). Secure the appropriate license before using this in a product. MSK-IMPACT/MSK-ACCESS gene panels are sourced from cBioPortal (ODbL / publication-cited).
+**Open by default — no key required.** `api/biomarkers.js` is a serverless proxy that, for the selected cancer, returns that tumor's genes with a clinical **evidence level (A–E)**, aggregated **alterations/variants** and **therapies**:
+
+- **Primary source — CIViC** (<https://civicdb.org>), released **CC0 / public domain** → free for any use, including commercial. The proxy reads CIViC's nightly clinical-evidence release, filters to the cancer (plus tumor-agnostic markers like NTRK fusions / MSI-H), and aggregates by gene keeping the strongest evidence level.
+- **Assay coverage** — **MSK-IMPACT505** and **MSK-ACCESS** panel membership from cBioPortal's public gene-panel API (free, no key), shown as `I` / `A` badges.
+- A small alias map keeps HUGO symbols matching how trials phrase them (e.g. `ERBB2`↔`HER2`, `CD274`↔`PD-L1`).
+
+**Optional upgrade — MSK OncoKB.** If you later obtain an OncoKB license, set `ONCOKB_TOKEN` in the Vercel env and the proxy transparently switches to OncoKB (same response shape). OncoKB is free for **research/academic** use but requires a **paid license for commercial/clinical** use (<https://www.oncokb.org/terms>) — so it's strictly opt-in. No token → CIViC.
+
+> **Attribution:** CIViC is CC0. MSK-IMPACT/MSK-ACCESS gene panels come from cBioPortal (cite the cBioPortal/MSK publications). All matching is preliminary decision support — final eligibility is confirmed by the study team.
 
 All matching is preliminary decision support — final eligibility is confirmed by the study team.
 
