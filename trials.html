@@ -49,11 +49,17 @@
     .bmk label{ font-size:13px; border:1px solid #d1d5db; border-radius:999px; padding:4px 10px; cursor:pointer; background:#fff; user-select:none; }
     .bmk input{ width:auto; margin-right:5px; vertical-align:-1px; }
     .bmk label:has(input:checked){ background:#eef2ff; border-color:#6366f1; color:#3730a3; }
-    .bmk .lvl{ font-size:10px; font-weight:800; border-radius:5px; padding:1px 4px; margin-left:5px; vertical-align:1px; color:#fff; background:#6b7280; }
-    .bmk .lvl1,.bmk .lvlA{ background:#15803d; } .bmk .lvl2,.bmk .lvlB{ background:#2563eb; }
-    .bmk .lvl3A,.bmk .lvl3B,.bmk .lvlC{ background:#a16207; } .bmk .lvl4,.bmk .lvlD{ background:#6b7280; }
-    .bmk .lvlE{ background:#9ca3af; } .bmk .lvlR1,.bmk .lvlR2{ background:#b91c1c; }
-    .bmk .pan{ font-size:10px; font-weight:800; border-radius:5px; padding:1px 4px; margin-left:4px; vertical-align:1px; color:#3730a3; background:#e0e7ff; border:1px solid #c7d2fe; }
+    .lvl{ font-size:10px; font-weight:800; border-radius:5px; padding:1px 4px; margin-left:5px; vertical-align:1px; color:#fff; background:#6b7280; }
+    .lvl1,.lvlA{ background:#15803d; } .lvl2,.lvlB{ background:#2563eb; }
+    .lvl3A,.lvl3B,.lvlC{ background:#a16207; } .lvl4,.lvlD{ background:#6b7280; }
+    .lvlE{ background:#9ca3af; } .lvlR1,.lvlR2{ background:#b91c1c; }
+    .pan{ font-size:10px; font-weight:800; border-radius:5px; padding:1px 4px; margin-left:4px; vertical-align:1px; color:#3730a3; background:#e0e7ff; border:1px solid #c7d2fe; }
+    /* selected-marker chips */
+    .mchips{ min-height:4px; }
+    .mchip{ display:inline-flex; align-items:center; gap:2px; font-size:13px; font-weight:600; border:1px solid #6366f1; background:#eef2ff; color:#3730a3; border-radius:999px; padding:4px 4px 4px 11px; }
+    .mchip .x{ cursor:pointer; border:none; background:#c7d2fe; color:#3730a3; border-radius:999px; width:18px; height:18px; line-height:1; font-weight:800; padding:0; margin-left:4px; display:inline-flex; align-items:center; justify-content:center; }
+    .mchip .x:hover{ background:#a5b4fc; }
+    #bmkSelect:disabled{ background:#f3f4f6; color:#9ca3af; cursor:not-allowed; }
     .disc{ font-size:12px; color:#6b7280; margin-top:10px; }
 
     /* match badges + why */
@@ -159,10 +165,11 @@
       <div class="pbody">
         <p class="muted" style="margin:2px 0 10px;">Add molecular and clinical details to rank trials by how well their eligibility fits you. Everything stays in your browser.</p>
         <div>
-          <label class="f">Biomarkers / molecular alterations</label>
-          <div class="bmk" id="bmk"></div>
+          <label class="f" for="bmkSelect">Tumor-specific markers</label>
+          <select id="bmkSelect"><option value="">Pick a cancer type to list its markers</option></select>
+          <div class="bmk mchips" id="bmkChips"></div>
           <div id="bmkSrc" class="muted" style="font-size:12px; margin-top:6px;"></div>
-          <input id="bmkOther" style="margin-top:8px;" placeholder="Other biomarker (e.g., FGFR2, IDH1)" />
+          <input id="bmkOther" style="margin-top:8px;" placeholder="Other marker not listed (e.g., FGFR2, IDH1)" />
         </div>
         <div class="pgrid" style="margin-top:12px;">
           <div>
@@ -292,9 +299,12 @@
       {id:"MSI-H/dMMR", rx:/msi[\s-]?h|microsatellite instab|dmmr|mismatch[\s-]?repair/},
       {id:"BRCA", rx:/\bbrca/}
     ];
-    let BIOMARKERS = STATIC_BIOMARKERS.slice();
+    let BIOMARKERS = STATIC_BIOMARKERS.slice();   // markers for the current tumor (dropdown options)
     let BMK_SOURCE = "";
-    const bmkWrap = document.getElementById("bmk");
+    const SELECTED = new Set();                    // chosen marker ids (genes)
+    const DEF_BY_ID = new Map();                   // id -> {id, rx, level, onImpact, onAccess, alterations, therapies}
+    const bmkSelect = document.getElementById("bmkSelect");
+    const bmkChips = document.getElementById("bmkChips");
     const bmkSrcEl = document.getElementById("bmkSrc");
 
     // Build a matching regex from a gene symbol + its aliases.
@@ -304,6 +314,10 @@
       try { return new RegExp("\\b("+parts.join("|")+")\\b","i"); }
       catch(_){ return new RegExp("\\b"+esc(gene)+"\\b","i"); }
     }
+    function rememberDefs(list){ list.forEach(b=>{ if(b && b.id) DEF_BY_ID.set(b.id, b); }); }
+    function markerDef(id){ return DEF_BY_ID.get(id) || { id, rx: makeRx(id, []) }; }
+    STATIC_BIOMARKERS.forEach(b=>DEF_BY_ID.set(b.id, b));
+
     function bmkBadges(b){
       let h = "";
       if(b.level){ const lv=escapeHtml(String(b.level)); h += `<span class="lvl lvl${lv}" title="Clinical evidence level ${lv}${b.therapies&&b.therapies.length?" — e.g. "+escapeHtml(b.therapies.slice(0,3).join(", ")):""}">${lv}</span>`; }
@@ -311,23 +325,34 @@
       if(b.onAccess) h += `<span class="pan" title="Tested by MSK-ACCESS (liquid biopsy)">A</span>`;
       return h;
     }
-    function renderBiomarkers(){
-      const checked = new Set([...bmkWrap.querySelectorAll("input:checked")].map(i=>i.value));
-      bmkWrap.innerHTML = "";
-      BIOMARKERS.forEach(b=>{
-        const l = document.createElement("label");
-        const title = b.alterations && b.alterations.length ? ` title="Alterations: ${escapeHtml(b.alterations.join(", "))}"` : "";
-        l.innerHTML = `<input type="checkbox" value="${escapeHtml(b.id)}"${checked.has(b.id)?" checked":""}><span${title}>${escapeHtml(b.id)}</span>${bmkBadges(b)}`;
-        bmkWrap.appendChild(l);
-      });
+    function optionLabel(b){
+      const bits = [b.id];
+      if(b.level) bits.push("— level "+b.level);
+      const alt = (b.alterations||[]).slice(0,3).join(", ");
+      if(alt) bits.push("· "+alt);
+      const pan = [b.onImpact?"IMPACT":null, b.onAccess?"ACCESS":null].filter(Boolean).join("/");
+      if(pan) bits.push("["+pan+"]");
+      return bits.join(" ");
+    }
+    // Dropdown = this tumor's markers (minus already-picked); chips = the picked markers.
+    function renderMarkers(){
+      const avail = BIOMARKERS.filter(b=>!SELECTED.has(b.id));
+      const head = BIOMARKERS.length ? "Add a marker…" : "Pick a cancer type to list its markers";
+      bmkSelect.innerHTML = [`<option value="">${escapeHtml(head)}</option>`]
+        .concat(avail.map(b=>`<option value="${escapeHtml(b.id)}">${escapeHtml(optionLabel(b))}</option>`)).join("");
+      bmkSelect.disabled = BIOMARKERS.length===0;
+      bmkChips.innerHTML = [...SELECTED].map(id=>{
+        const b = markerDef(id);
+        return `<span class="mchip">${escapeHtml(id)}${bmkBadges(b)}<button type="button" class="x" data-id="${escapeHtml(id)}" aria-label="Remove ${escapeHtml(id)}">×</button></span>`;
+      }).join("");
       if(bmkSrcEl) bmkSrcEl.textContent = BMK_SOURCE;
     }
 
-    // Pull cancer-specific biomarkers from MSK OncoKB (+ IMPACT/ACCESS coverage) for the
-    // selected cancer type; fall back to the common markers when unavailable.
+    // Pull the selected tumor's markers from CIViC (+ IMPACT/ACCESS coverage) and populate
+    // the dropdown; fall back to common markers when a cancer has no specific list.
     async function loadBiomarkers(){
       const cancer = cancerEl.value;
-      if(!cancer){ BIOMARKERS = STATIC_BIOMARKERS.slice(); BMK_SOURCE = "Common markers — pick a cancer type for biomarkers specific to it."; renderBiomarkers(); return; }
+      if(!cancer){ BIOMARKERS = STATIC_BIOMARKERS.slice(); rememberDefs(BIOMARKERS); BMK_SOURCE = "Pick a cancer type to list its tumor-specific markers."; renderMarkers(); return; }
       try{
         const r = await fetch(`/api/biomarkers?cancer=${encodeURIComponent(cancer)}`);
         const d = await r.json().catch(()=>({}));
@@ -336,18 +361,19 @@
             id: g.gene, rx: makeRx(g.gene, g.aliases),
             level: g.level, onImpact: g.onImpact, onAccess: g.onAccess, alterations: g.alterations, therapies: g.therapies
           }));
-          BMK_SOURCE = `${d.genes.length} genes for ${cancer} — ${d.source || "clinical evidence knowledgebase"}. Level = evidence strength; I = MSK-IMPACT, A = MSK-ACCESS.`;
+          BMK_SOURCE = `${d.genes.length} markers for ${cancer} — ${d.source || "clinical evidence knowledgebase"}. Level = evidence strength; I = MSK-IMPACT, A = MSK-ACCESS.`;
         } else {
           BIOMARKERS = STATIC_BIOMARKERS.slice();
-          BMK_SOURCE = "Common markers (no cancer-specific list available for this type).";
+          BMK_SOURCE = `No tumor-specific list for ${cancer} yet — showing common markers. Add any others below.`;
         }
       }catch(_){
         BIOMARKERS = STATIC_BIOMARKERS.slice();
-        BMK_SOURCE = "Common markers (couldn't reach the biomarker service).";
+        BMK_SOURCE = "Couldn't reach the biomarker service — showing common markers.";
       }
-      renderBiomarkers();
+      rememberDefs(BIOMARKERS);
+      renderMarkers();
     }
-    renderBiomarkers();
+    renderMarkers();
 
     const stageEl=document.getElementById("stage"), linesEl=document.getElementById("lines"),
           ecogEl=document.getElementById("ecog"), pageEl=document.getElementById("page"),
@@ -388,7 +414,7 @@
     }
 
     function getProfile(){
-      const marks = [...bmkWrap.querySelectorAll("input:checked")].map(i=>i.value);
+      const marks = [...SELECTED];
       const other = cleanText(bmkOtherEl.value);
       if(other) marks.push(other);
       const ageNum = parseInt(cleanText(pageEl.value),10);
@@ -445,8 +471,7 @@
       }
       // biomarkers
       p.biomarkers.forEach(id=>{
-        const def = BIOMARKERS.find(b=>b.id===id);
-        const rx = def ? def.rx : new RegExp("\\b"+id.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b");
+        const rx = markerDef(id).rx;
         const inInc = rx.test(inc), inExc = rx.test(exc);
         if(inExc && !inInc){ reasons.push({k:"bad",txt:`Excludes ${id}`}); hardFail=true; }
         else if(inInc){ reasons.push({k:"ok",txt:`Matches ${id} (inclusion)`}); score+=3; }
@@ -941,7 +966,8 @@
     pageEl.addEventListener("input", rerender);
     // biomarker changes also refresh the NCI structured lookup
     async function onBiomarkerChange(){ await refreshNci(); rerender(); }
-    bmkWrap.addEventListener("change", onBiomarkerChange);
+    bmkSelect.addEventListener("change", ()=>{ const id=bmkSelect.value; if(id){ SELECTED.add(id); bmkSelect.value=""; renderMarkers(); onBiomarkerChange(); } });
+    bmkChips.addEventListener("click", (e)=>{ const btn=e.target.closest(".x"); if(!btn) return; SELECTED.delete(btn.getAttribute("data-id")); renderMarkers(); onBiomarkerChange(); });
     let bmkTimer;
     bmkOtherEl.addEventListener("input", ()=>{ clearTimeout(bmkTimer); bmkTimer=setTimeout(onBiomarkerChange, 500); });
 
